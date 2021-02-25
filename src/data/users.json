@@ -1,0 +1,18 @@
+[
+  {
+    "token": "user-1",
+    "email": "admin@admin.com",
+    "password": "12345678",
+    "profile": {
+      "name": "Administrador"
+    }
+  },
+  {
+    "token": "user-2",
+    "email": "user@email.com",
+    "password": "12345678",
+    "profile": {
+      "name": "Usuário comum"
+    }
+  }
+]

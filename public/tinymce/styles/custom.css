@@ -1,0 +1,47 @@
+.mce-content-body {
+  font-family: "Roboto", sans-serif;
+}
+.mce-content-body img,
+.mce-content-body iframe,
+.mce-content-body .mce-object-iframe {
+  margin: 0 auto;
+  display: block;
+}
+.mce-content-body table {
+  border-collapse: collapse;
+}
+.mce-content-body table th,
+.mce-content-body table td {
+  border: 1px solid #ccc;
+  padding: 0.4rem;
+}
+.mce-content-body figure {
+  display: table;
+  margin: 1rem auto;
+}
+.mce-content-body figure figcaption {
+  color: #999;
+  display: block;
+  margin-top: 0.25rem;
+  text-align: center;
+}
+.mce-content-body hr {
+  border-color: #ccc;
+  border-style: solid;
+  border-width: 1px 0 0 0;
+}
+.mce-content-body code {
+  background-color: #e8e8e8;
+  border-radius: 3px;
+  padding: 0.1rem 0.2rem;
+}
+.mce-content-body:not([dir="rtl"]) blockquote {
+  border-left: 2px solid #ccc;
+  margin-left: 1.5rem;
+  padding-left: 1rem;
+}
+.mce-content-body[dir="rtl"] blockquote {
+  border-right: 2px solid #ccc;
+  margin-right: 1.5rem;
+  padding-right: 1rem;
+}

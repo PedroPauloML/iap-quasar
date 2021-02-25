@@ -11,8 +11,15 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
-    "quasar": "^1.0.0"
+    "moment": "^2.29.1",
+    "quasar": "^1.0.0",
+    "quasar-tiptap": "^1.9.1",
+    "tiptap": "^1.32.1",
+    "tiptap-extensions": "^1.35.1",
+    "vue-cropperjs": "^5.0.0",
+    "vue-router": "^3.5.1"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",

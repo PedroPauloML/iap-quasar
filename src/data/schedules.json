@@ -1,0 +1,152 @@
+[
+  {
+    "id": 10,
+    "title": "Retiro de final de ano",
+    "description": [
+      "<p>O Retiro de final de ano é um momento de alegria entre os irmãos ",
+      "momento de confraternização e, também, de adoração e agradecimento ao senhor.</p>",
+      "<p>Aproveite esse momento para se alegrar juntamente com sua igreja e ",
+      "agradecer ao senhor por mais um ano debaixo da graça do senhor.</p>",
+      "<p>Venha e participe conosco!</p>"
+    ],
+    "date_start": "2020-09-26T08:00:00-03:00",
+    "date_end": "2020-09-26T18:00:00-03:00",
+    "image": "/images/schedule.png",
+    "location": "Chácara Santo Antônio"
+  },
+  {
+    "id": 9,
+    "title": "Retiro de final de ano",
+    "description": [
+      "<p>O Retiro de final de ano é um momento de alegria entre os irmãos ",
+      "momento de confraternização e, também, de adoração e agradecimento ao senhor.</p>",
+      "<p>Aproveite esse momento para se alegrar juntamente com sua igreja e ",
+      "agradecer ao senhor por mais um ano debaixo da graça do senhor.</p>",
+      "<p>Venha e participe conosco!</p>"
+    ],
+    "date_start": "2020-09-25T08:00:00-03:00",
+    "date_end": "2020-09-25T18:00:00-03:00",
+    "image": "/images/schedule.png",
+    "location": "Chácara Santo Antônio"
+  },
+  {
+    "id": 8,
+    "title": "Retiro de final de ano",
+    "description": [
+      "<p>O Retiro de final de ano é um momento de alegria entre os irmãos ",
+      "momento de confraternização e, também, de adoração e agradecimento ao senhor.</p>",
+      "<p>Aproveite esse momento para se alegrar juntamente com sua igreja e ",
+      "agradecer ao senhor por mais um ano debaixo da graça do senhor.</p>",
+      "<p>Venha e participe conosco!</p>"
+    ],
+    "date_start": "2020-09-24T08:00:00-03:00",
+    "date_end": "2020-09-24T18:00:00-03:00",
+    "image": "/images/schedule.png",
+    "location": "Chácara Santo Antônio"
+  },
+  {
+    "id": 7,
+    "title": "Retiro de final de ano",
+    "description": [
+      "<p>O Retiro de final de ano é um momento de alegria entre os irmãos ",
+      "momento de confraternização e, também, de adoração e agradecimento ao senhor.</p>",
+      "<p>Aproveite esse momento para se alegrar juntamente com sua igreja e ",
+      "agradecer ao senhor por mais um ano debaixo da graça do senhor.</p>",
+      "<p>Venha e participe conosco!</p>"
+    ],
+    "date_start": "2020-09-23T08:00:00-03:00",
+    "date_end": "2020-09-23T18:00:00-03:00",
+    "image": "/images/schedule.png",
+    "location": "Chácara Santo Antônio"
+  },
+  {
+    "id": 6,
+    "title": "Retiro de final de ano",
+    "description": [
+      "<p>O Retiro de final de ano é um momento de alegria entre os irmãos ",
+      "momento de confraternização e, também, de adoração e agradecimento ao senhor.</p>",
+      "<p>Aproveite esse momento para se alegrar juntamente com sua igreja e ",
+      "agradecer ao senhor por mais um ano debaixo da graça do senhor.</p>",
+      "<p>Venha e participe conosco!</p>"
+    ],
+    "date_start": "2020-09-22T08:00:00-03:00",
+    "date_end": "2020-09-22T18:00:00-03:00",
+    "image": "/images/schedule.png",
+    "location": "Chácara Santo Antônio"
+  },
+  {
+    "id": 5,
+    "title": "Retiro de final de ano",
+    "description": [
+      "<p>O Retiro de final de ano é um momento de alegria entre os irmãos ",
+      "momento de confraternização e, também, de adoração e agradecimento ao senhor.</p>",
+      "<p>Aproveite esse momento para se alegrar juntamente com sua igreja e ",
+      "agradecer ao senhor por mais um ano debaixo da graça do senhor.</p>",
+      "<p>Venha e participe conosco!</p>"
+    ],
+    "date_start": "2020-09-21T08:00:00-03:00",
+    "date_end": "2020-09-21T18:00:00-03:00",
+    "image": "/images/schedule.png",
+    "location": "Chácara Santo Antônio"
+  },
+  {
+    "id": 4,
+    "title": "Retiro de final de ano",
+    "description": [
+      "<p>O Retiro de final de ano é um momento de alegria entre os irmãos ",
+      "momento de confraternização e, também, de adoração e agradecimento ao senhor.</p>",
+      "<p>Aproveite esse momento para se alegrar juntamente com sua igreja e ",
+      "agradecer ao senhor por mais um ano debaixo da graça do senhor.</p>",
+      "<p>Venha e participe conosco!</p>"
+    ],
+    "date_start": "2020-09-20T08:00:00-03:00",
+    "date_end": "2020-09-20T18:00:00-03:00",
+    "image": "/images/schedule.png",
+    "location": "Chácara Santo Antônio"
+  },
+  {
+    "id": 3,
+    "title": "Retiro de final de ano",
+    "description": [
+      "<p>O Retiro de final de ano é um momento de alegria entre os irmãos ",
+      "momento de confraternização e, também, de adoração e agradecimento ao senhor.</p>",
+      "<p>Aproveite esse momento para se alegrar juntamente com sua igreja e ",
+      "agradecer ao senhor por mais um ano debaixo da graça do senhor.</p>",
+      "<p>Venha e participe conosco!</p>"
+    ],
+    "date_start": "2020-09-19T08:00:00-03:00",
+    "date_end": "2020-09-19T18:00:00-03:00",
+    "image": "/images/schedule.png",
+    "location": "Chácara Santo Antônio"
+  },
+  {
+    "id": 2,
+    "title": "Retiro de final de ano",
+    "description": [
+      "<p>O Retiro de final de ano é um momento de alegria entre os irmãos ",
+      "momento de confraternização e, também, de adoração e agradecimento ao senhor.</p>",
+      "<p>Aproveite esse momento para se alegrar juntamente com sua igreja e ",
+      "agradecer ao senhor por mais um ano debaixo da graça do senhor.</p>",
+      "<p>Venha e participe conosco!</p>"
+    ],
+    "date_start": "2020-09-18T08:00:00-03:00",
+    "date_end": "2020-09-18T18:00:00-03:00",
+    "image": "/images/schedule.png",
+    "location": "Chácara Santo Antônio"
+  },
+  {
+    "id": 1,
+    "title": "Retiro de final de ano",
+    "description": [
+      "<p>O Retiro de final de ano é um momento de alegria entre os irmãos ",
+      "momento de confraternização e, também, de adoração e agradecimento ao senhor.</p>",
+      "<p>Aproveite esse momento para se alegrar juntamente com sua igreja e ",
+      "agradecer ao senhor por mais um ano debaixo da graça do senhor.</p>",
+      "<p>Venha e participe conosco!</p>"
+    ],
+    "date_start": "2020-09-17T08:00:00-03:00",
+    "date_end": "2020-09-17T18:00:00-03:00",
+    "image": "/images/schedule.png",
+    "location": "Chácara Santo Antônio"
+  }
+]

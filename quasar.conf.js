@@ -18,7 +18,7 @@ module.exports = function(/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/boot-files
-    boot: [],
+    boot: ["mixins", "axios", "tiptap", "moment"],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
     css: ["app.scss"],
@@ -26,7 +26,7 @@ module.exports = function(/* ctx */) {
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
       // 'ionicons-v4',
-      // 'mdi-v5',
+      "mdi-v5",
       // 'fontawesome-v5',
       // 'eva-icons',
       // 'themify',
@@ -34,12 +34,21 @@ module.exports = function(/* ctx */) {
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
       "roboto-font", // optional, you are not bound to it
-      "material-icons" // optional, you are not bound to it
+      "material-icons", // optional, you are not bound to it
+      "material-icons-outlined"
     ],
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       vueRouterMode: "history", // available values: 'hash', 'history'
+
+      env: {
+        ENV_API: process.env.API_ENV || "DEVELOPMENT",
+        API:
+          process.env.API_ENV == "HOMOLOGATION"
+            ? ""
+            : "http://localhost:3000/v1"
+      },
 
       // transpile: false,
 
@@ -91,15 +100,15 @@ module.exports = function(/* ctx */) {
       // you can manually specify Quasar components/directives to be available everywhere:
       //
       // components: [],
-      // directives: [],
+      directives: ["ClosePopup"],
 
       // Quasar plugins
-      plugins: []
+      plugins: ["Notify", "Dialog", "Cookies"]
     },
 
     // animations: 'all', // --- includes all animations
     // https://quasar.dev/options/animations
-    animations: [],
+    animations: ["fadeInDown", "fadeOutUp", "fadeIn", "fadeOut"],
 
     // https://quasar.dev/quasar-cli/developing-ssr/configuring-ssr
     ssr: {
