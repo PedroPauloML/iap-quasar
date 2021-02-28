@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex commentary">
+  <div class="flex commentary">
     <v-scroll-x-reverse-transition>
       <q-img
         v-show="!showEditForm || (!showEditForm && $vuetify.breakpoint.smAndUp)"
@@ -14,7 +14,7 @@
     </v-scroll-x-reverse-transition>
 
     <div class="flex">
-      <div class="d-flex align-center justify-space-between">
+      <div class="flex align-center justify-space-between">
         <span class="overline">
           {{ commentary.author.name }}
         </span>

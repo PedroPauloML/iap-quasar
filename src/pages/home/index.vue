@@ -1,33 +1,37 @@
 <template>
   <div id="home">
-    <div class="flex justify-between align-center q-mb-sm">
-      <span class="title">Últimas Notícias</span>
+    <div class="flex justify-between align-center q-mb-lg">
+      <span class="text-h6">Últimas Notícias</span>
 
       <router-link :to="{ name: 'news' }" v-slot="{ href }">
-        <q-btn :to="href" height="100%" text link color="primary" class="pa-3">
+        <q-btn :to="href" height="100%" text link color="primary">
           Ver mais
         </q-btn>
       </router-link>
     </div>
-    <div class="row mb-5">
+    <div class="row q-col-gutter-lg q-mb-lg">
       <div
         v-for="(news, group_index) in grouped_news"
         :key="group_index"
         class="col-12 col-sm-6"
       >
-        <div v-if="Array.isArray(news)">
-          <News
+        <div v-if="Array.isArray(news)" class="full-height row">
+          <div
+            class="col"
             v-for="(single_new, i) in news"
             :key="i"
-            :id="single_new.id"
-            :title="single_new.title"
-            :caption="single_new.caption"
-            :image="{
-              url: single_new.image,
-              ratio: '2.1'
-            }"
-            :class="{ 'mt-7': i % 2 != 0 }"
-          />
+            :class="{ 'col-12': true, 'self-end': i == news.length - 1 }"
+          >
+            <News
+              :id="single_new.id"
+              :title="single_new.title"
+              :caption="single_new.caption"
+              :image="{
+                url: single_new.image,
+                ratio: '2.1'
+              }"
+            />
+          </div>
         </div>
         <News
           v-else
@@ -42,11 +46,11 @@
       </div>
     </div>
 
-    <div class="flex justify-between align-center q-mb-sm">
-      <span class="title">Nossa Agenda</span>
+    <div class="flex justify-between align-center q-mb-md">
+      <span class="text-h6">Nossa Agenda</span>
 
       <router-link :to="{ name: 'schedules' }" v-slot="{ href }">
-        <q-btn :to="href" height="100%" text link color="primary" class="pa-3">
+        <q-btn :to="href" height="100%" text link color="primary">
           Ver mais
         </q-btn>
       </router-link>
@@ -88,9 +92,9 @@
       </q-carousel-item>
     </q-carousel>
     <div v-else>
-      <q-card class="mb-5">
+      <q-card class="q-mb-lg">
         <q-card-section>
-          <p class="mb-0 black--text">
+          <p class="q-mb-none">
             Não temos nenhuma programação para os próximos dias. Mas fique
             atento, em breve estaremos divulgando as nossas novas atividades.
           </p>
@@ -98,39 +102,43 @@
       </q-card>
     </div>
 
-    <div class="flex justify-between align-center q-mb-sm">
-      <span class="title">Versículos do Dia</span>
+    <div class="flex justify-between align-center q-mb-lg">
+      <span class="text-h6">Versículos do Dia</span>
 
       <router-link :to="{ name: 'verses_of_day' }" v-slot="{ href }">
-        <q-btn :to="href" height="100%" text link color="primary" class="pa-3">
+        <q-btn :to="href" height="100%" text link color="primary">
           Ver mais
         </q-btn>
       </router-link>
     </div>
     <q-carousel
       v-model="verses_of_day_page"
-      class="mb-10"
-      height="auto"
-      hide-delimiters
-      hide-delimiter-background
-      :continuous="false"
-      reverse
+      transition-prev="slide-right"
+      transition-next="slide-left"
+      swipeable
+      animated
+      control-color="primary"
+      control-type="push"
+      arrows
+      class="bg-transparent q-mb-lg"
+      :height="`${currentVerseContainerHeight}px`"
     >
-      <q-carousel-item
+      <q-carousel-slide
         v-for="(verse_of_day, index) in verses_of_day_list"
         :key="index"
-        class="px-8"
+        :name="index"
       >
         <VerseOfDay
+          :ref="`verseOfDay${index + 1}`"
           :verse="verse_of_day.verse"
           :reference="verse_of_day.reference"
           :date="verse_of_day.date"
           :route="verse_of_day.route"
+          class="q-mx-lg"
           no-actions
           no-commentaries
-          class="ma-2"
         />
-      </q-carousel-item>
+      </q-carousel-slide>
     </q-carousel>
 
     <Message
@@ -163,8 +171,16 @@ export default {
       schedule_page: 0,
       verses_of_day_list: [],
       verses_of_day_page: 0,
+      currentVerseContainerHeight: 450,
       message: null
     };
+  },
+  watch: {
+    verses_of_day_page() {
+      setTimeout(() => {
+        this.setCurrentVerseContainerHeight();
+      }, 200);
+    }
   },
   created() {
     this.$store.dispatch("news/loadNews").then(() => {
@@ -196,10 +212,8 @@ export default {
     }
     this.verses_of_day_list = verses;
   },
-  methods: {
-    generateRatio(row, col) {
-      return row % 2 == 0 ? (col == 0 ? "1" : "2") : col == 2 ? "1" : "2";
-    }
+  mounted() {
+    this.setCurrentVerseContainerHeight();
   },
   computed: {
     grouped_news() {
@@ -244,14 +258,41 @@ export default {
         return accumulator;
       }, []);
     }
+  },
+  methods: {
+    generateRatio(row, col) {
+      return row % 2 == 0 ? (col == 0 ? "1" : "2") : col == 2 ? "1" : "2";
+    },
+
+    setCurrentVerseContainerHeight() {
+      let currentVerseOfDay = this.$refs[
+        `verseOfDay${this.verses_of_day_page + 1}`
+      ];
+      let height = currentVerseOfDay
+        ? currentVerseOfDay[0]?.$el?.clientHeight
+        : 300;
+      this.currentVerseContainerHeight = (height || 300) + 40;
+    }
   }
 };
 </script>
 
 <style lang="scss">
+#home {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .v-window__prev,
 .v-window__next {
   margin: 0;
   transform: scale(0.7);
+}
+
+.q-carousel__prev-arrow--horizontal {
+  left: 0;
+}
+.q-carousel__next-arrow--horizontal {
+  right: 0;
 }
 </style>

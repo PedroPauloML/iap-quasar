@@ -1,92 +1,117 @@
 <template>
   <q-card class="verse-of-day" light>
-    <q-card-text class="d-flex flex-column flex-sm-row">
+    <q-card-section class="row">
       <div
         :class="{
-          header: true,
-          'd-flex': true,
-          'align-center': true,
-          'mb-3': $vuetify.breakpoint.xs
+          'col-12': true,
+          'col-sm-auto': true,
+          'self-center': true,
+          'q-mb-md': $q.screen.lt.sm
         }"
       >
-        <img
-          src="/bible.svg"
-          alt="Bíblia"
-          :width="$vuetify.breakpoint.xs ? '30' : '55'"
-          class="mr-3"
-        />
-        <p
-          v-if="$vuetify.breakpoint.xs"
-          class="title font-weight-bold primary--text mb-0"
-        >
-          Versículo do dia
-        </p>
+        <div class="row">
+          <div class="col-auto self-center">
+            <img
+              :src="bibleSRC"
+              alt="Bíblia"
+              :width="$q.screen.lt.sm ? '30' : '55'"
+              class="q-mr-md"
+            />
+          </div>
+
+          <div class="col">
+            <span v-if="$q.screen.lt.sm" class="text-h6 text-primary">
+              Versículo do dia
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div class="content mr-3">
+      <div class="col-12 col-sm self-center">
         <p
-          v-if="$vuetify.breakpoint.smAndUp"
-          class="title font-weight-bold mb-2 primary--text"
+          v-if="$q.screen.gt.xs"
+          class="text-h6 text-weight-bold q-mb-sm text-primary"
         >
           Versículo do dia
         </p>
         <p>
           {{ verse }}
         </p>
-        <p class="mb-0 overline">
+        <p class="q-mb-none text-overline text-uppercase">
           {{ reference }}
         </p>
       </div>
 
-      <div class="d-flex flex-sm-column align-center justify-center">
-        <img
-          src="/calendar.svg"
-          alt="Bíblia"
-          :width="$vuetify.breakpoint.xs ? '25' : '55'"
-          :class="{
-            'mr-1': $vuetify.breakpoint.xs
-          }"
-        />
-        <span
-          :class="{
-            'text-uppercase': true,
-            'font-weight-bold': true,
-            'body-2': true,
-            'mb-3': $vuetify.breakpoint.smAndUp
-          }"
-          >{{ date | moment("DD/MMM") }}</span
-        >
-        <q-separator v-if="$vuetify.breakpoint.xs" class="mx-3"></q-separator>
-        <router-link v-if="route" :to="route" v-slot="{ href }">
-          <q-btn small link color="primary" :to="href" class="py-4 pl-2 pr-0">
-            Ver mais <q-icon>mdi-chevron-right</q-icon>
-          </q-btn>
-        </router-link>
+      <div class="col-12 col-sm-auto self-center">
+        <div class="row">
+          <div class="col-auto col-sm-12 text-center self-center">
+            <img
+              :src="calendarSRC"
+              alt="Bíblia"
+              :width="$q.screen.lt.sm ? '25' : '55'"
+              :class="{
+                'q-mr-xs': $q.screen.lt.sm
+              }"
+            />
+          </div>
+
+          <div class="col-auto col-sm-12 q-mb-sm-sm text-center self-center">
+            <span
+              :class="{
+                'text-uppercase': true,
+                'text-weight-bold': true,
+                'text-body2': true,
+                'q-mb-md': $q.screen.gt.xs
+              }"
+            >
+              {{ $moment(date).format("DD/MMM") }}
+            </span>
+          </div>
+
+          <div v-if="$q.screen.lt.sm" class="col self-center">
+            <q-separator class="q-mx-sm"></q-separator>
+          </div>
+
+          <div class="col-auto col-sm-12 text-center self-center">
+            <router-link v-if="route" :to="route" v-slot="{ href }">
+              <q-btn
+                :size="$q.screen.lt.sm ? 'sm' : 'md'"
+                link
+                color="primary"
+                :to="href"
+                dense
+                class="q-pl-sm"
+              >
+                Ver mais <q-icon name="chevron_right" />
+              </q-btn>
+            </router-link>
+          </div>
+        </div>
       </div>
-    </q-card-text>
+    </q-card-section>
 
     <q-separator />
 
-    <q-card-text
+    <q-card-section
       ref="commentariesContainer"
-      class="d-flex align-center justify-space-between"
+      class="flex align-center justify-space-between"
     >
       <span v-if="fetchingCommentaries">
         <v-progress-circular
           indeterminate
           color="primary"
-          class="mr-3"
+          class="q-mr-md"
           size="18"
           width="2"
         ></v-progress-circular>
         Buscando os comentários desse versículo
       </span>
       <span v-else>
-        <q-icon class="mr-3">mdi-comment-outline</q-icon>
+        <q-icon name="o_mode_comment" class="q-mr-md" />
         <span v-if="isCommentariesPresent">
           {{ commentaries.length }}
           {{
-            $vuetify.breakpoint.smAndUp
+            $q.screen.gt.xs
               ? commentaries.length > 1
                 ? "comentários"
                 : "comentário"
@@ -112,7 +137,7 @@
       >
         Adicionar novo comentário
       </q-btn>
-    </q-card-text>
+    </q-card-section>
 
     <v-scroll-y-transition v-if="userSigned && !noActions" group>
       <q-separator v-show="showCommentaryForm" key="divider" />
@@ -133,7 +158,7 @@
       <v-progress-linear indeterminate color="primary"></v-progress-linear>
     </span>
 
-    <q-card-text
+    <q-card-section
       v-if="!noCommentaries && !fetchingCommentaries && isCommentariesPresent"
       class="commentaries"
     >
@@ -146,13 +171,16 @@
         @delete="deleteCommentary"
         :deleting="commentaryIdToDelete == commentary.id && deletingCommentary"
       />
-    </q-card-text>
+    </q-card-section>
   </q-card>
 </template>
 
 <script>
 import Commentary from "./commentaries/Component";
 import NewCommetary from "./commentaries/Form";
+
+import calendarSRC from "assets/imgs/calendar.svg";
+import bibleSRC from "assets/imgs/bible.svg";
 
 export default {
   props: {
@@ -198,7 +226,11 @@ export default {
             avatar: "https://picsum.photos/id/1013/100/100"
           }
         }
-      ]
+      ],
+
+      // Icons
+      calendarSRC,
+      bibleSRC
     };
   },
   created() {

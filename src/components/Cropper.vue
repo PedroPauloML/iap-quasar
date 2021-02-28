@@ -135,7 +135,7 @@
         <q-img :src="cropImg" alt="Cropped Image">
           <template v-slot:placeholder>
             <v-row
-              class="fill-height ma-0 secondary darken-1"
+              class="full-height ma-0 secondary darken-1"
               align="center"
               justify="center"
             >

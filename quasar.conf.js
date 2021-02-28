@@ -103,7 +103,9 @@ module.exports = function(/* ctx */) {
       directives: ["ClosePopup"],
 
       // Quasar plugins
-      plugins: ["Notify", "Dialog", "Cookies"]
+      plugins: ["Notify", "Dialog", "Cookies"],
+
+      cssAddon: true
     },
 
     // animations: 'all', // --- includes all animations

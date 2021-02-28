@@ -193,7 +193,7 @@
 
           <!-- <q-separator class="mx-5" />
 
-          <div class="d-flex flex-column align-center px-5 py-3">
+          <div class="flex flex-column align-center px-5 py-3">
             <p class="body-2">Acessar com a conta social</p>
 
             <q-btn

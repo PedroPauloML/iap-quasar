@@ -1,6 +1,6 @@
 <template>
   <div id="verses-of-day">
-    <div v-if="value.search || value.date" class="d-flex flex-wrap mb-5">
+    <div v-if="value.search || value.date" class="flex flex-wrap mb-5">
       <span v-if="searching" class="mr-1 text-nowrap">
         Aguarde um momento, estamos pesquisando por
       </span>
@@ -52,14 +52,14 @@ export default {
     value: {
       search: String,
       date: String,
-      required: true,
+      required: true
     },
-    searching: Boolean,
+    searching: Boolean
   },
   data() {
     return {
       verses_of_day: [],
-      list_of_verses: [],
+      list_of_verses: []
     };
   },
   created() {
@@ -73,7 +73,7 @@ export default {
         date: this.$moment("2020-07-05T03:37:00-03:00")
           .subtract(index, "days")
           .format(),
-        route: { name: "verse_of_day", params: { id: 10 - index } },
+        route: { name: "verse_of_day", params: { id: 10 - index } }
       });
     }
     this.list_of_verses = verses;
@@ -89,8 +89,8 @@ export default {
       handler: function() {
         this.filterVersesOfDay(this.value);
       },
-      deep: true,
-    },
+      deep: true
+    }
   },
   // beforeRouteLeave(to, from, next) {
   //   next();
@@ -112,7 +112,7 @@ export default {
             : "";
 
           this.verses_of_day = this.list_of_verses.filter(
-            (verse_of_day) =>
+            verse_of_day =>
               (verse_of_day.verse
                 .toLocaleLowerCase()
                 .normalize("NFD")
@@ -131,8 +131,8 @@ export default {
           this.$emit("searching", false);
         }, 1000);
       }
-    },
-  },
+    }
+  }
 };
 </script>
 

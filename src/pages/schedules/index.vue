@@ -1,6 +1,6 @@
 <template>
   <div id="schedules">
-    <div v-if="value.search || value.date" class="d-flex flex-wrap mb-5">
+    <div v-if="value.search || value.date" class="flex flex-wrap mb-5">
       <span v-if="searching" class="mr-1 text-nowrap">
         Aguarde um momento, estamos pesquisando por
       </span>

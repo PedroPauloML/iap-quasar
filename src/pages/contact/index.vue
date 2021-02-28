@@ -44,12 +44,12 @@
 
     <div
       id="representatives"
-      class="d-flex flex-wrap flex-column flex-sm-row justify-space-around"
+      class="flex flex-wrap flex-column flex-sm-row justify-space-around"
     >
       <div
         v-for="(integrant, index) in integrants"
         :key="index"
-        class="d-flex flex flex-sm-column align-start align-sm-center mb-5"
+        class="flex flex flex-sm-column align-start align-sm-center mb-5"
       >
         <div style="position: relative;" class="mb-4 mr-3 mr-sm-0">
           <q-img
@@ -63,7 +63,7 @@
           >
             <template v-slot:placeholder>
               <v-row
-                class="fill-height ma-0 secondary darken-1"
+                class="full-height ma-0 secondary darken-1"
                 align="center"
                 justify="center"
               >
@@ -132,7 +132,7 @@
 
       <div
         v-if="userSigned"
-        class="d-flex flex flex-sm-column align-center justify-center mb-5"
+        class="flex flex flex-sm-column align-center justify-center mb-5"
       >
         <q-tooltip top>
           <template v-slot:activator="{ on, attrs }">

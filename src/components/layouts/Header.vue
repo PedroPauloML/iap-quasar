@@ -98,7 +98,7 @@
                     <q-img src="https://picsum.photos/id/1012/100/100">
                       <template v-slot:placeholder>
                         <q-row
-                          class="fill-height ma-0 secondary darken-1"
+                          class="full-height ma-0 secondary darken-1"
                           align="center"
                           justify="center"
                         >

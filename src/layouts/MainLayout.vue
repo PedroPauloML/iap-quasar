@@ -11,7 +11,7 @@
     />
 
     <q-page-container>
-      <div class="q-pa-lg q-pb-xl q-mb-xl bg-secondary">
+      <div class="q-pa-lg q-pb-xl bg-secondary">
         <transition
           enter-active-class="animated fadeIn"
           leave-active-class="animated fadeOut"
@@ -21,16 +21,19 @@
         </transition>
       </div>
     </q-page-container>
+
+    <Footer />
   </q-layout>
 </template>
 
 <script>
 import Header from "../components/layouts/Header";
 import Sidebar from "../components/layouts/Sidebar";
+import Footer from "../components/layouts/Footer";
 
 export default {
   name: "MainLayout",
-  components: { Header, Sidebar },
+  components: { Header, Sidebar, Footer },
   data() {
     return {
       leftDrawerOpen: false

@@ -17,14 +17,14 @@
 
       <div class="col-12 col-md-5 col-sm-7 flex align-center">
         <div class="flex flex flex-column flex-sm-row">
-          <v-menu
+          <q-menu
             v-model="menu"
             transition="scale-transition"
             offset-y
             min-width="290px"
           >
             <template v-slot:activator="{ on, attrs }">
-              <v-text-field
+              <q-input
                 v-model="dateFormatted"
                 placeholder="Pesquisar por data..."
                 append-icon="mdi-calendar"
@@ -42,7 +42,7 @@
                 v-on="on"
                 @click:clear="value.date = null"
                 :disabled="searching"
-              ></v-text-field>
+              ></q-input>
             </template>
             <v-date-picker
               v-model="value.date"
@@ -57,9 +57,9 @@
               "
             >
             </v-date-picker>
-          </v-menu>
+          </q-menu>
 
-          <v-text-field
+          <q-input
             name="search"
             v-model="filters.search"
             placeholder="Pesquisar por..."
@@ -73,7 +73,7 @@
             @keyup.enter="filterMessages"
             @click:append="filterMessages"
             :disabled="searching"
-          ></v-text-field>
+          ></q-input>
         </div>
 
         <q-tooltip v-if="userSigned" bottom>

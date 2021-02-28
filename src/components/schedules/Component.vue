@@ -1,7 +1,7 @@
 <template>
   <q-card class="schedule" light>
     <q-card-text>
-      <div class="d-flex justify-space-between">
+      <div class="flex justify-space-between">
         <p
           v-if="date_start"
           class="text-uppercase black--text text-caption font-weight-bold"
@@ -28,7 +28,7 @@
         <q-img :src="image" aspect-ratio="2" class="rounded mb-3">
           <template v-slot:placeholder>
             <v-row
-              class="fill-height ma-0 secondary darken-1"
+              class="full-height ma-0 secondary darken-1"
               align="center"
               justify="center"
             >
@@ -43,7 +43,7 @@
       <q-img v-else :src="image" aspect-ratio="2" class="rounded mb-3">
         <template v-slot:placeholder>
           <v-row
-            class="fill-height ma-0 secondary darken-1"
+            class="full-height ma-0 secondary darken-1"
             align="center"
             justify="center"
           >
@@ -55,7 +55,7 @@
         </template>
       </q-img>
 
-      <div class="d-flex justify-space-between">
+      <div class="flex justify-space-between">
         <p class="title primary--text">
           <router-link v-if="route" :to="route" class="text-decoration-none">
             {{ title }}
@@ -126,7 +126,7 @@
       class="
         px-3
         pt-3
-        d-flex
+        flex
         flex-column
         align-stretch,
       "
@@ -144,7 +144,7 @@
 
       <div
         :class="{
-          'd-flex': true,
+          flex: true,
           'flex-column': !solo || $vuetify.breakpoint.smAndDown
         }"
       >
@@ -184,7 +184,7 @@
 
       <div
         :class="{
-          'd-flex': true,
+          flex: true,
           'flex-column': !solo || $vuetify.breakpoint.smAndDown
         }"
       >

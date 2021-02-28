@@ -1,6 +1,6 @@
 <template>
   <div id="messages">
-    <div v-if="value.search || value.date" class="d-flex flex-wrap mb-5">
+    <div v-if="value.search || value.date" class="flex flex-wrap mb-5">
       <span v-if="searching" class="mr-1 text-nowrap">
         Aguarde um momento, estamos pesquisando por
       </span>
@@ -37,7 +37,7 @@
         :published_at="message.published_at"
         :tags="Array.from(new Set(message.tags))"
         :metadata="{ read_time: true }"
-        @filterMessages="(search) => (value.search = search)"
+        @filterMessages="search => (value.search = search)"
         @onDestroy="loadMessages"
         class="mb-10"
       />
@@ -58,14 +58,14 @@ export default {
     value: {
       search: String,
       date: String,
-      required: true,
+      required: true
     },
-    searching: Boolean,
+    searching: Boolean
   },
   data() {
     return {
       messages: [],
-      list_of_messages: [],
+      list_of_messages: []
     };
   },
   created() {
@@ -76,8 +76,8 @@ export default {
       handler: function() {
         this.filterMessages(this.value);
       },
-      deep: true,
-    },
+      deep: true
+    }
   },
   methods: {
     loadMessages() {
@@ -102,7 +102,7 @@ export default {
             : "";
 
           this.messages = this.$store.state.messages.messages.filter(
-            (message) =>
+            message =>
               (message.title
                 .toLocaleLowerCase()
                 .normalize("NFD")
@@ -113,7 +113,7 @@ export default {
                   .normalize("NFD")
                   .replace(/[\u0300-\u036f]/g, "")
                   .includes(search) ||
-                message.tags.find((tag) =>
+                message.tags.find(tag =>
                   tag
                     .toLocaleLowerCase()
                     .normalize("NFD")
@@ -130,8 +130,8 @@ export default {
           this.$emit("searching", false);
         }, 1000);
       }
-    },
-  },
+    }
+  }
 };
 </script>
 

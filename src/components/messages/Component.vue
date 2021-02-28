@@ -12,79 +12,75 @@
         :to="{ name: 'messages_show', params: { id: id } }"
         v-slot="{ href }"
       >
-        <h1 class="primary--text my-3">
-          <a class="text-decoration-none" :href="href">
-            {{ title }}
-          </a>
-        </h1>
+        <a
+          class="text-h4 text-weight-bold text-primary q-my-md full-width"
+          :href="href"
+        >
+          {{ title }}
+        </a>
       </router-link>
-      <h1 v-else class="primary--text my-3">{{ title }}</h1>
+      <span v-else class="text-primary q-my-md full-width">{{ title }}</span>
 
-      <div class="d-flex justify-center">
-        <div class="flex metadata">
-          <span v-if="metadata.read_time" class="overline">
+      <div class="row">
+        <div class="col self-center metadata">
+          <span v-if="metadata.read_time" class="text-overline text-uppercase">
             Tempo de leitura:
             {{ Math.ceil(content.split(" ").length / 5 / 60) }} minuto(s)
           </span>
 
-          <span v-if="published_at" class="overline">
+          <span v-if="published_at" class="text-overline text-uppercase">
             Publicado em:
             {{ $moment(published_at).format("DD/MM/YYYY hh:mm") }}
           </span>
 
-          <span v-if="author" class="overline"> Autor: {{ author }} </span>
+          <span v-if="author" class="text-overline text-uppercase">
+            Autor: {{ author }}
+          </span>
         </div>
 
-        <div v-if="!noActions" class="actions">
-          <q-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <q-btn
-                icon
-                color="accent"
-                @click="saved = !saved"
-                v-bind="attrs"
-                v-on="on"
-              >
-                <q-icon>{{
-                  saved ? "mdi-bookmark" : "mdi-bookmark-outline"
-                }}</q-icon>
-              </q-btn>
-            </template>
-            <span>{{ saved ? "Remover marcação" : "Marcar publicação" }}</span>
-          </q-tooltip>
+        <div v-if="!noActions" class="col-auto actions">
+          <q-btn flat round color="accent" @click="saved = !saved">
+            <q-icon v-if="saved" name="mdi-bookmark" />
+            <q-icon v-else name="mdi-bookmark-outline" />
 
-          <v-menu v-if="userSigned" v-model="optionsMenu" bottom left offset-y>
-            <template v-slot:activator="{ on, attrs }">
-              <q-btn icon v-bind="attrs" v-on="on">
-                <q-icon>mdi-dots-vertical</q-icon>
-              </q-btn>
-            </template>
+            <q-tooltip>
+              {{ saved ? "Remover marcação" : "Marcar publicação" }}
+            </q-tooltip>
+          </q-btn>
 
-            <v-list dense flat>
-              <v-list-item
-                :to="{
-                  name: 'messages_edit',
-                  params: { id: id }
-                }"
-              >
-                <v-list-item-icon>
-                  <q-icon>mdi-pencil</q-icon>
-                </v-list-item-icon>
-                <v-list-item-content>
-                  Editar
-                </v-list-item-content>
-              </v-list-item>
+          <q-btn v-if="userSigned" flat round>
+            <q-icon name="mdi-dots-vertical" />
 
-              <v-list-item @click="destroy">
-                <v-list-item-icon>
-                  <q-icon>mdi-delete</q-icon>
-                </v-list-item-icon>
-                <v-list-item-content>
-                  Excluir
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-          </v-menu>
+            <q-menu bottom left offset-y>
+              <q-list dense flat>
+                <q-item
+                  clickable
+                  :to="{
+                    name: 'messages_edit',
+                    params: { id: id }
+                  }"
+                >
+                  <q-item-section avatar class="q-py-sm">
+                    <q-icon name="edit" />
+                  </q-item-section>
+
+                  <q-item-section class="q-py-sm">
+                    Editar
+                  </q-item-section>
+                </q-item>
+
+                <q-item clickable @click="destroy">
+                  <q-item-section avatar class="q-py-sm">
+                    <q-icon name="delete" />
+                  </q-item-section>
+
+                  <q-item-section class="q-py-sm">
+                    Excluir
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
         </div>
       </div>
     </q-card-section>
@@ -94,18 +90,18 @@
     <div class="content-wrapper">
       <q-card-section v-if="content">
         <div
-          class="content black--text body-1 d-flex align-center flex-column mce-content-body"
+          class="content black--text body-1 flex align-center flex-column mce-content-body"
           v-html="content"
         />
       </q-card-section>
 
-      <div v-if="showReadMore" class="show-more d-flex align-end">
+      <div v-if="showReadMore" class="show-more flex align-end">
         <div class="col background pa-4 white--text">
-          <div class="d-flex justify-center">
+          <div class="flex justify-center">
             <q-btn
-              text
+              flat
               link
-              class="primary--text font-weight-bold title"
+              class="text-h6 text-primary text-weight-bold full-width"
               @click="showReadMore = !showReadMore"
             >
               Continuar lendo
@@ -126,9 +122,10 @@
         color="accent"
         label
         text-color="white"
+        square
         @click="filterMessages(tag)"
       >
-        <q-icon left>mdi-label</q-icon>
+        <q-icon name="mdi-label" size="sm" class="q-mr-sm" />
         {{ tag }}
       </q-chip>
     </q-card-section>
@@ -215,7 +212,7 @@ export default {
       border-radius: 5px;
       box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
         0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
-      margin: 15px 0;
+      margin: 15px auto;
       max-width: 100%;
       max-height: 50vh;
     }
