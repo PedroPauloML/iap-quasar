@@ -6,7 +6,7 @@
           v-if="date_start"
           class="text-uppercase black--text text-caption font-weight-bold"
         >
-          {{ date_start | moment("DD [de] MMMM [de] YYYY") }}
+          {{ $moment(date_start).format("DD [de] MMMM [de] YYYY") }}
         </p>
         <p v-else>Data de início não informada</p>
 
@@ -106,11 +106,13 @@
       <p>
         <q-icon small class="mr-1">mdi-clock-outline</q-icon>
         <span v-if="date_start">{{
-          date_start | moment("DD/MM/YYYY HH:mm")
+          $moment(date_start).format("DD/MM/YYYY HH:mm")
         }}</span>
         <span v-else>Data de início não informada</span>
         -
-        <span v-if="date_end">{{ date_end | moment("DD/MM/YYYY HH:mm") }}</span>
+        <span v-if="date_end">{{
+          $moment(date_end).format("DD/MM/YYYY HH:mm")
+        }}</span>
         <span v-else>Data de término não informada</span>
       </p>
 
@@ -137,7 +139,7 @@
         <p class="text-center grey--text">
           Estamos atualizando sua decisão...
         </p>
-        <v-progress-linear indeterminate></v-progress-linear>
+        <q-linear-progress indeterminate></q-linear-progress>
       </div>
 
       <p class="body-2">Podemos contar com sua presença?</p>
@@ -145,7 +147,7 @@
       <div
         :class="{
           flex: true,
-          'flex-column': !solo || $vuetify.breakpoint.smAndDown
+          'flex-column': !solo || $q.screen.lt.md
         }"
       >
         <q-btn
@@ -185,7 +187,7 @@
       <div
         :class="{
           flex: true,
-          'flex-column': !solo || $vuetify.breakpoint.smAndDown
+          'flex-column': !solo || $q.screen.lt.md
         }"
       >
         <q-btn

@@ -1,5 +1,5 @@
 <template>
-  <div id="home">
+  <div id="home" class="container">
     <div class="flex justify-between align-center q-mb-lg">
       <span class="text-h6">Últimas Notícias</span>
 
@@ -9,13 +9,13 @@
         </q-btn>
       </router-link>
     </div>
-    <div class="row q-col-gutter-lg q-mb-lg">
+    <div v-if="news_list.length > 0" class="row q-col-gutter-lg q-mb-lg">
       <div
         v-for="(news, group_index) in grouped_news"
         :key="group_index"
         class="col-12 col-sm-6"
       >
-        <div v-if="Array.isArray(news)" class="full-height row">
+        <div v-if="Array.isArray(news)" class="full-height row q-col-gutter-lg">
           <div
             class="col"
             v-for="(single_new, i) in news"
@@ -44,6 +44,12 @@
           }"
         />
       </div>
+    </div>
+    <div v-else class="flex no-wrap items-center justify-center q-mb-lg">
+      <q-img :src="newsSRC" width="40px" class="q-mr-lg" />
+      <span class="text-h6">
+        Nenhuma notícia no momento. Volte mais tarde.
+      </span>
     </div>
 
     <div class="flex justify-between align-center q-mb-md">
@@ -91,15 +97,12 @@
         </div>
       </q-carousel-item>
     </q-carousel>
-    <div v-else>
-      <q-card class="q-mb-lg">
-        <q-card-section>
-          <p class="q-mb-none">
-            Não temos nenhuma programação para os próximos dias. Mas fique
-            atento, em breve estaremos divulgando as nossas novas atividades.
-          </p>
-        </q-card-section>
-      </q-card>
+    <div v-else class="flex no-wrap items-center justify-center q-mb-lg">
+      <q-img :src="scheduleSRC" width="40px" class="q-mr-lg" />
+      <span class="text-h6">
+        Não temos nenhuma programação para os próximos dias. Mas fique atento,
+        em breve estaremos divulgando as nossas novas atividades.
+      </span>
     </div>
 
     <div class="flex justify-between align-center q-mb-lg">
@@ -162,6 +165,9 @@ import VerseOfDay from "../../components/verse_of_day/Component";
 import Message from "../../components/messages/Component";
 import Schedule from "../../components/schedules/Component";
 
+import newsSRC from "assets/icons/news.svg";
+import scheduleSRC from "assets/icons/schedule.svg";
+
 export default {
   components: { News, VerseOfDay, Message, Schedule },
   data() {
@@ -172,7 +178,11 @@ export default {
       verses_of_day_list: [],
       verses_of_day_page: 0,
       currentVerseContainerHeight: 450,
-      message: null
+      message: null,
+
+      // Icons
+      newsSRC,
+      scheduleSRC
     };
   },
   watch: {
@@ -247,7 +257,7 @@ export default {
     grouped_schedules() {
       const group_by = this.$vuetify.breakpoint.mdAndUp
         ? 3
-        : this.$vuetify.breakpoint.smAndUp
+        : this.$q.screen.gt.sm
         ? 2
         : 1;
 
@@ -278,11 +288,6 @@ export default {
 </script>
 
 <style lang="scss">
-#home {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .v-window__prev,
 .v-window__next {
   margin: 0;

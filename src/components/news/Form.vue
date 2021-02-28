@@ -1,15 +1,17 @@
 <template>
   <q-card class="mb-8">
     <q-card-section>
-      Criando nova notícia
-    </q-card-section>
-    <q-card-section>
-      Insira as informações abaixo para criar uma nova notícia. É possível
-      pré-visualizar como a notícia ficará antes de criá-la clicando em
-      "Pré-visualização".
+      <p class="text-h6 q-mb-none">
+        Criando nova notícia
+      </p>
+      <p class="q-mb-none text-grey-8">
+        Insira as informações abaixo para criar uma nova notícia. É possível
+        pré-visualizar como a notícia ficará antes de criá-la clicando em
+        "Pré-visualização".
+      </p>
     </q-card-section>
 
-    <q-card-text>
+    <q-card-section>
       <News
         v-show="preview"
         :id="id"
@@ -27,7 +29,7 @@
         :tags="tags"
         no-actions
       />
-      <v-form v-show="!preview" ref="form" v-model="valid" lazy-validation>
+      <q-form v-show="!preview" ref="form" v-model="valid" @submit="createNews">
         <Cropper
           ref="image"
           v-model="image"
@@ -46,63 +48,50 @@
           :rules="requiredRules['image']"
         ></v-file-input> -->
 
-        <v-text-field
+        <q-input
           ref="title"
           v-model="title"
           :rules="requiredRules.title"
           label="Título"
           required
-          @keyup.enter="createNews"
-        ></v-text-field>
+        ></q-input>
 
-        <v-text-field
+        <q-input
           ref="caption"
           v-model="caption"
           :rules="requiredRules.caption"
           label="Legenda"
           required
-          @keyup.enter="createNews"
-        ></v-text-field>
+        ></q-input>
 
         <p class="body-2 mt-2">Conteúdo</p>
         <p ref="contentLabelError" v-show="contentPrintError" class="red--text">
           O conteúdo da notícia é obrigatório(a)
         </p>
-        <div class="mb-5">
+        <div class="q-mb-lg">
           <TipTapEditor ref="content" v-model="content" />
         </div>
 
-        <v-combobox
-          ref="tags"
+        <q-select
           v-model="tags"
-          :items="tagsSuggestions"
-          :search-input.sync="tagsSearch"
-          hide-selected
-          hint="Máximo de 5 tags"
-          label="Tags (opcional)"
           multiple
-          persistent-hint
-          small-chips
-        >
-          <template v-slot:no-data>
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Nenhum resultado encontrado para "<strong>{{
-                    tagsSearch
-                  }}</strong
-                  >". Pressione <kbd>enter</kbd> para criar uma nova tag.
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </template>
-        </v-combobox>
-      </v-form>
-    </q-card-text>
+          :options="tagsSuggestions"
+          use-chips
+          use-input
+          hide-dropdown-icon
+          input-debounce="0"
+          label="Tags (opcional)"
+          hint="Máximo de 5 tags"
+          new-value-mode="add"
+        />
+
+        <q-btn label="Submeter fomrulário" class="hidden" />
+      </q-form>
+    </q-card-section>
 
     <q-card-actions>
       <q-btn
-        v-if="$vuetify.breakpoint.smAndUp"
+        v-if="$q.screen.gt.sm"
         color="primary"
         outlined
         @click="preview = !preview"
@@ -128,7 +117,8 @@
         <span>{{ preview ? "Formulário" : "Pré-visualizar" }}</span>
       </q-tooltip>
 
-      <v-spacer></v-spacer>
+      <q-space />
+
       <q-btn color="grey" dark @click="closeForm" :disabled="loading">
         Cancelar
       </q-btn>

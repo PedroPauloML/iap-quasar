@@ -8,7 +8,7 @@
       :image="{
         url: news.image,
         //ratio: $vuetify.breakpoint.xs ? '1.2' : '2.5',
-        ratio: 16 / 9,
+        ratio: 16 / 9
       }"
       :content="news.content"
       :metadata="news.metadata"
@@ -16,7 +16,7 @@
       @onDestroy="$router.push({ name: 'news' })"
     />
     <div v-else class="mb-3 body-2">
-      <v-progress-linear indeterminate></v-progress-linear>
+      <q-linear-progress indeterminate></q-linear-progress>
       <p class="text-center mt-5">
         Estamos preparando a notícia...
       </p>
@@ -32,7 +32,7 @@ export default {
   data() {
     return {
       back_router: "/news",
-      news: null,
+      news: null
     };
   },
   created() {
@@ -42,14 +42,14 @@ export default {
   methods: {
     findNews() {
       this.news = this.$store.state.news.news.find(
-        (el) => el.id == this.$route.params.id
+        el => el.id == this.$route.params.id
       );
-    },
+    }
   },
   beforeRouteLeave(to, from, next) {
     this.$emit("setBackRoute", null);
     next();
-  },
+  }
 };
 </script>
 

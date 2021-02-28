@@ -21,7 +21,7 @@
         v-if="value.date"
         class="text-truncate-1-line font-weight-medium mr-1"
       >
-        {{ value.date | moment("DD/MM/YYYY") }}
+        {{ $moment(value.date).format("DD/MM/YYYY") }}
       </span>
     </div>
 
@@ -39,7 +39,7 @@
       />
     </div>
     <v-row v-else align="center" justify="center">
-      <v-progress-linear indeterminate color="primary"></v-progress-linear>
+      <q-linear-progress indeterminate color="primary"></q-linear-progress>
     </v-row>
   </div>
 </template>

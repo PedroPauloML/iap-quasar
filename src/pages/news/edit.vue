@@ -7,7 +7,7 @@
       @updateNews="(id, news) => updateNews(id, news)"
     />
     <div v-else class="mb-3 body-2">
-      <v-progress-linear indeterminate></v-progress-linear>
+      <q-linear-progress indeterminate></q-linear-progress>
       <p class="text-center mt-5">
         Estamos preparando a notícia...
       </p>
@@ -23,41 +23,41 @@ export default {
   data() {
     return {
       news: null,
-      showEditingForm: false,
+      showEditingForm: false
     };
   },
   created() {
     this.$store.dispatch("news/loadNews").then(this.findNews);
     this.$emit("setBackRoute", {
       name: "news_show",
-      params: { id: this.$route.params.id },
+      params: { id: this.$route.params.id }
     });
   },
   methods: {
     findNews() {
       this.news = this.$store.state.news.news.find(
-        (el) => el.id == this.$route.params.id
+        el => el.id == this.$route.params.id
       );
     },
     updateNews(payload) {
       this.$store.dispatch("news/updateNews", payload).then(() => {
         this.$router.push({
           name: "news_show",
-          params: { id: this.$route.params.id },
+          params: { id: this.$route.params.id }
         });
       });
     },
     closeEditingForm() {
       this.$router.push({
         name: "news_show",
-        params: { id: this.$route.params.id },
+        params: { id: this.$route.params.id }
       });
-    },
+    }
   },
   beforeRouteLeave(to, from, next) {
     this.$emit("setBackRoute", null);
     next();
-  },
+  }
 };
 </script>
 

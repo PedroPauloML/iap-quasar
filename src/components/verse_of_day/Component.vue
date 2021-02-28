@@ -155,7 +155,7 @@
     <q-separator v-if="isCommentariesPresent" />
 
     <span v-if="fetchingCommentaries" class="d-block pa-5">
-      <v-progress-linear indeterminate color="primary"></v-progress-linear>
+      <q-linear-progress indeterminate color="primary"></q-linear-progress>
     </span>
 
     <q-card-section

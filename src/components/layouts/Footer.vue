@@ -1,12 +1,12 @@
 <template>
   <q-footer class="bg-primary-lighten-1">
     <div class="row">
-      <div class="col-12 no-wrap flex justify-center">
+      <div class="col-12 flex justify-center">
         <router-link
           v-for="(route, index) in routes"
           :key="index"
           :to="{ name: route.path_name }"
-          v-slot="{ href, isActive }"
+          v-slot="{ href, isActive, isExactActive }"
         >
           <q-btn
             :to="href"
@@ -16,8 +16,8 @@
             link
             :class="{
               'q-my-sm': true,
-              'text-primary': isActive,
-              'bg-primary-lighten-2': isActive
+              'text-primary': isExactActive,
+              'bg-primary-lighten-2': isExactActive
             }"
           >
             {{ route.title }}

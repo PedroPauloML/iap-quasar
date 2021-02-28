@@ -25,24 +25,22 @@
           no-actions
         />
       </div>
-      <v-form v-show="!preview" ref="form" v-model="valid" lazy-validation>
-        <v-text-field
+      <q-form v-show="!preview" ref="form" v-model="valid" @submit="createNews">
+        <q-input
           ref="title"
           v-model="title"
           :rules="requiredRules.title"
           label="Título"
           required
-          @keyup.enter="createNews"
-        ></v-text-field>
+        ></q-input>
 
-        <v-text-field
+        <q-input
           ref="caption"
           v-model="caption"
           :rules="requiredRules.caption"
           label="Legenda"
           required
-          @keyup.enter="createNews"
-        ></v-text-field>
+        ></q-input>
 
         <p
           :class="{
@@ -90,12 +88,14 @@
             </v-list-item>
           </template>
         </v-combobox>
-      </v-form>
+
+        <q-btn label="Submeter fomrulário" class="hidden" />
+      </q-form>
     </q-card-text>
 
     <q-card-actions>
       <q-btn
-        v-if="$vuetify.breakpoint.smAndUp"
+        v-if="$q.screen.gt.sm"
         color="primary"
         outlined
         @click="preview = !preview"
@@ -103,23 +103,20 @@
       >
         {{ preview ? "Formulário" : "Pré-visualizar" }}
       </q-btn>
-      <q-tooltip v-else bottom>
-        <template v-slot:activator="{ on, attrs }">
-          <q-btn
-            v-bind="attrs"
-            v-on="on"
-            color="primary"
-            outlined
-            @click="preview = !preview"
-            :disabled="loading"
-          >
-            <q-icon>
-              {{ preview ? "mdi-file" : "mdi-file-find" }}
-            </q-icon>
-          </q-btn>
-        </template>
-        <span>{{ preview ? "Formulário" : "Pré-visualizar" }}</span>
-      </q-tooltip>
+      <q-btn
+        v-else
+        color="primary"
+        outlined
+        @click="preview = !preview"
+        :disabled="loading"
+      >
+        <q-icon v-if="preview" name="mdi-file" />
+        <q-icon v-else name="mdi-file-find" />
+
+        <q-tooltip>
+          <span>{{ preview ? "Formulário" : "Pré-visualizar" }}</span>
+        </q-tooltip>
+      </q-btn>
 
       <v-spacer></v-spacer>
       <q-btn color="grey" dark @click="closeForm" :disabled="loading">

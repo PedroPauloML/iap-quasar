@@ -11,12 +11,12 @@
       :tags="Array.from(new Set(message.tags))"
       :metadata="{ read_time: true }"
       :full_content="true"
-      @filterMessages="(search) => (value.search = search)"
+      @filterMessages="search => (value.search = search)"
       @onDestroy="$router.push({ name: 'messages' })"
       class="mb-10"
     />
     <v-row v-else align="center" justify="center">
-      <v-progress-linear indeterminate color="primary"></v-progress-linear>
+      <q-linear-progress indeterminate color="primary"></q-linear-progress>
     </v-row>
   </div>
 </template>
@@ -29,7 +29,7 @@ export default {
   data() {
     return {
       back_router: "/messages",
-      message: null,
+      message: null
     };
   },
   created() {
@@ -39,14 +39,14 @@ export default {
   methods: {
     findMessages() {
       this.message = this.$store.state.messages.messages.find(
-        (el) => el.id == this.$route.params.id
+        el => el.id == this.$route.params.id
       );
-    },
+    }
   },
   beforeRouteLeave(to, from, next) {
     this.$emit("setBackRoute", null);
     next();
-  },
+  }
 };
 </script>
 

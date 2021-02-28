@@ -1,89 +1,102 @@
 <template>
-  <div id="news-header" class="mb-3">
-    <v-row>
-      <v-slide-x-transition>
+  <div id="news-header" class="q-mb-md">
+    <div class="row q-col-gutter-md">
+      <transition
+        enter-active-class="animated fadeInRight"
+        leave-active-class="animated fadeOutLeft"
+        mode="out-in"
+      >
         <div v-if="back_route" class="col-auto flex align-center">
           <router-link :to="back_route" v-slot="{ href }">
-            <q-btn icon link color="gray" :to="href">
-              <q-icon color="white">mdi-chevron-left</q-icon>
+            <q-btn round color="primary" :to="href">
+              <q-icon name="chevron_left" color="white" />
+
+              <q-tooltip>Voltar</q-tooltip>
             </q-btn>
           </router-link>
         </div>
-      </v-slide-x-transition>
+      </transition>
 
-      <div class="col">
-        <h1>Notícias</h1>
+      <div class="col-12 col-sm">
+        <span class="text-h4 text-weight-bold">Notícias</span>
       </div>
 
-      <div class="col-12 col-md-5 col-sm-7 flex align-center">
-        <div class="flex flex flex-column flex-sm-row">
-          <v-menu
-            v-model="menu"
-            transition="scale-transition"
-            offset-y
-            min-width="290px"
-            :close-on-content-click="false"
-            :return-value="filters.date"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-model="dateFormatted"
-                placeholder="Pesquisar por data..."
-                append-icon="mdi-calendar"
-                background-color="white"
-                :class="{
-                  'mr-3': $vuetify.breakpoint.mdAndUp,
-                  'mb-3': $vuetify.breakpoint.smAndDown
-                }"
-                readonly
-                outlined
-                clearable
-                dense
-                hide-details
-                v-bind="attrs"
-                v-on="on"
-                @click:clear="
-                  filters.date = null;
-                  filterNews();
-                "
-                :disabled="searching"
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              v-model="filters.date"
-              locale="pt-br"
-              no-title
-              scrollable
-            >
-              <v-spacer></v-spacer>
-              <q-btn text color="gray" @click="menu = false">Cancelar</q-btn>
-              <q-btn text color="primary" @click="changeDate">Selecionar</q-btn>
-            </v-date-picker>
-          </v-menu>
+      <div class="col-12 col-sm-auto">
+        <div class="row items-center">
+          <div class="col">
+            <div class="row">
+              <div class="col-12 col-sm">
+                <q-input
+                  v-model="filters.date"
+                  placeholder="Pesquisar por data..."
+                  background-color="white"
+                  :class="{
+                    'q-mr-md': $q.screen.gt.sm,
+                    'q-mb-md': $q.screen.lt.md
+                  }"
+                  outlined
+                  clearable
+                  dense
+                  hide-details
+                  bg-color="white"
+                  mask="##/##/####"
+                  @change="filterNews"
+                  @clear="
+                    filters.date = null;
+                    filterNews();
+                  "
+                  :disabled="searching"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        ref="qDateProxydate"
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateFormattedToPicker"
+                          @input="filterNews"
+                        />
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
 
-          <v-text-field
-            name="search"
-            v-model="filters.search"
-            placeholder="Pesquisar por..."
-            append-icon="mdi-magnify"
-            background-color="white"
-            width="100"
-            outlined
-            clearable
-            dense
-            :hide-details="true"
-            @keyup.enter="filterNews"
-            @click:append="filterNews"
-            :disabled="searching"
-          ></v-text-field>
-        </div>
+              <div class="col-12 col-sm">
+                <q-input
+                  name="search"
+                  v-model="filters.search"
+                  placeholder="Pesquisar por..."
+                  background-color="white"
+                  width="100"
+                  outlined
+                  clearable
+                  dense
+                  bg-color="white"
+                  hide-details
+                  @keyup.enter="filterNews"
+                  @clear="filterNews"
+                  :disabled="searching"
+                >
+                  <template v-slot:append>
+                    <q-icon
+                      name="search"
+                      class="cursor-pointer"
+                      @click="filterNews"
+                    />
+                  </template>
+                </q-input>
+              </div>
+            </div>
+          </div>
 
-        <q-tooltip v-if="userSigned" bottom>
-          <template v-slot:activator="{ on, attrs }">
+          <div class="col-auto">
             <q-btn
+              v-if="userSigned"
               color="primary"
-              fab
-              small
+              round
               @click="
                 $router.push({
                   name:
@@ -92,24 +105,25 @@
                       : 'news_new'
                 })
               "
-              class="ml-5"
-              v-bind="attrs"
-              v-on="on"
+              class="q-ml-lg"
             >
               <q-icon
+                name="mdi-plus"
                 :class="{ rotateZ: $router.currentRoute.name == 'news_new' }"
               >
-                mdi-plus
               </q-icon>
+
+              <q-tooltip>
+                <span v-if="$router.currentRoute.name == 'news_new'"
+                  >Cancelar notícia</span
+                >
+                <span v-else>Criar notícia</span>
+              </q-tooltip>
             </q-btn>
-          </template>
-          <span v-if="$router.currentRoute.name == 'news_new'"
-            >Cancelar notícia</span
-          >
-          <span v-else>Criar notícia</span>
-        </q-tooltip>
+          </div>
+        </div>
       </div>
-    </v-row>
+    </div>
   </div>
 </template>
 
@@ -148,6 +162,15 @@ export default {
       },
       set(newValue) {
         return newValue;
+      }
+    },
+    dateFormattedToPicker: {
+      get() {
+        return this.parseDateToPicker(this.filters.date) || "";
+      },
+      set(newValue) {
+        this.$refs.qDateProxydate.hide();
+        return (this.filters.date = this.parseDateToInput(newValue));
       }
     }
   },

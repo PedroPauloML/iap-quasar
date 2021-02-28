@@ -10,7 +10,7 @@
 
     <div v-show="imgSrc && !cropImg" class="content">
       <section class="cropper-area">
-        <div class="img-cropper">
+        <!-- <div class="img-cropper">
           <vue-cropper
             ref="cropper"
             :aspect-ratio="aspectRatio"
@@ -19,76 +19,48 @@
             :responsive="true"
             :containerStyle="{ maxHeight: '60vh' }"
           />
-        </div>
+        </div> -->
+        <Cropper
+          ref="cropper"
+          :src="imgSrc"
+          :stencil-props="{ aspectRatio }"
+          class="cropper-container"
+        />
         <div
           :class="{
             actions: 'true',
-            'flex-column': $vuetify.breakpoint.smAndDown || linearActionsButton
+            'flex-column': $q.screen.lt.md || linearActionsButton
           }"
         >
           <div>
             <span class="font-weight-bold">Editar:</span>
-            <q-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <q-btn
-                  icon
-                  type="button"
-                  @click.prevent="rotate(-90)"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <q-icon>mdi-format-rotate-90</q-icon>
-                </q-btn>
-              </template>
-              <span>Girar -90°</span>
-            </q-tooltip>
+            <q-btn icon type="button" @click.prevent="rotate(-90)">
+              <q-icon name="mdi-format-rotate-90" />
+              <q-tooltip>
+                <span>Girar -90°</span>
+              </q-tooltip>
+            </q-btn>
 
-            <q-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <q-btn
-                  icon
-                  type="button"
-                  @click.prevent="rotate(90)"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <q-icon class="mdi-flip-h">mdi-format-rotate-90</q-icon>
-                </q-btn>
-              </template>
-              <span>Girar 90°</span>
-            </q-tooltip>
+            <q-btn icon type="button" @click.prevent="rotate(90)">
+              <q-icon name="mdi-format-rotate-90" class="mdi-flip-h" />
+              <q-tooltip>
+                <span>Girar 90°</span>
+              </q-tooltip>
+            </q-btn>
 
-            <q-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <q-btn
-                  icon
-                  type="button"
-                  ref="flipX"
-                  @click.prevent="flipX"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <q-icon>mdi-flip-horizontal</q-icon>
-                </q-btn>
-              </template>
-              <span>Inverter horizontalmente</span>
-            </q-tooltip>
+            <q-btn icon type="button" ref="flipX" @click.prevent="flipX">
+              <q-icon name="mdi-flip-horizontal" />
+              <q-tooltip>
+                <span>Inverter horizontalmente</span>
+              </q-tooltip>
+            </q-btn>
 
-            <q-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <q-btn
-                  icon
-                  type="button"
-                  ref="flipY"
-                  @click.prevent="flipY"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <q-icon>mdi-flip-vertical</q-icon>
-                </q-btn>
-              </template>
-              <span>Inverter verticalmente</span>
-            </q-tooltip>
+            <q-btn icon type="button" ref="flipY" @click.prevent="flipY">
+              <q-icon name="mdi-flip-vertical" />
+              <q-tooltip>
+                <span>Inverter verticalmente</span>
+              </q-tooltip>
+            </q-btn>
           </div>
 
           <div>
@@ -121,11 +93,11 @@
       @click.prevent="showFileChooser"
     >
       <span v-if="loadingCropper">
-        <v-progress-circular
+        <q-circular-progress
           indeterminate
           color="primary"
           class="mr-3"
-        ></v-progress-circular>
+        ></q-circular-progress>
         Carregando editor da imagem
       </span>
       <span v-else>Selecionar {{ imageName }}</span>
@@ -139,10 +111,10 @@
               align="center"
               justify="center"
             >
-              <v-progress-circular
+              <q-circular-progress
                 indeterminate
                 color="primary"
-              ></v-progress-circular>
+              ></q-circular-progress>
             </v-row>
           </template>
         </q-img>
@@ -156,8 +128,11 @@
 </template>
 
 <script>
-import VueCropper from "vue-cropperjs";
-import "cropperjs/dist/cropper.css";
+// import VueCropper from "vue-cropperjs";
+// import "cropperjs/dist/cropper.css";
+import { Cropper } from "vue-advanced-cropper";
+// Add the following line to import the cropper styles
+import "vue-advanced-cropper/dist/style.css";
 
 export default {
   props: {
@@ -168,7 +143,8 @@ export default {
     linearActionsButton: { type: Boolean, default: false }
   },
   components: {
-    VueCropper
+    // VueCropper
+    Cropper
   },
   data() {
     return {
@@ -189,8 +165,9 @@ export default {
   methods: {
     cropImage() {
       // get image data for post processing, e.g. upload or setting image src
+      const { canvas } = this.$refs.cropper.getResult();
       this.cropping = true;
-      let result = this.$refs.cropper.getCroppedCanvas().toDataURL();
+      let result = canvas.toDataURL();
       this.cropImg = result;
       this.$emit("input", result);
       this.cropping = false;
@@ -199,14 +176,14 @@ export default {
       const dom = this.$refs.flipX.$el;
       let scale = dom.getAttribute("data-scale");
       scale = scale ? -scale : -1;
-      this.$refs.cropper.scaleX(scale);
+      this.$refs.cropper.flip(true, false);
       dom.setAttribute("data-scale", scale);
     },
     flipY() {
       const dom = this.$refs.flipY.$el;
       let scale = dom.getAttribute("data-scale");
       scale = scale ? -scale : -1;
-      this.$refs.cropper.scaleY(scale);
+      this.$refs.cropper.flip(false, true);
       dom.setAttribute("data-scale", scale);
     },
     rotate(deg) {
@@ -225,7 +202,7 @@ export default {
           reader.onload = event => {
             this.imgSrc = event.target.result;
             // rebuild cropperjs with the updated source
-            this.$refs.cropper.replace(event.target.result);
+            // this.$refs.cropper.replace(event.target.result);
             this.cropImg = "";
             this.loadingCropper = false;
           };
@@ -260,7 +237,7 @@ input[type="file"] {
   align-items: flex-start;
 }
 .cropper-area {
-  /* width: 614px; */
+  width: 100%;
   background-color: #d0d7dd;
   border-radius: 3px;
   padding: 10px;
@@ -313,7 +290,7 @@ input[type="file"] {
   border: 3px solid #004b83;
   background: #004b83;
   border-radius: 5px;
-  max-width: 100%;
+  width: 100%;
 }
 .cropped-img-content .v-image {
   max-height: 40vh;
@@ -329,5 +306,8 @@ input[type="file"] {
   text-transform: uppercase;
   color: #fff;
   font-weight: 500;
+}
+.cropper-container {
+  max-height: 60vh;
 }
 </style>

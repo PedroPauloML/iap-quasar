@@ -1,6 +1,10 @@
 <template>
   <div id="password-recover-request">
-    <transition name="slide-y-transition" mode="out-in">
+    <transition
+      enter-active-class="animated fadeInDown"
+      leave-active-class="animated fadeOutUp"
+      mode="out-in"
+    >
       <div v-if="!requestPasswordRecoverSended" key="1" class="centered">
         <q-icon class="primary--text mb-5" size="70">
           mdi-lock-alert

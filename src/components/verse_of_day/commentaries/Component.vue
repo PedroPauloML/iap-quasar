@@ -2,7 +2,7 @@
   <div class="flex commentary">
     <v-scroll-x-reverse-transition>
       <q-img
-        v-show="!showEditForm || (!showEditForm && $vuetify.breakpoint.smAndUp)"
+        v-show="!showEditForm || (!showEditForm && $q.screen.gt.sm)"
         :src="commentary.author.avatar"
         aspect-ratio="1"
         width="60px"

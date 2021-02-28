@@ -31,7 +31,7 @@
                 background-color="white"
                 :class="{
                   'mr-3': $vuetify.breakpoint.mdAndUp,
-                  'mb-3': $vuetify.breakpoint.smAndDown
+                  'mb-3': $q.screen.lt.md
                 }"
                 readonly
                 outlined

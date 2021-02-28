@@ -2,32 +2,50 @@
   <div id="news">
     <p
       v-if="value.search || value.date"
-      class="mb-5"
+      class="q-mb-lg"
       v-html="feedbackOfSearching"
     ></p>
 
-    <transition name="slide-y-transition" mode="out-in">
+    <transition
+      enter-active-class="animated fadeInDown"
+      leave-active-class="animated fadeOutUp"
+      mode="out-in"
+    >
       <div v-if="!showForm">
-        <div v-if="!searching" class="row">
+        <div v-if="searching">
+          <q-linear-progress indeterminate color="primary"></q-linear-progress>
+        </div>
+
+        <div
+          v-else-if="news_list.length > 0"
+          class="row q-col-gutter-lg q-mb-lg"
+        >
           <div
             v-for="(news, group_index) in grouped_news"
             :key="group_index"
             class="col-12 col-sm-6"
           >
-            <div v-if="Array.isArray(news)">
-              <News
+            <div
+              v-if="Array.isArray(news)"
+              class="full-height row q-col-gutter-lg"
+            >
+              <div
+                class="col"
                 v-for="(single_new, i) in news"
                 :key="i"
-                :id="single_new.id"
-                :title="single_new.title"
-                :caption="single_new.caption"
-                :image="{
-                  url: single_new.image,
-                  ratio: $vuetify.breakpoint.xs ? '1.2' : '2.1'
-                }"
-                :class="{ 'mt-7': i % 2 != 0 }"
-                @onDestroy="loadNews"
-              />
+                :class="{ 'col-12': true, 'self-end': i == news.length - 1 }"
+              >
+                <News
+                  :id="single_new.id"
+                  :title="single_new.title"
+                  :caption="single_new.caption"
+                  :image="{
+                    url: single_new.image,
+                    ratio: $q.screen.lt.sm ? '1.2' : '2.1'
+                  }"
+                  @onDestroy="loadNews"
+                />
+              </div>
             </div>
             <News
               v-else
@@ -36,16 +54,19 @@
               :caption="news.caption"
               :image="{
                 url: news.image,
-                ratio: $vuetify.breakpoint.xs ? '1.2' : '1'
+                ratio: $q.screen.lt.sm ? '1.2' : '1'
               }"
               @onDestroy="loadNews"
             />
           </div>
         </div>
 
-        <v-row v-else align="center" justify="center">
-          <v-progress-linear indeterminate color="primary"></v-progress-linear>
-        </v-row>
+        <div v-else class="flex no-wrap items-center justify-center">
+          <q-img :src="newsSRC" width="40px" class="q-mr-lg" />
+          <span class="text-h6">
+            Nenhuma notícia no momento. Volte mais tarde.
+          </span>
+        </div>
       </div>
     </transition>
   </div>
@@ -53,6 +74,8 @@
 
 <script>
 import News from "../../components/news/Component";
+
+import newsSRC from "assets/icons/news.svg";
 
 export default {
   components: { News },
@@ -67,7 +90,8 @@ export default {
   },
   data() {
     return {
-      news_list: []
+      news_list: [],
+      newsSRC
     };
   },
   created() {

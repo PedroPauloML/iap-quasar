@@ -55,10 +55,10 @@
           <q-img
             :src="integrant.photo"
             aspect-ratio="1"
-            :width="$vuetify.breakpoint.smAndUp ? 150 : 80"
-            :max-width="$vuetify.breakpoint.smAndUp ? 150 : 80"
-            :height="$vuetify.breakpoint.smAndUp ? 150 : 80"
-            :max-height="$vuetify.breakpoint.smAndUp ? 150 : 80"
+            :width="$q.screen.gt.sm ? 150 : 80"
+            :max-width="$q.screen.gt.sm ? 150 : 80"
+            :height="$q.screen.gt.sm ? 150 : 80"
+            :max-height="$q.screen.gt.sm ? 150 : 80"
             class="rounded-circle"
           >
             <template v-slot:placeholder>
@@ -85,7 +85,7 @@
                 class="white--text delete-integrant"
                 fab
                 :x-small="$vuetify.breakpoint.xsOnly"
-                :small="$vuetify.breakpoint.smAndUp"
+                :small="$q.screen.gt.sm"
                 @click="deleteIntegrant(index)"
                 :loading="index == integrantIndexForDelete"
                 :disabled="integrantIndexForDelete != null"
@@ -109,7 +109,7 @@
                 class="white--text edit-integrant"
                 fab
                 :x-small="$vuetify.breakpoint.xsOnly"
-                :small="$vuetify.breakpoint.smAndUp"
+                :small="$q.screen.gt.sm"
                 :disabled="integrantIndexForDelete != null"
                 @click="openIntegrantUpdateDialog(index)"
                 v-bind="attrs"

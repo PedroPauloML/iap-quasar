@@ -239,7 +239,7 @@
 
     <q-card-actions>
       <q-btn
-        v-if="$vuetify.breakpoint.smAndUp"
+        v-if="$q.screen.gt.sm"
         color="primary"
         outlined
         @click="preview = !preview"

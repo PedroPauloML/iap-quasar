@@ -1,14 +1,22 @@
 <template>
   <div id="recover-password">
-    <transition name="slide-y-transition" mode="out-in">
+    <transition
+      enter-active-class="animated fadeInDown"
+      leave-active-class="animated fadeOutUp"
+      mode="out-in"
+    >
       <div v-if="checkingTokenValidity" key="1">
-        <v-progress-linear indeterminate class="mb-5"></v-progress-linear>
+        <q-linear-progress indeterminate class="mb-5"></q-linear-progress>
 
         <h3>Estamos lhe procurando. Aguarde um momento!</h3>
       </div>
 
       <div v-else-if="!checkingTokenValidity && validToken">
-        <transition name="slide-y-transition" mode="out-in">
+        <transition
+          enter-active-class="animated fadeInDown"
+          leave-active-class="animated fadeOutUp"
+          mode="out-in"
+        >
           <div v-if="!recoveredPassword" key="2.1" class="centered">
             <q-icon class="primary--text mb-5" size="70">
               mdi-lock-alert

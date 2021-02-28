@@ -1,7 +1,9 @@
 <template>
-  <div>
-    <quasar-tiptap v-bind="options" @update="onUpdate" />
-  </div>
+  <QuasarTiptap
+    v-bind="options"
+    @update="onUpdate"
+    :class="{ readonly: readonly }"
+  />
 </template>
 
 <script>
@@ -9,43 +11,42 @@ import { QuasarTiptap, RecommendedExtensions } from "quasar-tiptap";
 import "quasar-tiptap/lib/index.css";
 
 export default {
+  props: {
+    value: String,
+    readonly: Boolean
+  },
+  components: {
+    QuasarTiptap
+  },
   data() {
     return {
       options: {
-        content: "content",
-        editable: true,
-        extensions: [
-          ...RecommendedExtensions
-          // other extenstions
-          // name string, or custom extension
-        ],
-        toolbar: [
-          "add-more",
-          "separator",
-          "bold",
-          "italic",
-          "underline"
-          // other toolbar buttons
-          // name string
-        ]
+        content: this.value,
+        editable: !this.readonly,
+        showToolbar: !this.readonly,
+        showBubble: false,
+        extensions: [...RecommendedExtensions.filter(ext => ext != "ODoc")],
+        toolbar: []
       },
       json: "",
       html: ""
     };
   },
-  components: {
-    QuasarTiptap
-  },
   methods: {
     onUpdate({ getJSON, getHTML }) {
-      this.json = getJSON();
-      this.html = getHTML();
-      console.log("html", this.html);
+      this.$emit("input", getHTML());
     }
-  },
-  mounted() {
-    // set language dynamically
-    // this.$o.lang.set('en-us')
   }
 };
 </script>
+
+<style lang="scss">
+.tiptap-editor:not(.readonly) {
+  border: 1px solid #eee;
+
+  .editor__content {
+    max-height: 60vh;
+    overflow: auto;
+  }
+}
+</style>

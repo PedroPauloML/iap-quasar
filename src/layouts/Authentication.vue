@@ -2,7 +2,11 @@
   <v-app>
     <v-main class="secondary">
       <v-container id="main-container" class="py-5">
-        <transition name="slide-y-transition" mode="out-in">
+        <transition
+          enter-active-class="animated fadeInDown"
+          leave-active-class="animated fadeOutUp"
+          mode="out-in"
+        >
           <router-view></router-view>
         </transition>
       </v-container>
@@ -17,8 +21,8 @@ import Footer from "../../components/Footer";
 
 export default {
   components: {
-    Footer,
-  },
+    Footer
+  }
 };
 </script>
 

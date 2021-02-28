@@ -38,39 +38,39 @@ const routes = [
         path: "",
         component: () => import("../pages/home/index"),
         meta: { title: `Início | ${site_name}` }
-      }
-    ]
-  },
+      },
 
-  // NEWS
-  {
-    path: "/news",
-    component: () => import("../pages/news/layout"),
-    meta: { title: `Notícias | ${site_name}` },
-    children: [
+      // NEWS
       {
-        name: "news",
-        path: "",
-        component: () => import("../pages/news/index"),
-        meta: { title: `Notícias | ${site_name}` }
-      },
-      {
-        name: "news_new",
-        path: "/news/new",
-        component: () => import("../pages/news/new"),
-        meta: { title: `Nova Notícia | ${site_name}` }
-      },
-      {
-        name: "news_show",
-        path: "/news/:id",
-        component: () => import("../pages/news/show"),
-        meta: { title: `Notícias | ${site_name}` }
-      },
-      {
-        name: "news_edit",
-        path: "/news/:id/edit",
-        component: () => import("../pages/news/edit"),
-        meta: { title: `Editando Notícia | ${site_name}` }
+        path: "/news",
+        component: () => import("../pages/news/layout"),
+        meta: { title: `Notícias | ${site_name}` },
+        children: [
+          {
+            name: "news",
+            path: "",
+            component: () => import("../pages/news/index"),
+            meta: { title: `Notícias | ${site_name}` }
+          },
+          {
+            name: "news_new",
+            path: "/news/new",
+            component: () => import("../pages/news/new"),
+            meta: { title: `Nova Notícia | ${site_name}` }
+          },
+          {
+            name: "news_show",
+            path: "/news/:id",
+            component: () => import("../pages/news/show"),
+            meta: { title: `Notícias | ${site_name}` }
+          },
+          {
+            name: "news_edit",
+            path: "/news/:id/edit",
+            component: () => import("../pages/news/edit"),
+            meta: { title: `Editando Notícia | ${site_name}` }
+          }
+        ]
       }
     ]
   },

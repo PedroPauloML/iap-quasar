@@ -1,8 +1,12 @@
 <template>
   <div id="confirm-account">
-    <transition name="slide-y-transition" mode="out-in">
+    <transition
+      enter-active-class="animated fadeInDown"
+      leave-active-class="animated fadeOutUp"
+      mode="out-in"
+    >
       <div v-if="checkingTokenValidity" key="1">
-        <v-progress-linear indeterminate class="mb-5"></v-progress-linear>
+        <q-linear-progress indeterminate class="mb-5"></q-linear-progress>
 
         <h3>Estamos lhe procurando. Aguarde um momento!</h3>
       </div>
@@ -39,7 +43,11 @@
         key="3"
         class="not-confirmed-account"
       >
-        <transition name="slide-y-transition" mode="out-in">
+        <transition
+          enter-active-class="animated fadeInDown"
+          leave-active-class="animated fadeOutUp"
+          mode="out-in"
+        >
           <div v-if="!emailResended" key="3.1" class="centered">
             <q-icon class="warning--text text--darken-2 mb-5" size="70">
               mdi-alert-outline

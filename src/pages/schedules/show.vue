@@ -12,7 +12,7 @@
       @onDestroy="$router.push({ name: 'schedules' })"
     />
     <v-row v-else align="center" justify="center">
-      <v-progress-linear indeterminate color="primary"></v-progress-linear>
+      <q-linear-progress indeterminate color="primary"></q-linear-progress>
     </v-row>
   </div>
 </template>
@@ -25,7 +25,7 @@ export default {
   data() {
     return {
       back_router: "/schedules",
-      schedule: null,
+      schedule: null
     };
   },
   created() {
@@ -35,14 +35,14 @@ export default {
   methods: {
     findSchedule() {
       this.schedule = this.$store.state.schedules.schedules.find(
-        (el) => el.id == this.$route.params.id
+        el => el.id == this.$route.params.id
       );
-    },
+    }
   },
   beforeRouteLeave(to, from, next) {
     this.$emit("setBackRoute", null);
     next();
-  },
+  }
 };
 </script>
 

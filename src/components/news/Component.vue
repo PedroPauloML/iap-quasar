@@ -97,33 +97,33 @@
 
     <q-card-section
       v-if="metadata"
-      class="flex align-center metadata flex-column flex-sm-row"
+      class="flex align-center metadata flex-column flex-sm-row text-overline text-uppercase"
     >
-      <span v-if="metadata.read_time" class="overline">
+      <span v-if="metadata.read_time">
         Tempo de leitura:
         {{ Math.ceil(content.split(" ").length / 5 / 60) }} minuto(s)
       </span>
 
-      <span v-if="metadata.published_at" class="overline">
+      <span v-if="metadata.published_at">
         Publicado em:
         {{
-          $moment(metadata.published_at, "DD/MM/YYYY")
-            | moment("DD/MM/YYYY hh:mm")
+          $moment(metadata.published_at, "DD/MM/YYYY").format(
+            "DD/MM/YYYY hh:mm"
+          )
         }}
       </span>
 
-      <span v-if="metadata.author" class="overline">
-        Autor: {{ metadata.author }}
-      </span>
+      <span v-if="metadata.author"> Autor: {{ metadata.author }} </span>
     </q-card-section>
 
     <q-separator v-if="metadata" />
 
-    <q-card-section v-if="content">
-      <div
+    <q-card-section v-if="content" class="q-pa-none">
+      <!-- <div
         class="content mce-content-body black--text body-1"
         v-html="content"
-      />
+      /> -->
+      <TipTapEditor ref="content" v-model="content" readonly />
     </q-card-section>
 
     <q-separator v-if="content && tags" />
@@ -136,14 +136,14 @@
         v-slot="{ href }"
       >
         <q-chip
-          link
-          :to="href"
+          clickable
           class="ma-2 font-weight-medium"
           color="accent"
           label
           text-color="white"
+          @click="$router.push(href)"
         >
-          <q-icon left>mdi-label</q-icon>
+          <q-icon name="mdi-label" size="sm" class="q-mr-sm" />
           {{ tag }}
         </q-chip>
       </router-link>
@@ -152,6 +152,8 @@
 </template>
 
 <script>
+import TipTapEditor from "../TipTapEditor";
+
 export default {
   props: {
     id: Number,
@@ -170,6 +172,7 @@ export default {
     tags: Array,
     noActions: { type: Boolean, default: false }
   },
+  components: { TipTapEditor },
   data() {
     return {
       optionsMenu: false,
@@ -213,16 +216,16 @@ export default {
   background: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#000000",endColorstr="#000000",GradientType=1);
 }
-// .metadata span:not(:last-child):after {
-//   content: "\F09DE";
-//   display: inline-block;
-//   font: normal normal normal 24px/1 "Material Design Icons";
-//   font-size: inherit;
-//   text-rendering: auto;
-//   line-height: inherit;
-//   -webkit-font-smoothing: antialiased;
-//   -moz-osx-font-smoothing: grayscale;
-// }
+.metadata span:not(:last-child):after {
+  content: "\F09DE";
+  display: inline-block;
+  font: normal normal normal 24px/1 "Material Design Icons";
+  font-size: inherit;
+  text-rendering: auto;
+  line-height: inherit;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 .q-img__content > div {
   padding: 0;
