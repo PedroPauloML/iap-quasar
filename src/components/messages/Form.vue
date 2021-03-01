@@ -1,17 +1,23 @@
 <template>
-  <q-card class="mb-8">
+  <q-card>
     <q-card-section>
-      Criando nova mensagem
-    </q-card-section>
-    <q-card-section>
-      Insira as informações abaixo para criar uma nova mensagem. É possível
-      pré-visualizar como a mensagem ficará antes de criá-la clicando em
-      "Pré-visualização".
+      <p class="text-h6 q-mb-none">
+        {{ id ? "Editando mensagem" : "Criando nova mensagem" }}
+      </p>
+      <p class="q-mb-none text-grey-8">
+        {{
+          id
+            ? "Edite as informações abaixo para atualizar a mensagem."
+            : "Insira as informações abaixo para criar uma nova mensagem."
+        }}
+        É possível pré-visualizar como a mensagem ficará antes de criá-la
+        clicando em "Pré-visualização".
+      </p>
     </q-card-section>
 
-    <q-card-text>
+    <q-card-section>
       <div ref="previewContainer" v-show="preview">
-        <p class="body-1 primary--text font-weight-bold">Pré-visualização</p>
+        <p class="text-h6 text-primary text-weight-bold">Pré-visualização</p>
         <Message
           :title="title"
           :caption="caption"
@@ -21,77 +27,99 @@
           :tags="tags"
           :metadata="{ read_time: true }"
           @filterMessages="search => (value.search = search)"
-          class="mb-10"
+          class="q-mb-lg"
           no-actions
         />
       </div>
-      <q-form v-show="!preview" ref="form" v-model="valid" @submit="createNews">
+      <q-form
+        v-show="!preview"
+        ref="form"
+        @submit="id ? updateMessage : createMessage"
+      >
         <q-input
           ref="title"
           v-model="title"
           :rules="requiredRules.title"
           label="Título"
-          required
-        ></q-input>
+        />
 
         <q-input
           ref="caption"
           v-model="caption"
           :rules="requiredRules.caption"
           label="Legenda"
-          required
-        ></q-input>
+        />
 
-        <p
+        <div
+          ref="contentContainer"
           :class="{
-            'body-2': true,
-            'mt-2': true,
-            'mb-1': true,
-            'red--text': contentPrintError
+            'content-container bg-white': true,
+            fullscreen: fullscreen
           }"
         >
-          Conteúdo
-        </p>
-        <p
-          ref="contentLabelError"
-          v-show="contentPrintError"
-          class="red--text mb-1"
-        >
-          O conteúdo da notícia é obrigatório(a)
-        </p>
-        <div class="mb-5">
-          <TipTapEditor ref="content" v-model="content" />
+          <div
+            :class="{
+              'row items-center': true,
+              'bg-primary text-white text-weight-bold q-pa-sm': fullscreen
+            }"
+          >
+            <div class="col">
+              <p
+                :class="{
+                  'q-mt-md q-mb-sm': !fullscreen,
+                  'q-mb-none': fullscreen,
+                  'text-red': contentPrintError
+                }"
+              >
+                Conteúdo
+              </p>
+              <p
+                ref="contentLabelError"
+                v-show="contentPrintError && !fullscreen"
+                class="text-red q-mb-sm"
+              >
+                O conteúdo da notícia é obrigatório(a)
+              </p>
+            </div>
+
+            <q-btn
+              dense
+              flat
+              :icon="fullscreen ? 'fullscreen_exit' : 'fullscreen'"
+              @click.stop="fullscreen = !fullscreen"
+              class="col-auto"
+            >
+              <q-tooltip>
+                {{ fullscreen ? "Sair da tela cheia" : "Entrar em tela cheia" }}
+              </q-tooltip>
+            </q-btn>
+          </div>
+
+          <div class="q-mb-lg">
+            <TipTapEditor
+              ref="content"
+              v-model="content"
+              :max-size="fullscreen ? 'calc(100vh - 48px - 40px)' : null"
+            />
+          </div>
         </div>
 
-        <v-combobox
-          ref="tags"
+        <q-select
           v-model="tags"
-          :items="tagsSuggestions"
-          :search-input.sync="tagsSearch"
-          hide-selected
-          hint="Máximo de 5 tags"
-          label="Tags (opcional)"
           multiple
-          persistent-hint
-          small-chips
-        >
-          <template v-slot:no-data>
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title>
-                  Nenhum resultado encontrado para "<strong>{{
-                    tagsSearch
-                  }}</strong
-                  >". Pressione <kbd>enter</kbd> para criar uma nova tag.
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </template>
-        </v-combobox>
+          :options="tagsSuggestions"
+          use-chips
+          use-input
+          hide-dropdown-icon
+          input-debounce="0"
+          label="Tags (opcional)"
+          hint="Máximo de 5 tags"
+          new-value-mode="add"
+        />
 
         <q-btn label="Submeter fomrulário" class="hidden" />
       </q-form>
-    </q-card-text>
+    </q-card-section>
 
     <q-card-actions>
       <q-btn
@@ -118,7 +146,8 @@
         </q-tooltip>
       </q-btn>
 
-      <v-spacer></v-spacer>
+      <q-space />
+
       <q-btn color="grey" dark @click="closeForm" :disabled="loading">
         Cancelar
       </q-btn>
@@ -149,6 +178,7 @@ export default {
     return {
       // General
       preview: false,
+      fullscreen: false,
 
       // Fields
       id: this.data ? this.data.id : null,
@@ -221,83 +251,95 @@ export default {
   },
   methods: {
     createMessage() {
-      if (this.checkFormValidity()) {
-        let data = {
-          title: this.title,
-          caption: this.caption,
-          content: this.content,
-          tags: this.tags,
-          published_at: this.$moment().format(),
-          author: this.author
-        };
+      this.$refs.form.validate(false).then(valid => {
+        if (valid) {
+          let data = {
+            title: this.title,
+            caption: this.caption,
+            content: this.content,
+            tags: this.tags,
+            published_at: this.$moment().format(),
+            author: this.author
+          };
 
-        this.loading = true;
+          this.loading = true;
 
-        setTimeout(() => {
-          this.loading = false;
-          this.$emit("createMessage", data);
-        }, 1000);
-      }
+          setTimeout(() => {
+            this.loading = false;
+            this.$emit("createMessage", data);
+          }, 1000);
+        } else {
+          this.scrollToFieldNotValid();
+        }
+      });
     },
     updateMessage() {
-      if (this.checkFormValidity()) {
-        let data = {
-          title: this.title,
-          caption: this.caption,
-          content: this.content,
-          tags: this.tags,
-          published_at: this.published_at,
-          author: this.author
-        };
+      this.$refs.form.validate(false).then(valid => {
+        if (valid) {
+          let data = {
+            title: this.title,
+            caption: this.caption,
+            content: this.content,
+            tags: this.tags,
+            published_at: this.published_at,
+            author: this.author
+          };
 
-        this.loading = true;
+          this.loading = true;
 
-        setTimeout(() => {
-          this.loading = false;
-          this.$emit("updateMessage", { id: this.id, data });
-        }, 1000);
-      }
+          setTimeout(() => {
+            this.loading = false;
+            this.$emit("updateMessage", { id: this.id, data });
+          }, 1000);
+        } else {
+          this.scrollToFieldNotValid();
+        }
+      });
     },
-    checkFormValidity() {
-      if (this.$refs.form.validate() && this.content) {
-        return true;
-      } else {
-        if (!this.content) this.contentPrintError = true;
+    scrollToFieldNotValid() {
+      if (!this.content) {
+        this.contentPrintError = true;
+        let y =
+          this.$refs.contentContainer.$el.getBoundingClientRect().top +
+          window.pageYOffset -
+          150;
+        window.scrollTo({
+          top: y,
+          behavior: "smooth"
+        });
+      }
 
-        if (!this.title) {
-          let y =
-            this.$refs.title.$el.getBoundingClientRect().top +
-            window.pageYOffset -
-            60;
-          window.scrollTo({
-            top: y,
-            behavior: "smooth"
-          });
-          return;
-        }
-        if (!this.caption) {
-          let y =
-            this.$refs.caption.$el.getBoundingClientRect().top +
-            window.pageYOffset -
-            60;
-          window.scrollTo({
-            top: y,
-            behavior: "smooth"
-          });
-          return;
-        }
-        if (!this.content) {
-          let y =
-            this.$refs.contentLabelError.getBoundingClientRect().top +
-            window.pageYOffset -
-            60;
-          window.scrollTo({
-            top: y,
-            behavior: "smooth"
-          });
-          return;
-        }
-        return false;
+      if (!this.title) {
+        let y =
+          this.$refs.title.$el.getBoundingClientRect().top +
+          window.pageYOffset -
+          150;
+        window.scrollTo({
+          top: y,
+          behavior: "smooth"
+        });
+      }
+
+      if (!this.caption) {
+        let y =
+          this.$refs.caption.$el.getBoundingClientRect().top +
+          window.pageYOffset -
+          150;
+        window.scrollTo({
+          top: y,
+          behavior: "smooth"
+        });
+      }
+
+      if (!this.content) {
+        let y =
+          this.$refs.contentLabelError.getBoundingClientRect().top +
+          window.pageYOffset -
+          150;
+        window.scrollTo({
+          top: y,
+          behavior: "smooth"
+        });
       }
     },
     closeForm() {

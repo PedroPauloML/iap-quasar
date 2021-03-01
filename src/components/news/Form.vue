@@ -1,5 +1,5 @@
 <template>
-  <q-card class="mb-8">
+  <q-card>
     <q-card-section>
       <p class="text-h6 q-mb-none">
         Criando nova notícia

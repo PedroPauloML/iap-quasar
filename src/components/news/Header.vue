@@ -1,5 +1,5 @@
 <template>
-  <div id="news-header" class="q-mb-md">
+  <div id="news-header" class="q-mb-lg">
     <div class="row q-col-gutter-md">
       <transition
         enter-active-class="animated fadeInRight"

@@ -12,17 +12,20 @@
         :to="{ name: 'messages_show', params: { id: id } }"
         v-slot="{ href }"
       >
-        <a
-          class="text-h4 text-weight-bold text-primary q-my-md full-width"
-          :href="href"
-        >
+        <a class="text-h4 text-weight-bold text-primary" :href="href">
           {{ title }}
         </a>
       </router-link>
-      <span v-else class="text-primary q-my-md full-width">{{ title }}</span>
+      <span v-else class="text-h4 text-weight-bold text-primary">
+        {{ title }}
+      </span>
+
+      <span class="text-grey-8 text-weight-medium q-my-sm block">
+        {{ caption }}
+      </span>
 
       <div class="row">
-        <div class="col self-center metadata">
+        <div class="col-12 col-sm self-center metadata">
           <span v-if="metadata.read_time" class="text-overline text-uppercase">
             Tempo de leitura:
             {{ Math.ceil(content.split(" ").length / 5 / 60) }} minuto(s)
@@ -87,12 +90,9 @@
 
     <q-separator />
 
-    <div class="content-wrapper">
+    <div class="content-wrapper tiptap">
       <q-card-section v-if="content">
-        <div
-          class="content black--text body-1 flex align-center flex-column mce-content-body"
-          v-html="content"
-        />
+        <div class="content editor__content" v-html="content" />
       </q-card-section>
 
       <div v-if="showReadMore" class="show-more flex align-end">
@@ -117,12 +117,11 @@
       <q-chip
         v-for="(tag, index) in tags"
         :key="index"
-        link
-        class="ma-2 font-weight-medium"
         color="accent"
         label
         text-color="white"
         square
+        clickable
         @click="filterMessages(tag)"
       >
         <q-icon name="mdi-label" size="sm" class="q-mr-sm" />
@@ -137,6 +136,7 @@ export default {
   props: {
     id: Number,
     title: { type: String, required: true },
+    caption: { type: String, required: true },
     content: { type: String, required: true },
     full_content: Boolean,
     published_at: String,
@@ -205,6 +205,8 @@ export default {
     -moz-osx-font-smoothing: grayscale;
   }
   .content {
+    padding: 0 !important;
+
     p {
       width: 100%;
     }
@@ -213,6 +215,7 @@ export default {
       box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
         0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
       margin: 15px auto;
+      height: auto;
       max-width: 100%;
       max-height: 50vh;
     }

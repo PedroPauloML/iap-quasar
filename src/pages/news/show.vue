@@ -44,6 +44,9 @@ export default {
       this.news = this.$store.state.news.news.find(
         el => el.id == this.$route.params.id
       );
+      if (!this.news) {
+        this.$router.push({ name: "404" });
+      }
     }
   },
   beforeRouteLeave(to, from, next) {

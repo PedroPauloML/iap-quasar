@@ -15,9 +15,9 @@
       @onDestroy="$router.push({ name: 'messages' })"
       class="mb-10"
     />
-    <v-row v-else align="center" justify="center">
-      <q-linear-progress indeterminate color="primary"></q-linear-progress>
-    </v-row>
+    <div v-else>
+      <q-linear-progress indeterminate color="primary" />
+    </div>
   </div>
 </template>
 
@@ -41,6 +41,9 @@ export default {
       this.message = this.$store.state.messages.messages.find(
         el => el.id == this.$route.params.id
       );
+      if (!this.message) {
+        this.$router.push({ name: "404" });
+      }
     }
   },
   beforeRouteLeave(to, from, next) {

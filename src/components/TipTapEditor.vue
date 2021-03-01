@@ -3,6 +3,7 @@
     v-bind="options"
     @update="onUpdate"
     :class="{ readonly: readonly }"
+    :style="customMaxSize"
   />
 </template>
 
@@ -12,8 +13,9 @@ import "quasar-tiptap/lib/index.css";
 
 export default {
   props: {
-    value: String,
-    readonly: Boolean
+    value: { type: String, required: true },
+    readonly: Boolean,
+    maxSize: String
   },
   components: {
     QuasarTiptap
@@ -32,6 +34,13 @@ export default {
       html: ""
     };
   },
+  computed: {
+    customMaxSize() {
+      return {
+        "--custom-max-size": this.maxSize || "60vh"
+      };
+    }
+  },
   methods: {
     onUpdate({ getJSON, getHTML }) {
       this.$emit("input", getHTML());
@@ -45,7 +54,12 @@ export default {
   border: 1px solid #eee;
 
   .editor__content {
-    max-height: 60vh;
+    overflow: auto;
+    max-height: var(--custom-max-size);
+  }
+
+  .menubar {
+    flex-wrap: nowrap;
     overflow: auto;
   }
 }

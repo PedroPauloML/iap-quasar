@@ -1,5 +1,5 @@
 <template>
-  <q-header elevated class="bg-white text-dark" reveal>
+  <q-header elevated class="bg-white text-dark" reveal :reveal-offset="10">
     <q-toolbar id="toolbar" class="q-py-sm q-px-md">
       <q-btn
         v-if="$q.screen.lt.sm"
@@ -42,7 +42,10 @@
         >
           <q-btn
             :to="href"
-            :class="{ 'text-primary': isExactActive }"
+            :class="{
+              'text-primary':
+                route.path_name == 'home' ? isExactActive : isActive
+            }"
             height="100%"
             flat
             link
