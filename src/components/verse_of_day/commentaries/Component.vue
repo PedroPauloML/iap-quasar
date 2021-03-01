@@ -1,71 +1,70 @@
 <template>
-  <div class="flex commentary">
-    <v-scroll-x-reverse-transition>
-      <q-img
+  <div class="row commentary">
+    <transition
+      enter-active-class="animated fadeIn"
+      leave-active-class="animated fadeOut"
+    >
+      <q-avatar
         v-show="!showEditForm || (!showEditForm && $q.screen.gt.sm)"
-        :src="commentary.author.avatar"
-        aspect-ratio="1"
-        width="60px"
-        height="60px"
-        max-width="60px"
-        max-height="60px"
-        class="rounded-circle mr-4"
-      ></q-img>
-    </v-scroll-x-reverse-transition>
+        size="60px"
+        class="col-auto q-mr-md"
+      >
+        <q-img :src="commentary.author.avatar" width="60px" />
+      </q-avatar>
+    </transition>
 
-    <div class="flex">
-      <div class="flex align-center justify-space-between">
-        <span class="overline">
+    <div class="col flex flex-block">
+      <div class="flex no-wrap items-center justify-between">
+        <span class="text-overline text-uppercase text-grey-7">
           {{ commentary.author.name }}
         </span>
 
-        <v-scroll-x-transition v-if="userSigned" mode="out-in">
+        <transition
+          v-if="userSigned"
+          enter-active-class="animated fadeIn"
+          leave-active-class="animated fadeOut"
+          mode="out-in"
+        >
           <div v-show="!showEditForm" class="actions">
-            <q-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <q-btn
-                  icon
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                  :disabled="deleting"
-                  @click="showUpdatingForm"
-                >
-                  <q-icon small>mdi-pencil-outline</q-icon>
-                </q-btn>
-              </template>
-              <span>Editar</span>
-            </q-tooltip>
+            <q-btn flat round :disabled="deleting" @click="showUpdatingForm">
+              <q-icon name="mdi-pencil-outline" />
+              <q-tooltip>Editar</q-tooltip>
+            </q-btn>
 
-            <q-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <q-btn
-                  color="red"
-                  icon
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                  @click="deleteCommentary"
-                  :loading="deleting"
-                >
-                  <q-icon small>mdi-delete-outline</q-icon>
-                </q-btn>
-              </template>
-              <span>Excluir</span>
-            </q-tooltip>
+            <q-btn
+              color="red"
+              flat
+              round
+              @click="deleteCommentary"
+              :loading="deleting"
+            >
+              <q-icon name="mdi-delete-outline" />
+              <q-tooltip>Excluir</q-tooltip>
+            </q-btn>
           </div>
-        </v-scroll-x-transition>
+        </transition>
       </div>
 
-      <v-scroll-x-transition mode="out-in">
-        <div key="commentary-form" v-if="userSigned && showEditForm">
+      <transition
+        enter-active-class="animated fadeIn"
+        leave-active-class="animated fadeOut"
+        mode="out-in"
+      >
+        <div
+          key="commentary-form"
+          ref="commentaryForm"
+          v-if="userSigned && showEditForm"
+        >
+          <p v-if="showError" class="text-red">
+            O comentário não pode ficar vazio
+          </p>
           <TipTapEditor ref="content" v-model="commentaryEdited" />
 
-          <div class="text-right mt-4">
+          <div class="text-right q-mt-lg">
             <q-btn
               color="grey"
               :dark="!updating"
-              class="mr-2"
+              class="q-mr-md"
               @click="closeUpdatingForm"
               :disabled="updating"
             >
@@ -81,13 +80,8 @@
           </div>
         </div>
 
-        <div
-          key="commentary-text"
-          v-else
-          class="black--text body-1 mce-content-body"
-          v-html="commentary.text"
-        />
-      </v-scroll-x-transition>
+        <div key="commentary-text" v-else v-html="commentary.text" />
+      </transition>
     </div>
   </div>
 </template>
@@ -112,7 +106,8 @@ export default {
   data() {
     return {
       showEditForm: false,
-      commentaryEdited: this.commentary.text
+      commentaryEdited: this.commentary.text,
+      showError: false
     };
   },
   watch: {
@@ -132,10 +127,25 @@ export default {
       this.showEditForm = false;
     },
     updateCommentary() {
-      this.$emit("update", {
-        id: this.commentary.id,
-        text: this.commentaryEdited
-      });
+      if (this.commentaryEdited && this.commentaryEdited != "<p></p>") {
+        this.showError = false;
+
+        this.$emit("update", {
+          id: this.commentary.id,
+          text: this.commentaryEdited
+        });
+      } else {
+        this.showError = true;
+
+        let y =
+          this.$refs.commentaryForm.getBoundingClientRect().top +
+          window.pageYOffset -
+          60;
+        window.scrollTo({
+          top: y,
+          behavior: "smooth"
+        });
+      }
     },
     deleteCommentary() {
       this.$emit("delete", this.commentary.id);

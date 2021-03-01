@@ -71,100 +71,100 @@ const routes = [
             meta: { title: `Editando Notícia | ${site_name}` }
           }
         ]
+      },
+
+      // VERSE OF DAY
+      {
+        path: "/verses_of_day",
+        component: () => import("../pages/verse_of_day/layout"),
+        children: [
+          {
+            name: "verses_of_day",
+            path: "",
+            component: () => import("../pages/verse_of_day/index"),
+            meta: { title: `Versículos do dia | ${site_name}` }
+          },
+          {
+            name: "verse_of_day",
+            path: "/verses_of_day/:id",
+            component: () => import("../pages/verse_of_day/show"),
+            meta: { title: `Versículos do dia | ${site_name}` }
+          }
+        ]
+      },
+
+      // MESSAGES
+      {
+        path: "/messages",
+        component: () => import("../pages/messages/layout"),
+        children: [
+          {
+            name: "messages",
+            path: "",
+            component: () => import("../pages/messages/index"),
+            meta: { title: `Mensagens | ${site_name}` }
+          },
+          {
+            name: "messages_new",
+            path: "/messages/new",
+            component: () => import("../pages/messages/new"),
+            meta: { title: `Nova Mensagem | ${site_name}` }
+          },
+          {
+            name: "messages_show",
+            path: "/messages/:id",
+            component: () => import("../pages/messages/show"),
+            meta: { title: `Mensagens | ${site_name}` }
+          },
+          {
+            name: "messages_edit",
+            path: "/messages/:id/edit",
+            component: () => import("../pages/messages/edit"),
+            meta: { title: `Editando Mensagem | ${site_name}` }
+          }
+        ]
+      },
+
+      // SCHEDULES
+      {
+        path: "/schedules",
+        component: () => import("../pages/schedules/layout"),
+        children: [
+          {
+            name: "schedules",
+            path: "",
+            component: () => import("../pages/schedules/index"),
+            meta: { title: `Agendas | ${site_name}` }
+          },
+          {
+            name: "schedules_new",
+            path: "/schedules/new",
+            component: () => import("../pages/schedules/new"),
+            meta: { title: `Nova Agenda | ${site_name}` }
+          },
+          {
+            name: "schedules_show",
+            path: "/schedules/:id",
+            component: () => import("../pages/schedules/show"),
+            meta: { title: `Agendas | ${site_name}` }
+          },
+          {
+            name: "schedules_edit",
+            path: "/schedules/:id/edit",
+            component: () => import("../pages/schedules/edit"),
+            meta: { title: `Editando Agenda | ${site_name}` }
+          }
+        ]
+      },
+
+      // CONTACT
+      {
+        name: "contact",
+        path: "/contact",
+        component: () => import("../pages/contact/index"),
+        meta: { title: `Contato | ${site_name}` }
       }
     ]
-  },
-
-  // VERSE OF DAY
-  {
-    path: "/verses_of_day",
-    component: () => import("../pages/verse_of_day/layout"),
-    children: [
-      {
-        name: "verses_of_day",
-        path: "",
-        component: () => import("../pages/verse_of_day/index"),
-        meta: { title: `Versículos do dia | ${site_name}` }
-      },
-      {
-        name: "verse_of_day",
-        path: "/verses_of_day/:id",
-        component: () => import("../pages/verse_of_day/show"),
-        meta: { title: `Versículos do dia | ${site_name}` }
-      }
-    ]
-  },
-
-  // MESSAGES
-  {
-    path: "/messages",
-    component: () => import("../pages/messages/layout"),
-    children: [
-      {
-        name: "messages",
-        path: "",
-        component: () => import("../pages/messages/index"),
-        meta: { title: `Mensagens | ${site_name}` }
-      },
-      {
-        name: "messages_new",
-        path: "/messages/new",
-        component: () => import("../pages/messages/new"),
-        meta: { title: `Nova Mensagem | ${site_name}` }
-      },
-      {
-        name: "messages_show",
-        path: "/messages/:id",
-        component: () => import("../pages/messages/show"),
-        meta: { title: `Mensagens | ${site_name}` }
-      },
-      {
-        name: "messages_edit",
-        path: "/messages/:id/edit",
-        component: () => import("../pages/messages/edit"),
-        meta: { title: `Editando Mensagem | ${site_name}` }
-      }
-    ]
-  },
-
-  // SCHEDULES
-  {
-    path: "/schedules",
-    component: () => import("../pages/schedules/layout"),
-    children: [
-      {
-        name: "schedules",
-        path: "",
-        component: () => import("../pages/schedules/index"),
-        meta: { title: `Agendas | ${site_name}` }
-      },
-      {
-        name: "schedules_new",
-        path: "/schedules/new",
-        component: () => import("../pages/schedules/new"),
-        meta: { title: `Nova Agenda | ${site_name}` }
-      },
-      {
-        name: "schedules_show",
-        path: "/schedules/:id",
-        component: () => import("../pages/schedules/show"),
-        meta: { title: `Agendas | ${site_name}` }
-      },
-      {
-        name: "schedules_edit",
-        path: "/schedules/:id/edit",
-        component: () => import("../pages/schedules/edit"),
-        meta: { title: `Editando Agenda | ${site_name}` }
-      }
-    ]
-  },
-
-  // CONTACT
-  {
-    name: "contact",
-    path: "/contact",
-    component: () => import("../pages/contact/index"),
-    meta: { title: `Contato | ${site_name}` }
   },
 
   // Always leave this as last one,

@@ -1,9 +1,9 @@
 <template>
   <div ref="container" class="new-commentary">
-    <p class="primary--text font-weight-bold mb-0">
+    <p class="text-primary text-weight-bold q-mb-none">
       Novo comentário
     </p>
-    <p v-if="showError" class="red--text">
+    <p v-if="showError" class="text-red">
       Para inserir um novo comentário é preciso inserir o conteúdo do comentário
     </p>
     <p v-else>
@@ -12,11 +12,11 @@
 
     <TipTapEditor ref="content" v-model="commentaryContent" />
 
-    <div class="text-right mt-4">
+    <div class="text-right q-mt-lg">
       <q-btn
         color="grey"
         :dark="!sending"
-        class="mr-2"
+        class="q-mr-md"
         @click="cancelCommentary"
         :disabled="sending"
       >
@@ -66,7 +66,7 @@ export default {
       this.$emit("cancelCommentary");
     },
     sendCommentary() {
-      if (this.commentaryContent) {
+      if (this.commentaryContent && this.commentaryContent != "<p></p>") {
         this.$emit("sendCommentary", this.commentaryContent);
       } else {
         this.showError = true;

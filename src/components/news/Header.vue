@@ -17,7 +17,7 @@
         </div>
       </transition>
 
-      <div class="col-12 col-sm">
+      <div class="col">
         <span class="text-h4 text-weight-bold">Notícias</span>
       </div>
 
@@ -156,14 +156,6 @@ export default {
     }
   },
   computed: {
-    dateFormatted: {
-      get() {
-        return this.parseDate(this.filters.date) || "";
-      },
-      set(newValue) {
-        return newValue;
-      }
-    },
     dateFormattedToPicker: {
       get() {
         return this.parseDateToPicker(this.filters.date) || "";

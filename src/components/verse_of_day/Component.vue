@@ -1,16 +1,14 @@
 <template>
   <q-card class="verse-of-day" light>
-    <q-card-section class="row">
+    <q-card-section class="row items-center">
       <div
         :class="{
-          'col-12': true,
-          'col-sm-auto': true,
-          'self-center': true,
+          'col-12 col-sm-auto': true,
           'q-mb-md': $q.screen.lt.sm
         }"
       >
         <div class="row">
-          <div class="col-auto self-center">
+          <div class="col-auto">
             <img
               :src="bibleSRC"
               alt="Bíblia"
@@ -27,7 +25,7 @@
         </div>
       </div>
 
-      <div class="col-12 col-sm self-center">
+      <div class="col-12 col-sm">
         <p
           v-if="$q.screen.gt.xs"
           class="text-h6 text-weight-bold q-mb-sm text-primary"
@@ -42,7 +40,7 @@
         </p>
       </div>
 
-      <div class="col-12 col-sm-auto self-center">
+      <div class="col-12 col-sm-auto">
         <div class="row">
           <div class="col-auto col-sm-12 text-center self-center">
             <img
@@ -94,9 +92,9 @@
 
     <q-card-section
       ref="commentariesContainer"
-      class="flex align-center justify-space-between"
+      class="flex items-center justify-between"
     >
-      <span v-if="fetchingCommentaries">
+      <div v-if="fetchingCommentaries">
         <v-progress-circular
           indeterminate
           color="primary"
@@ -105,9 +103,9 @@
           width="2"
         ></v-progress-circular>
         Buscando os comentários desse versículo
-      </span>
-      <span v-else>
-        <q-icon name="o_mode_comment" class="q-mr-md" />
+      </div>
+      <div v-else>
+        <q-icon name="o_mode_comment" size="sm" class="q-mr-md" />
         <span v-if="isCommentariesPresent">
           {{ commentaries.length }}
           {{
@@ -125,7 +123,7 @@
         <span v-else>
           Nenhum comentário adicionado a esse versículo
         </span>
-      </span>
+      </div>
 
       <q-btn
         v-if="userSigned && !noActions"
@@ -139,18 +137,22 @@
       </q-btn>
     </q-card-section>
 
-    <v-scroll-y-transition v-if="userSigned && !noActions" group>
+    <transition-group
+      v-if="userSigned && !noActions"
+      enter-active-class="animated fadeIn"
+      leave-active-class="animated fadeOut"
+    >
       <q-separator v-show="showCommentaryForm" key="divider" />
       <NewCommetary
         key="form"
         v-show="showCommentaryForm"
-        class="ma-4"
+        class="q-ma-md"
         :commentary="''"
         @cancelCommentary="closeCommentaryForm"
         @sendCommentary="createNewCommentary"
         :sending="sendingCommentary"
       />
-    </v-scroll-y-transition>
+    </transition-group>
 
     <q-separator v-if="isCommentariesPresent" />
 

@@ -1,82 +1,99 @@
 <template>
-  <div id="news-header" class="mb-3">
-    <v-row>
-      <v-slide-x-transition>
+  <div id="news-header" class="q-mb-lg">
+    <div class="row q-col-gutter-md">
+      <transition
+        enter-active-class="animated fadeInRight"
+        leave-active-class="animated fadeOutLeft"
+        mode="out-in"
+      >
         <div v-if="back_route" class="col-auto flex align-center">
           <router-link :to="back_route" v-slot="{ href }">
-            <q-btn icon link color="gray" :to="href">
-              <q-icon color="white">mdi-chevron-left</q-icon>
+            <q-btn round color="primary" :to="href">
+              <q-icon name="chevron_left" color="white" />
+
+              <q-tooltip>Voltar</q-tooltip>
             </q-btn>
           </router-link>
         </div>
-      </v-slide-x-transition>
+      </transition>
 
       <div class="col">
-        <h1>Versículos do dia</h1>
+        <span class="text-h4 text-weight-bold">Versículos do dia</span>
       </div>
 
-      <div class="col-12 col-md-5 col-sm-7 flex align-center">
-        <div class="flex flex flex-column flex-sm-row">
-          <v-menu
-            v-model="menu"
-            transition="scale-transition"
-            offset-y
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-model="dateFormatted"
-                placeholder="Pesquisar por data..."
-                append-icon="mdi-calendar"
-                background-color="white"
-                :class="{
-                  'mr-3': $vuetify.breakpoint.mdAndUp,
-                  'mb-3': $q.screen.lt.md
-                }"
-                readonly
-                outlined
-                clearable
-                dense
-                hide-details
-                v-bind="attrs"
-                v-on="on"
-                @click:clear="value.date = null"
-                :disabled="searching"
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              v-model="value.date"
-              locale="pt-br"
-              no-title
-              scrollable
-              @change="
-                date => {
-                  filters.date = date;
-                  filterVerseOfDay();
-                }
-              "
-            >
-            </v-date-picker>
-          </v-menu>
+      <div class="col-12 col-sm-auto">
+        <div class="row items-center">
+          <div class="col">
+            <div class="row">
+              <div class="col-12 col-sm">
+                <q-input
+                  v-model="filters.date"
+                  placeholder="Pesquisar por data..."
+                  background-color="white"
+                  :class="{
+                    'q-mr-md': $q.screen.gt.sm,
+                    'q-mb-md': $q.screen.lt.md
+                  }"
+                  outlined
+                  clearable
+                  dense
+                  hide-details
+                  bg-color="white"
+                  mask="##/##/####"
+                  @change="filterVerseOfDay"
+                  @clear="
+                    filters.date = null;
+                    filterVerseOfDay();
+                  "
+                  :disabled="searching"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        ref="qDateProxydate"
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateFormattedToPicker"
+                          @input="filterVerseOfDay"
+                        />
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
 
-          <v-text-field
-            name="search"
-            v-model="filters.search"
-            placeholder="Pesquisar por..."
-            append-icon="mdi-magnify"
-            background-color="white"
-            max-width="100"
-            outlined
-            clearable
-            dense
-            :hide-details="true"
-            @keyup.enter="filterVerseOfDay"
-            @click:append="filterVerseOfDay"
-            :disabled="searching"
-          ></v-text-field>
+              <div class="col-12 col-sm">
+                <q-input
+                  name="search"
+                  v-model="filters.search"
+                  placeholder="Pesquisar por..."
+                  background-color="white"
+                  width="100"
+                  outlined
+                  clearable
+                  dense
+                  bg-color="white"
+                  hide-details
+                  @keyup.enter="filterVerseOfDay"
+                  @clear="filterVerseOfDay"
+                  :disabled="searching"
+                >
+                  <template v-slot:append>
+                    <q-icon
+                      name="search"
+                      class="cursor-pointer"
+                      @click="filterVerseOfDay"
+                    />
+                  </template>
+                </q-input>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </v-row>
+    </div>
   </div>
 </template>
 
@@ -105,12 +122,13 @@ export default {
     }
   },
   computed: {
-    dateFormatted: {
+    dateFormattedToPicker: {
       get() {
-        return this.parseDate(this.value.date) || "";
+        return this.parseDateToPicker(this.filters.date) || "";
       },
       set(newValue) {
-        return newValue;
+        this.$refs.qDateProxydate.hide();
+        return (this.filters.date = this.parseDateToInput(newValue));
       }
     }
   },
