@@ -2,6 +2,7 @@
   <div id="schedule">
     <Schedule
       v-if="schedule"
+      :id="schedule.id"
       :title="schedule.title"
       :description="schedule.description"
       :date_start="schedule.date_start"
@@ -11,9 +12,7 @@
       :solo="true"
       @onDestroy="$router.push({ name: 'schedules' })"
     />
-    <v-row v-else align="center" justify="center">
-      <q-linear-progress indeterminate color="primary"></q-linear-progress>
-    </v-row>
+    <q-linear-progress v-else indeterminate color="primary" />
   </div>
 </template>
 

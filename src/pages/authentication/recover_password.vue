@@ -18,12 +18,12 @@
           mode="out-in"
         >
           <div v-if="!recoveredPassword" key="2.1" class="centered">
-            <q-icon class="primary--text mb-5" size="70">
+            <q-icon class="text-primary mb-5" size="70">
               mdi-lock-alert
             </q-icon>
 
             <div class="mb-10 text-center">
-              <h1 class="primary--text">
+              <h1 class="text-primary">
                 Recuperação de senha
               </h1>
 
@@ -33,7 +33,7 @@
               </h3>
 
               <q-card class="recover-password-container">
-                <q-card-text>
+                <q-card-section>
                   <v-form
                     ref="form"
                     v-model="recoverPasswordValid"
@@ -46,7 +46,7 @@
                       }
                     "
                   >
-                    <v-text-field
+                    <q-input
                       v-model="password"
                       :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                       :rules="passwordRules"
@@ -55,9 +55,9 @@
                       @click:append="showPassword = !showPassword"
                       @keyup.enter="recoverPassword"
                       autocomplete="new-password"
-                    ></v-text-field>
+                    ></q-input>
 
-                    <v-text-field
+                    <q-input
                       v-model="passwordConfirmation"
                       :append-icon="
                         showPasswordConfirmation ? 'mdi-eye' : 'mdi-eye-off'
@@ -70,7 +70,7 @@
                       "
                       @keyup.enter="recoverPassword"
                       autocomplete="new-password-confirmation"
-                    ></v-text-field>
+                    ></q-input>
 
                     <q-btn
                       color="primary"
@@ -83,7 +83,7 @@
                       Atualizar senha
                     </q-btn>
                   </v-form>
-                </q-card-text>
+                </q-card-section>
               </q-card>
 
               <router-link :to="{ name: 'home' }" v-slot="{ href }">

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog :value="dialog" @input="closeDialog" max-width="400">
+  <q-dialog :value="dialog" @input="closeDialog" max-width="400">
     <q-card>
       <q-card-section class="headline">
         <span v-if="id" class="mr-2">Atualizar</span>
@@ -7,8 +7,8 @@
         dados do integrate
       </q-card-section>
 
-      <q-card-text>
-        <v-form ref="form" v-model="valid" lazy-validation>
+      <q-card-section>
+        <q-form ref="form" v-model="valid" lazy-validation>
           <Cropper
             ref="photo"
             v-model="photo"
@@ -18,7 +18,7 @@
             class="mb-5"
             linear-actions-button
           />
-          <v-text-field
+          <q-input
             ref="title"
             v-model="name"
             :rules="requiredRules.name"
@@ -26,7 +26,7 @@
             required
             @keyup.enter="createOrUpdateIntegrant"
           />
-          <v-text-field
+          <q-input
             ref="title"
             v-model="role"
             :rules="requiredRules.role"
@@ -34,7 +34,7 @@
             required
             @keyup.enter="createOrUpdateIntegrant"
           />
-          <v-text-field
+          <q-input
             ref="title"
             v-model="contact"
             :rules="requiredRules.contact"
@@ -42,11 +42,11 @@
             required
             @keyup.enter="createOrUpdateIntegrant"
           />
-        </v-form>
-      </q-card-text>
+        </q-form>
+      </q-card-section>
 
       <q-card-actions>
-        <v-spacer></v-spacer>
+        <q-space></q-space>
         <q-btn color="grey" dark @click="closeDialog" :disabled="loading">
           Cancelar
         </q-btn>
@@ -69,7 +69,7 @@
         </q-btn>
       </q-card-actions>
     </q-card>
-  </v-dialog>
+  </q-dialog>
 </template>
 
 <script>

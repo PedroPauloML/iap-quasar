@@ -65,7 +65,7 @@
               </h3>
 
               <q-card class="resend-confirmation-email-container">
-                <q-card-text>
+                <q-card-section>
                   <v-form
                     ref="form"
                     v-model="resendConfirmationEmailValid"
@@ -83,7 +83,7 @@
                       re-enviarmos o e-mail de confirmação.
                     </p>
 
-                    <v-text-field
+                    <q-input
                       v-model="email"
                       :rules="emailRules"
                       label="E-mail"
@@ -91,7 +91,7 @@
                       @keyup.enter="resendConfirmationEmail"
                       class="mb-3"
                       autocomplete="new-email"
-                    ></v-text-field>
+                    ></q-input>
 
                     <q-btn
                       color="primary"
@@ -103,7 +103,7 @@
                       Re-enviar e-mail de confirmação
                     </q-btn>
                   </v-form>
-                </q-card-text>
+                </q-card-section>
               </q-card>
 
               <router-link :to="{ name: 'home' }" v-slot="{ href }">

@@ -12,7 +12,7 @@ export default ({ app, router, store, Vue }) => {
     },
     methods: {
       parseDateToPicker(date) {
-        if (!date) return null;
+        if (!date) return "";
         let format;
 
         if (date.search(/\d{4}-\d{2}-\d{2}/) == 0) format = "YYYY-MM-DD";
@@ -20,12 +20,15 @@ export default ({ app, router, store, Vue }) => {
 
         return qDate.formatDate(qDate.extractDate(date, format), "YYYY/MM/DD");
       },
-      parseDateToInput(date, dateFormat = "YYYY/MM/DD") {
-        if (!date) return null;
-        return qDate.formatDate(
-          qDate.extractDate(date, dateFormat),
-          "DD/MM/YYYY"
-        );
+      parseDateToInput(date) {
+        if (!date) return "";
+        let format;
+
+        if (date.search(/\d{4}-\d{2}-\d{2}/) == 0) format = "YYYY-MM-DD";
+        if (date.search(/\d{2}\/\d{2}\/\d{4}/) == 0) format = "DD/MM/YYYY";
+        if (date.search(/\d{4}\/\d{2}\/\d{2}/) == 0) format = "YYYY/MM/DD";
+
+        return qDate.formatDate(qDate.extractDate(date, format), "DD/MM/YYYY");
       },
       parseTimestamp(datetime) {
         if (!datetime) return null;

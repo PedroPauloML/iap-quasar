@@ -6,12 +6,12 @@
       mode="out-in"
     >
       <div v-if="!requestPasswordRecoverSended" key="1" class="centered">
-        <q-icon class="primary--text mb-5" size="70">
+        <q-icon class="text-primary mb-5" size="70">
           mdi-lock-alert
         </q-icon>
 
         <div class="mb-10 text-center">
-          <h1 class="primary--text">
+          <h1 class="text-primary">
             Recuperação de senha
           </h1>
 
@@ -21,7 +21,7 @@
           </h3>
 
           <q-card class="password-recover-request-container">
-            <q-card-text>
+            <q-card-section>
               <v-form
                 ref="form"
                 v-model="sendPasswordRecoverRequestValid"
@@ -39,7 +39,7 @@
                   enviarmos o e-mail de recuperação de senha.
                 </p>
 
-                <v-text-field
+                <q-input
                   v-model="email"
                   :rules="emailRules"
                   label="E-mail"
@@ -47,7 +47,7 @@
                   @keyup.enter="sendPasswordRecoverRequest"
                   class="mb-3"
                   autocomplete="new-email"
-                ></v-text-field>
+                ></q-input>
 
                 <q-btn
                   color="primary"
@@ -60,7 +60,7 @@
                   Enviar solicitação de recuperação de senha
                 </q-btn>
               </v-form>
-            </q-card-text>
+            </q-card-section>
           </q-card>
 
           <router-link :to="{ name: 'home' }" v-slot="{ href }">

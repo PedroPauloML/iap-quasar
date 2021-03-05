@@ -1,8 +1,8 @@
 <template>
-  <div id="edit-new">
+  <div id="new-schedule">
     <Form
       @closeForm="goToSchedules"
-      @createSchedule="(data) => createSchedule(data)"
+      @createSchedule="data => createSchedule(data)"
     />
   </div>
 </template>
@@ -14,7 +14,7 @@ export default {
   components: { Form },
   created() {
     this.$emit("setBackRoute", {
-      name: "schedules",
+      name: "schedules"
     });
   },
   methods: {
@@ -24,12 +24,12 @@ export default {
     },
     goToSchedules() {
       this.$router.push({ name: "schedules" });
-    },
+    }
   },
   beforeRouteLeave(to, from, next) {
     this.$emit("setBackRoute", null);
     next();
-  },
+  }
 };
 </script>
 

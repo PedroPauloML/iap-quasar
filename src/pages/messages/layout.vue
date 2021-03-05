@@ -1,5 +1,5 @@
 <template>
-  <div id="messages-layout">
+  <div id="messages-layout" class="container">
     <Header :back_route="back_route" v-model="filters" :searching="searching" />
     <transition
       enter-active-class="animated fadeIn"

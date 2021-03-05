@@ -32,12 +32,11 @@
         v-for="(route, index) in routes"
         :key="index"
         :to="{ name: route.path_name }"
-        v-slot="{ href, isExactActive }"
+        v-slot="{ href }"
       >
         <q-item
-          clickable
           :to="href"
-          :active="isExactActive"
+          :exact="route.path_name == 'home'"
           active-class="bg-primary-lighten-2 text-white"
           class="text-weight-bold"
         >

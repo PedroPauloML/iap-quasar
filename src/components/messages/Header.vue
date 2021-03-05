@@ -1,6 +1,6 @@
 <template>
   <div id="messages-header" class="q-mb-lg">
-    <div class="row q-col-gutter-md">
+    <div class="row q-col-gutter-md items-center">
       <transition
         enter-active-class="animated fadeInRight"
         leave-active-class="animated fadeOutLeft"
@@ -24,16 +24,12 @@
       <div class="col-12 col-sm-auto">
         <div class="row items-center">
           <div class="col">
-            <div class="row">
+            <div class="row q-col-gutter-md items-center">
               <div class="col-12 col-sm">
                 <q-input
                   v-model="filters.date"
                   placeholder="Pesquisar por data..."
                   background-color="white"
-                  :class="{
-                    'q-mr-md': $q.screen.gt.sm,
-                    'q-mb-md': $q.screen.lt.md
-                  }"
                   outlined
                   clearable
                   dense

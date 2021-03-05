@@ -1,17 +1,23 @@
 <template>
-  <q-card class="mb-8">
+  <q-card class="q-mb-lg">
     <q-card-section>
-      Criando nova agenda
-    </q-card-section>
-    <q-card-section>
-      Insira as informações abaixo para criar uma nova agenda. É possível
-      pré-visualizar como a agenda ficará antes de criá-la clicando em
-      "Pré-visualização".
+      <p class="text-h6 q-mb-none">
+        {{ id ? "Editando agenda" : "Criando nova agenda" }}
+      </p>
+      <p class="q-mb-none text-grey-8">
+        {{
+          id
+            ? "Edite as informações abaixo para atualizar a agenda."
+            : "Insira as informações abaixo para criar uma nova agenda."
+        }}
+        É possível pré-visualizar como a agenda ficará antes de salva-la
+        clicando em "Pré-visualização".
+      </p>
     </q-card-section>
 
-    <q-card-text>
+    <q-card-section>
       <div ref="previewContainer" v-show="preview">
-        <p class="body-1 primary--text font-weight-bold">Pré-visualização</p>
+        <p class="text-body1 text-primary text-weight-bold">Pré-visualização</p>
         <Schedule
           :id="id"
           :title="title"
@@ -24,7 +30,11 @@
           no-actions
         />
       </div>
-      <v-form v-show="!preview" ref="form" v-model="valid" lazy-validation>
+      <q-form
+        v-show="!preview"
+        ref="form"
+        @submit="id ? updateSchedule : createSchedule"
+      >
         <Cropper
           ref="image"
           v-model="image"
@@ -35,176 +45,122 @@
           A imagem da agenda é obrigatório(a)
         </p>
 
-        <v-text-field
+        <q-input
           ref="title"
           v-model="title"
           :rules="requiredRules.title"
           label="Título"
           required
           @keyup.enter="createSchedule"
-        ></v-text-field>
+        ></q-input>
 
         <div class="row">
-          <div class="col-12 col-md-6 col-sm-3">
-            <v-menu
-              v-model="dateStartMenu"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-input
+              ref="dateStart"
+              label="Data de início"
+              v-model="dateStartFormattedToInput"
+              :rules="requiredRules.date_start"
+              background-color="white"
+              class="q-mr-md"
+              mask="##/##/####"
+              required
+              clearable
             >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="dateStartFormatted"
-                  ref="dateStart"
-                  :rules="requiredRules.date_start"
-                  label="Data de início"
-                  required
-                  prepend-icon="mdi-calendar"
-                  background-color="white"
-                  class="mr-3"
-                  clearable
-                  dense
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                  @click:clear="date_start = ''"
-                ></v-text-field>
+              <template v-slot:append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy
+                    ref="qDateProxyDateStart"
+                    transition-show="scale"
+                    transition-hide="scale"
+                  >
+                    <q-date v-model="dateStartFormattedToPicker" />
+                  </q-popup-proxy>
+                </q-icon>
               </template>
-              <v-date-picker
-                v-model="date_start"
-                locale="pt-br"
-                no-title
-                scrollable
-                @change="date => (date_start = date)"
-              >
-              </v-date-picker>
-            </v-menu>
+            </q-input>
           </div>
 
-          <div class="col-12 col-md-6 col-sm-3">
-            <v-menu
-              v-model="timeStartMenu"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-              :close-on-content-click="false"
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-input
+              ref="timeStart"
+              label="Horário de início"
+              v-model="time_start"
+              :rules="requiredRules.time_start"
+              background-color="white"
+              class="q-mr-md"
+              mask="##:##"
+              required
+              clearable
             >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="timeStartFormatted"
-                  ref="timeStart"
-                  :rules="requiredRules.time_start"
-                  label="Horário de início"
-                  required
-                  prepend-icon="mdi-clock-outline"
-                  background-color="white"
-                  class="mr-3"
-                  clearable
-                  dense
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                  @click:clear="time_start = ''"
-                ></v-text-field>
+              <template v-slot:append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy
+                    ref="qDateProxyTimeStart"
+                    transition-show="scale"
+                    transition-hide="scale"
+                  >
+                    <q-time v-model="time_start" format24h />
+                  </q-popup-proxy>
+                </q-icon>
               </template>
-              <v-time-picker
-                :value="parseTime(time_start)"
-                @input="time => (time_start = time)"
-                format="24hr"
-                locale="pt-br"
-                scrollable
-                @change="
-                  time => {
-                    time_start = time;
-                    timeStartMenu = false;
-                  }
-                "
-              >
-              </v-time-picker>
-            </v-menu>
+            </q-input>
           </div>
 
-          <div class="col-12 col-md-6 col-sm-3">
-            <v-menu
-              v-model="dateEndMenu"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-input
+              ref="dateEnd"
+              label="Data de término"
+              v-model="dateEndFormattedToInput"
+              :rules="requiredRules.date_end"
+              background-color="white"
+              class="q-mr-md"
+              mask="##/##/####"
+              required
+              clearable
             >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="dateEndFormatted"
-                  ref="dateEnd"
-                  :rules="requiredRules.date_end"
-                  label="Data de início"
-                  required
-                  prepend-icon="mdi-calendar"
-                  background-color="white"
-                  class="mr-3"
-                  clearable
-                  dense
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                  @click:clear="date_end = ''"
-                ></v-text-field>
+              <template v-slot:append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy
+                    ref="qDateProxyDateEnd"
+                    transition-show="scale"
+                    transition-hide="scale"
+                  >
+                    <q-date v-model="dateEndFormattedToPicker" />
+                  </q-popup-proxy>
+                </q-icon>
               </template>
-              <v-date-picker
-                v-model="date_end"
-                locale="pt-br"
-                no-title
-                scrollable
-                @change="date => (date_end = date)"
-              >
-              </v-date-picker>
-            </v-menu>
+            </q-input>
           </div>
 
-          <div class="col-12 col-md-6 col-sm-3">
-            <v-menu
-              v-model="timeEndMenu"
-              transition="scale-transition"
-              offset-y
-              min-width="290px"
-              :close-on-content-click="false"
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-input
+              ref="timeEnd"
+              label="Horário de término"
+              v-model="time_end"
+              :rules="requiredRules.time_end"
+              background-color="white"
+              class="q-mr-md"
+              mask="##:##"
+              required
+              clearable
             >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="timeEndFormatted"
-                  ref="timeEnd"
-                  :rules="requiredRules.time_end"
-                  label="Horário de término"
-                  required
-                  prepend-icon="mdi-clock-outline"
-                  background-color="white"
-                  class="mr-3"
-                  clearable
-                  dense
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                  @click:clear="time_end = ''"
-                ></v-text-field>
+              <template v-slot:append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy
+                    ref="qDateProxyTimeEnd"
+                    transition-show="scale"
+                    transition-hide="scale"
+                  >
+                    <q-time v-model="time_end" format24h />
+                  </q-popup-proxy>
+                </q-icon>
               </template>
-              <v-time-picker
-                :value="parseTime(time_end)"
-                @input="time => (time_end = time)"
-                format="24hr"
-                locale="pt-br"
-                scrollable
-                @change="
-                  time => {
-                    time_end = time;
-                    timeEndMenu = false;
-                  }
-                "
-              >
-              </v-time-picker>
-            </v-menu>
+            </q-input>
           </div>
         </div>
 
-        <v-text-field
+        <q-input
           ref="location"
           v-model="location"
           :rules="requiredRules.location"
@@ -212,7 +168,7 @@
           prepend-icon="mdi-map-marker-outline"
           required
           @keyup.enter="createSchedule"
-        ></v-text-field>
+        ></q-input>
 
         <p
           :class="{
@@ -234,8 +190,8 @@
         <div class="mb-5">
           <TipTapEditor ref="description" v-model="description" />
         </div>
-      </v-form>
-    </q-card-text>
+      </q-form>
+    </q-card-section>
 
     <q-card-actions>
       <q-btn
@@ -265,7 +221,8 @@
         <span>{{ preview ? "Formulário" : "Pré-visualizar" }}</span>
       </q-tooltip>
 
-      <v-spacer></v-spacer>
+      <q-space />
+
       <q-btn color="grey" dark @click="closeForm" :disabled="loading">
         Cancelar
       </q-btn>
@@ -302,11 +259,11 @@ export default {
       id: this.data ? this.data.id : null,
       title: this.data ? this.data.title : "",
       description: this.data ? this.data.description : "",
-      date_start: this.data ? this.data.date_start : "",
+      date_start: this.data ? this.parseDateToInput(this.data.date_start) : "",
       time_start: this.data
         ? this.$moment(this.data.date_start).format("HH:mm")
         : "",
-      date_end: this.data ? this.data.date_end : "",
+      date_end: this.data ? this.parseDateToInput(this.data.date_end) : "",
       time_end: this.data
         ? this.$moment(this.data.date_end).format("HH:mm")
         : "",
@@ -371,39 +328,48 @@ export default {
     },
     image: function(val) {
       this.imagePrintError = !val;
+    },
+    date_start(newValue) {
+      console.log("date_start", newValue);
+    },
+    date_end(newValue) {
+      console.log("date_end", newValue);
     }
   },
   computed: {
-    dateStartFormatted: {
+    dateStartFormattedToPicker: {
       get() {
-        return this.parseDate(this.date_start) || "";
+        return this.parseDateToPicker(this.date_start) || "";
       },
       set(newValue) {
-        return newValue;
+        this.$refs.qDateProxyDateStart.hide();
+        console.log(newValue);
+        return (this.date_start = this.parseDateToInput(newValue));
       }
     },
-    timeStartFormatted: {
+    dateEndFormattedToPicker: {
       get() {
-        return this.parseTime(this.time_start) || "";
+        return this.parseDateToPicker(this.date_end) || "";
       },
       set(newValue) {
-        return newValue;
+        this.$refs.qDateProxyDateEnd.hide();
+        return (this.date_end = this.parseDateToInput(newValue));
       }
     },
-    dateEndFormatted: {
+    dateStartFormattedToInput: {
       get() {
-        return this.parseDate(this.date_end) || "";
+        return this.parseDateToInput(this.date_start) || "";
       },
       set(newValue) {
-        return newValue;
+        return (this.date_start = newValue);
       }
     },
-    timeEndFormatted: {
+    dateEndFormattedToInput: {
       get() {
-        return this.parseTime(this.time_end) || "";
+        return this.parseDateToInput(this.date_end) || "";
       },
       set(newValue) {
-        return newValue;
+        return (this.date_end = newValue);
       }
     }
   },
@@ -560,7 +526,10 @@ export default {
           ? this.parseTime(this.time_start).split(":")[1]
           : "00";
 
-        this.date_start = this.$moment(this.date_start)
+        this.date_start = this.$moment(
+          this.parseDateToInput(this.date_start),
+          "DD/MM/YYYY"
+        )
           .set({ hour: hour_start, minute: minute_start, second: 0 })
           .format();
       }
@@ -572,7 +541,10 @@ export default {
           ? this.parseTime(this.time_end).split(":")[1]
           : "00";
 
-        this.date_end = this.$moment(this.date_end)
+        this.date_end = this.$moment(
+          this.parseDateToInput(this.date_end),
+          "DD/MM/YYYY"
+        )
           .set({ hour: hour_end, minute: minute_end, second: 0 })
           .format();
       }

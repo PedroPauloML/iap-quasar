@@ -255,11 +255,7 @@ export default {
       return group;
     },
     grouped_schedules() {
-      const group_by = this.$vuetify.breakpoint.mdAndUp
-        ? 3
-        : this.$q.screen.gt.sm
-        ? 2
-        : 1;
+      const group_by = this.$q.screen.gt.sm ? 3 : this.$q.screen.gt.xs ? 2 : 1;
 
       return this.schedules_list.reduce((accumulator, item, index) => {
         index % group_by

@@ -26,36 +26,32 @@
           :stencil-props="{ aspectRatio }"
           class="cropper-container"
         />
-        <div
-          :class="{
-            actions: 'true',
-            'flex-column': $q.screen.lt.md || linearActionsButton
-          }"
-        >
-          <div>
-            <span class="font-weight-bold">Editar:</span>
-            <q-btn icon type="button" @click.prevent="rotate(-90)">
+        <div class="actions row justify-between">
+          <div class="col-12 col-sm-auto">
+            <span class="text-weight-bold q-mr-sm">Editar:</span>
+
+            <q-btn flat round type="button" @click.prevent="rotate(-90)">
               <q-icon name="mdi-format-rotate-90" />
               <q-tooltip>
                 <span>Girar -90°</span>
               </q-tooltip>
             </q-btn>
 
-            <q-btn icon type="button" @click.prevent="rotate(90)">
+            <q-btn flat round type="button" @click.prevent="rotate(90)">
               <q-icon name="mdi-format-rotate-90" class="mdi-flip-h" />
               <q-tooltip>
                 <span>Girar 90°</span>
               </q-tooltip>
             </q-btn>
 
-            <q-btn icon type="button" ref="flipX" @click.prevent="flipX">
+            <q-btn flat round type="button" ref="flipX" @click.prevent="flipX">
               <q-icon name="mdi-flip-horizontal" />
               <q-tooltip>
                 <span>Inverter horizontalmente</span>
               </q-tooltip>
             </q-btn>
 
-            <q-btn icon type="button" ref="flipY" @click.prevent="flipY">
+            <q-btn flat round type="button" ref="flipY" @click.prevent="flipY">
               <q-icon name="mdi-flip-vertical" />
               <q-tooltip>
                 <span>Inverter verticalmente</span>
@@ -63,12 +59,12 @@
             </q-btn>
           </div>
 
-          <div>
+          <div class="col-12 col-sm-auto">
             <q-btn
               color="grey"
               dark
               type="button"
-              class="mr-3"
+              class="q-mr-md"
               @click.prevent="cancel"
             >
               Cancelar
@@ -96,7 +92,7 @@
         <q-circular-progress
           indeterminate
           color="primary"
-          class="mr-3"
+          class="q-mr-md"
         ></q-circular-progress>
         Carregando editor da imagem
       </span>

@@ -1,35 +1,36 @@
 <template>
   <div id="schedules">
-    <div v-if="value.search || value.date" class="flex flex-wrap mb-5">
-      <span v-if="searching" class="mr-1 text-nowrap">
+    <div v-if="value.search || value.date" class="flex flex-wrap q-mb-lg">
+      <span v-if="searching" class="q-mr-sm text-nowrap">
         Aguarde um momento, estamos pesquisando por
       </span>
-      <span v-else class="mr-1 text-nowrap">
+      <span v-else class="q-mr-sm text-nowrap">
         Encontramos {{ schedules.length }} resultados para a busca
       </span>
       <span
         v-if="value.search"
-        class="text-truncate-1-line mr-1 font-weight-medium"
+        class="text-truncate-1-line q-mr-sm text-weight-medium"
       >
         {{ value.search }}
       </span>
 
-      <span v-if="value.date" class="mr-1">
+      <span v-if="value.date" class="q-mr-sm">
         no dia
       </span>
       <span
         v-if="value.date"
-        class="text-truncate-1-line font-weight-medium mr-1"
+        class="text-truncate-1-line text-weight-medium q-mr-sm"
       >
         {{ $moment(value.date).format("DD/MM/YYYY") }}
       </span>
     </div>
 
-    <div v-if="!searching" class="row">
+    <q-linear-progress v-if="searching" indeterminate color="primary" />
+    <div v-else class="row q-col-gutter-lg">
       <div
         v-for="(schedule, index) in schedules"
         :key="index"
-        class="col-12 col-md-4"
+        class="col-12 col-sm-6 col-md-4"
       >
         <Schedule
           :id="schedule.id"
@@ -43,10 +44,6 @@
         />
       </div>
     </div>
-
-    <v-row v-else align="center" justify="center">
-      <q-linear-progress indeterminate color="primary"></q-linear-progress>
-    </v-row>
   </div>
 </template>
 

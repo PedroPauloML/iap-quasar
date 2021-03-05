@@ -125,7 +125,7 @@
           <span class="d-block display-1 font-weight-thin">
             {{ integrant.name }}
           </span>
-          <span class="d-block font-weight-bold">{{ integrant.role }}</span>
+          <span class="d-block text-weight-bold">{{ integrant.role }}</span>
           <span class="d-block overline">{{ integrant.contact }}</span>
         </div>
       </div>

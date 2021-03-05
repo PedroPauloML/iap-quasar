@@ -1,14 +1,14 @@
 <template>
-  <div id="edit-new">
+  <div id="edit-schedule">
     <Form
       v-if="schedule"
       :data="schedule"
       @closeForm="closeEditingForm"
       @updateSchedule="(id, schedule) => updateSchedule(id, schedule)"
     />
-    <div v-else class="mb-3 body-2">
+    <div v-else class="q-mb-md text-body2">
       <q-linear-progress indeterminate></q-linear-progress>
-      <p class="text-center mt-5">
+      <p class="text-center q-mt-lg">
         Estamos preparando a mensagem...
       </p>
     </div>

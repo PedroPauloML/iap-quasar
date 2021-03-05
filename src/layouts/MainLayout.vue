@@ -5,7 +5,7 @@
       @handleLeftDrawerStatus="val => (leftDrawerOpen = val)"
     />
     <Sidebar
-      v-if="$q.screen.lt.sm"
+      v-if="$q.screen.lt.md"
       :leftDrawerOpen="leftDrawerOpen"
       @handleLeftDrawerStatus="val => (leftDrawerOpen = val)"
     />

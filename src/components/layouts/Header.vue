@@ -2,7 +2,7 @@
   <q-header elevated class="bg-white text-dark" reveal :reveal-offset="10">
     <q-toolbar id="toolbar" class="q-py-sm q-px-md">
       <q-btn
-        v-if="$q.screen.lt.sm"
+        v-if="$q.screen.lt.md"
         flat
         dense
         round
@@ -12,7 +12,7 @@
         @click="$emit('handleLeftDrawerStatus', !leftDrawerOpen)"
       />
 
-      <div class="col col-sm-auto flex">
+      <div class="col col-sm col-md-auto flex">
         <q-img
           v-if="$q.screen.gt.xs"
           :src="logoSRC"

@@ -120,7 +120,7 @@
 
     <q-card-section v-if="content" class="q-pa-none">
       <!-- <div
-        class="content mce-content-body black--text body-1"
+        class="content mce-content-body black--text text-body1"
         v-html="content"
       /> -->
       <TipTapEditor ref="content" v-model="content" readonly />

@@ -1,9 +1,9 @@
 <template>
-  <div id="schedules-layout">
+  <div id="schedules-layout" class="container">
     <Header :back_route="back_route" v-model="filters" :searching="searching" />
     <transition
-      enter-active-class="animated fadeInDown"
-      leave-active-class="animated fadeOutUp"
+      enter-active-class="animated fadeIn"
+      leave-active-class="animated fadeOut"
       mode="out-in"
     >
       <router-view
