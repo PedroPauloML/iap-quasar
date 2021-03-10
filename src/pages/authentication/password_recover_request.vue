@@ -1,38 +1,34 @@
 <template>
   <div id="password-recover-request">
     <transition
-      enter-active-class="animated fadeInDown"
-      leave-active-class="animated fadeOutUp"
+      enter-active-class="animated fadeIn"
+      leave-active-class="animated fadeOut"
       mode="out-in"
     >
       <div v-if="!requestPasswordRecoverSended" key="1" class="centered">
-        <q-icon class="text-primary mb-5" size="70">
-          mdi-lock-alert
-        </q-icon>
+        <q-icon
+          name="mdi-lock-alert"
+          color="primary"
+          size="70px"
+          class="q-mb-lg"
+        />
 
         <div class="mb-10 text-center">
-          <h1 class="text-primary">
+          <h1 class="text-primary text-h4 text-weight-bold q-ma-none">
             Recuperação de senha
           </h1>
 
-          <h3>
+          <p class="text-h6 text-weight-bold">
             Você esqueceu a sua senha? Informe o seu e-mail abaixo para podermos
             lhe ajudar.
-          </h3>
+          </p>
 
           <q-card class="password-recover-request-container">
             <q-card-section>
-              <v-form
+              <q-form
                 ref="form"
-                v-model="sendPasswordRecoverRequestValid"
+                @submit="sendPasswordRecoverRequest"
                 lazy-validation
-                @submit="
-                  e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    sendPasswordRecoverRequest();
-                  }
-                "
               >
                 <p>
                   Insira o e-mail cadastrado na conta do seu usuário para
@@ -45,7 +41,7 @@
                   label="E-mail"
                   required
                   @keyup.enter="sendPasswordRecoverRequest"
-                  class="mb-3"
+                  class="q-mb-md"
                   autocomplete="new-email"
                 ></q-input>
 
@@ -59,12 +55,12 @@
                 >
                   Enviar solicitação de recuperação de senha
                 </q-btn>
-              </v-form>
+              </q-form>
             </q-card-section>
           </q-card>
 
           <router-link :to="{ name: 'home' }" v-slot="{ href }">
-            <q-btn :to="href" color="light" type="button">
+            <q-btn :to="href" flat text-color="primary">
               Voltar para a página inicial
             </q-btn>
           </router-link>
@@ -72,23 +68,26 @@
       </div>
 
       <div v-else key="2" class="centered">
-        <q-icon class="green--text text--darken-3 mb-5" size="70">
-          mdi-check-circle-outline
-        </q-icon>
+        <q-icon
+          name="mdi-check-circle-outline"
+          color="green-8"
+          size="70px"
+          class="q-mb-lg"
+        />
 
-        <div class="mb-10 text-center">
-          <h1 class="green--text text--darken-3">
+        <div class="q-mb-xl text-center">
+          <h1 class="text-h4 text-weight-bold text-green-8 q-ma-none">
             Solicitação de recuperação de senha enviada!
           </h1>
 
-          <h3>
+          <p class="text-h6 text-weight-bold">
             Acesse o link enviado para a sua caixa de e-mail para recuperar a
             sua senha.
-          </h3>
+          </p>
         </div>
 
         <router-link :to="{ name: 'home' }" v-slot="{ href }">
-          <q-btn :to="href" color="primary" type="button">
+          <q-btn :to="href" color="primary">
             Voltar para a página inicial
           </q-btn>
         </router-link>

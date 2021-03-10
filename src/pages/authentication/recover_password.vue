@@ -1,76 +1,80 @@
 <template>
   <div id="recover-password">
     <transition
-      enter-active-class="animated fadeInDown"
-      leave-active-class="animated fadeOutUp"
+      enter-active-class="animated fadeIn"
+      leave-active-class="animated fadeOut"
       mode="out-in"
     >
       <div v-if="checkingTokenValidity" key="1">
-        <q-linear-progress indeterminate class="mb-5"></q-linear-progress>
+        <q-linear-progress indeterminate class="q-mb-lg" />
 
-        <h3>Estamos lhe procurando. Aguarde um momento!</h3>
+        <p class="text-h6 text-weight-bold">
+          Estamos lhe procurando. Aguarde um momento!
+        </p>
       </div>
 
       <div v-else-if="!checkingTokenValidity && validToken">
         <transition
-          enter-active-class="animated fadeInDown"
-          leave-active-class="animated fadeOutUp"
+          enter-active-class="animated fadeIn"
+          leave-active-class="animated fadeOut"
           mode="out-in"
         >
           <div v-if="!recoveredPassword" key="2.1" class="centered">
-            <q-icon class="text-primary mb-5" size="70">
-              mdi-lock-alert
-            </q-icon>
+            <q-icon
+              name="mdi-lock-alert"
+              color="primary"
+              size="70px"
+              class="q-mb-lg"
+            />
 
             <div class="mb-10 text-center">
-              <h1 class="text-primary">
+              <h1 class="text-primary text-h4 text-weight-bold q-ma-none">
                 Recuperação de senha
               </h1>
 
-              <h3>
+              <p class="text-h6 text-weight-bold">
                 Você solicitou a recuperação de sua senha. Insira a nova senha
                 abaixo para atualizá-la.
-              </h3>
+              </p>
 
               <q-card class="recover-password-container">
                 <q-card-section>
-                  <v-form
-                    ref="form"
-                    v-model="recoverPasswordValid"
-                    lazy-validation
-                    @submit="
-                      e => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        recoverPassword();
-                      }
-                    "
-                  >
+                  <q-form ref="form" @submit="recoverPassword" lazy-validation>
                     <q-input
+                      label="Senha"
                       v-model="password"
-                      :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                       :rules="passwordRules"
                       :type="showPassword ? 'text' : 'password'"
-                      label="Senha"
-                      @click:append="showPassword = !showPassword"
-                      @keyup.enter="recoverPassword"
                       autocomplete="new-password"
-                    ></q-input>
+                    >
+                      <template v-slot:append>
+                        <q-icon
+                          :name="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                          class="cursor-pointer"
+                          @click="showPassword = !showPassword"
+                        />
+                      </template>
+                    </q-input>
 
                     <q-input
+                      label="Confirmação de senha"
                       v-model="passwordConfirmation"
-                      :append-icon="
-                        showPasswordConfirmation ? 'mdi-eye' : 'mdi-eye-off'
-                      "
                       :rules="passwordConfirmationRules"
                       :type="showPasswordConfirmation ? 'text' : 'password'"
-                      label="Confirmação de senha"
-                      @click:append="
-                        showPasswordConfirmation = !showPasswordConfirmation
-                      "
-                      @keyup.enter="recoverPassword"
                       autocomplete="new-password-confirmation"
-                    ></q-input>
+                    >
+                      <template v-slot:append>
+                        <q-icon
+                          :name="
+                            showPasswordConfirmation ? 'mdi-eye' : 'mdi-eye-off'
+                          "
+                          class="cursor-pointer"
+                          @click="
+                            showPasswordConfirmation = !showPasswordConfirmation
+                          "
+                        />
+                      </template>
+                    </q-input>
 
                     <q-btn
                       color="primary"
@@ -78,16 +82,16 @@
                       @click="recoverPassword"
                       :disabled="!recoverPassword"
                       :loading="resendingConfirmationEmail"
-                      class="mt-3"
+                      class="q-mt-md"
                     >
                       Atualizar senha
                     </q-btn>
-                  </v-form>
+                  </q-form>
                 </q-card-section>
               </q-card>
 
               <router-link :to="{ name: 'home' }" v-slot="{ href }">
-                <q-btn :to="href" color="light" type="button">
+                <q-btn :to="href" flat color="primary">
                   Voltar para a página inicial
                 </q-btn>
               </router-link>
@@ -95,23 +99,26 @@
           </div>
 
           <div v-else key="2.2" class="centered">
-            <q-icon class="green--text text--darken-3 mb-5" size="70">
-              mdi-check-circle-outline
-            </q-icon>
+            <q-icon
+              name="mdi-check-circle-outline"
+              color="green-9"
+              size="70px"
+              class="q-mb-lg"
+            />
 
-            <div class="mb-10 text-center">
-              <h1 class="green--text text--darken-3">
+            <div class="q-mb-xl text-center">
+              <h1 class="text-h4 text-weight-bold text-green-8 q-ma-none">
                 Senha alterada com sucesso!
               </h1>
 
-              <h3>
+              <p class="text-h6 text-weight-bold">
                 A partir de agora você conseguirá acessar sua conta com a nova
                 senha definida.
-              </h3>
+              </p>
             </div>
 
             <router-link :to="{ name: 'home' }" v-slot="{ href }">
-              <q-btn :to="href" color="primary" type="button">
+              <q-btn :to="href" color="primary">
                 Voltar para a página inicial
               </q-btn>
             </router-link>
@@ -124,20 +131,23 @@
         key="3"
         class="centered"
       >
-        <q-icon class="warning--text text--darken-2 mb-5" size="70">
-          mdi-alert-outline
-        </q-icon>
+        <q-icon
+          name="mdi-alert-outline"
+          color="yellow-10"
+          size="70px"
+          class="q-mb-lg"
+        />
 
-        <div class="mb-10 text-center">
-          <h1 class="warning--text text--darken-2">
+        <div class="q-mb-xl text-center">
+          <h1 class="text-h4 text-weight-bold text-yellow-10 q-ma-none">
             Ops... Não identificamos sua conta!
           </h1>
 
-          <h3 class="mb-5">
+          <p class="text-h6 text-weight-bold q-mb-lg">
             Não conseguimos identificar a sua conta dentre os nossos usuários.
             Gostaria de enviar o e-mail de solicitação de recuperação de senha
             novamente?
-          </h3>
+          </p>
 
           <router-link
             :to="{ name: 'password_recover_request' }"
@@ -146,14 +156,15 @@
             <q-btn
               :to="href"
               type="button"
-              color="primary mr-md-3 mb-3 mb-md-0"
+              color="primary"
+              class="q-mr-md-md q-mb-md q-mb-md-none"
             >
               Solicitar recuperação de senha
             </q-btn>
           </router-link>
 
           <router-link :to="{ name: 'home' }" v-slot="{ href }">
-            <q-btn :to="href" type="button" color="light">
+            <q-btn :to="href" color="white" text-color="black">
               Voltar para a página inicial
             </q-btn>
           </router-link>
@@ -209,7 +220,7 @@ export default {
         setTimeout(() => {
           let user = users.find(u => u.email == "user@email.com");
           let jwt = user.token;
-          this.$cookies.set("jwt", jwt);
+          this.$q.cookies.set("jwt", jwt);
           this.$store.dispatch("user/setUser", user);
 
           this.resendingConfirmationEmail = false;

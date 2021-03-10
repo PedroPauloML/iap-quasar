@@ -6,9 +6,11 @@
       mode="out-in"
     >
       <div v-if="checkingTokenValidity" key="1">
-        <q-linear-progress indeterminate class="mb-5"></q-linear-progress>
+        <q-linear-progress indeterminate class="q-mb-lg" />
 
-        <h3>Estamos lhe procurando. Aguarde um momento!</h3>
+        <p class="text-h6 text-weight-bold">
+          Estamos lhe procurando. Aguarde um momento!
+        </p>
       </div>
 
       <div
@@ -16,19 +18,22 @@
         key="2"
         class="confirmed-account centered"
       >
-        <q-icon class="green--text text--darken-3 mb-5" size="70">
-          mdi-check-circle-outline
-        </q-icon>
+        <q-icon
+          name="mdi-check-circle-outline"
+          color="green-9"
+          size="70px"
+          class="q-mb-lg"
+        />
 
-        <div class="mb-10 text-center">
-          <h1 class="green--text text--darken-3">
+        <div class="q-mb-xl text-center">
+          <h1 class="text-green-9 text-h4 text-weight-bold q-ma-none">
             Sua conta foi confirmada!
           </h1>
 
-          <h3>
+          <p class="text-h6 text-weight-bold">
             A partir de agora você poderá acessar sua conta no IAP Paulo Afonso.
             Aproveite!
-          </h3>
+          </p>
         </div>
 
         <router-link :to="{ name: 'home' }" v-slot="{ href }">
@@ -49,34 +54,31 @@
           mode="out-in"
         >
           <div v-if="!emailResended" key="3.1" class="centered">
-            <q-icon class="warning--text text--darken-2 mb-5" size="70">
-              mdi-alert-outline
+            <q-icon
+              name="mdi-alert-outline"
+              color="yellow-9"
+              size="70px"
+              class="q-mb-lg"
+            >
             </q-icon>
 
-            <div class="mb-10 text-center">
-              <h1 class="warning--text text--darken-2">
+            <div class="q-mb-xl text-center">
+              <h1 class="text-yellow-9 text-h4 text-weight-bold q-ma-none">
                 Ops... Não identificamos sua conta!
               </h1>
 
-              <h3>
+              <p class="text-h6 text-weight-bold">
                 Não conseguimos identificar a sua conta dentre os nossos
                 usuários. Gostaria de enviar o e-mail de confirmação de conta
                 novamente?
-              </h3>
+              </p>
 
               <q-card class="resend-confirmation-email-container">
                 <q-card-section>
-                  <v-form
+                  <q-form
                     ref="form"
-                    v-model="resendConfirmationEmailValid"
+                    @submit="resendConfirmationEmail"
                     lazy-validation
-                    @submit="
-                      e => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        resendConfirmationEmail();
-                      }
-                    "
                   >
                     <p>
                       Insira o e-mail cadastrado na conta do seu usuário para
@@ -89,25 +91,24 @@
                       label="E-mail"
                       required
                       @keyup.enter="resendConfirmationEmail"
-                      class="mb-3"
+                      class="q-mb-md"
                       autocomplete="new-email"
                     ></q-input>
 
                     <q-btn
                       color="primary"
                       type="submit"
-                      @click="resendConfirmationEmail"
                       :disabled="!resendConfirmationEmailValid"
                       :loading="resendingConfirmationEmail"
                     >
                       Re-enviar e-mail de confirmação
                     </q-btn>
-                  </v-form>
+                  </q-form>
                 </q-card-section>
               </q-card>
 
               <router-link :to="{ name: 'home' }" v-slot="{ href }">
-                <q-btn :to="href" color="light" type="button">
+                <q-btn :to="href" flat color="primary">
                   Voltar para a página inicial
                 </q-btn>
               </router-link>
@@ -115,23 +116,26 @@
           </div>
 
           <div v-else key="3.2" class="centered">
-            <q-icon class="green--text text--darken-3 mb-5" size="70">
-              mdi-check-circle-outline
-            </q-icon>
+            <q-icon
+              name="mdi-check-circle-outline"
+              color="green-9"
+              size="70px"
+              class="q-mb-lg"
+            />
 
-            <div class="mb-10 text-center">
-              <h1 class="green--text text--darken-3">
+            <div class="q-mb-xl text-center">
+              <h1 class="text-green-9 text-h4 text-weight-bold q-ma-none">
                 E-mail de confirmação re-enviado!
               </h1>
 
-              <h3>
+              <p class="text-h6 text-weight-bold">
                 Acesse o link enviado para a sua caixa de e-mail para confirmar
                 a sua conta.
-              </h3>
+              </p>
             </div>
 
             <router-link :to="{ name: 'home' }" v-slot="{ href }">
-              <q-btn :to="href" color="primary" type="button">
+              <q-btn :to="href" color="primary">
                 Voltar para a página inicial
               </q-btn>
             </router-link>
@@ -173,7 +177,7 @@ export default {
       if (token && token == "123456") {
         let user = users.find(u => u.email == "user@email.com");
         let jwt = user.token;
-        this.$cookies.set("jwt", jwt);
+        this.$q.cookies.set("jwt", jwt);
         this.$store.dispatch("user/setUser", user);
 
         this.validToken = true;

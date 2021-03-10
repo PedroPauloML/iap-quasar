@@ -4,35 +4,42 @@ const routes = [
   // AUTHENTICATION
   // { name: "login", path: "/login", component: Login },
   {
-    name: "confirmation_email",
-    path: "/confirmation_email",
-    component: () => import("../pages/authentication/confirmation_email"),
-    meta: { title: `E-mail de confirmação de conta enviado | ${site_name}` }
-  },
-  {
-    name: "confirm_account",
-    path: "/confirm_account",
-    component: () => import("../pages/authentication/confirm_account"),
-    meta: { title: `Confirmação de e-mail | ${site_name}` }
-  },
-  {
-    name: "password_recover_request",
-    path: "/password_recover_request",
-    component: () => import("../pages/authentication/password_recover_request"),
-    meta: { title: `Solicitar recuperação de senha | ${site_name}` }
-  },
-  {
-    name: "recover_password",
-    path: "/recover_password",
-    component: () => import("../pages/authentication/recover_password"),
-    meta: { title: `Recuperar senha | ${site_name}` }
+    path: "/authentication",
+    component: () => import("../layouts/Authentication"),
+    children: [
+      {
+        name: "confirmation_email",
+        path: "confirmation_email",
+        component: () => import("../pages/authentication/confirmation_email"),
+        meta: { title: `E-mail de confirmação de conta enviado | ${site_name}` }
+      },
+      {
+        name: "confirm_account",
+        path: "confirm_account",
+        component: () => import("../pages/authentication/confirm_account"),
+        meta: { title: `Confirmação de e-mail | ${site_name}` }
+      },
+      {
+        name: "password_recover_request",
+        path: "password_recover_request",
+        component: () =>
+          import("../pages/authentication/password_recover_request"),
+        meta: { title: `Solicitar recuperação de senha | ${site_name}` }
+      },
+      {
+        name: "recover_password",
+        path: "recover_password",
+        component: () => import("../pages/authentication/recover_password"),
+        meta: { title: `Recuperar senha | ${site_name}` }
+      }
+    ]
   },
 
-  // HOME
   {
     path: "/",
     component: () => import("../layouts/MainLayout"),
     children: [
+      // HOME
       {
         name: "home",
         path: "",

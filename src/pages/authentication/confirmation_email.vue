@@ -1,22 +1,25 @@
 <template>
   <div id="sended-confirmation-email">
-    <q-icon class="green--text text--darken-3 mb-5" size="70">
-      mdi-check-circle-outline
-    </q-icon>
+    <q-icon
+      name="mdi-check-circle-outline"
+      color="green-9"
+      size="70px"
+      class="q-mb-lg"
+    />
 
-    <div class="mb-10 text-center">
-      <h1 class="green--text text--darken-3">
+    <div class="q-mb-xl text-center">
+      <h1 class="text-green-9 text-h4 text-weight-bold q-ma-none">
         Um e-mail de confirmação foi enviado para o seu endereço de e-mail!
       </h1>
 
-      <h3>
+      <p class="text-h6 text-weight-bold">
         Acesse o link enviado para a sua caixa de e-mail para confirmar a sua
         conta
-      </h3>
+      </p>
     </div>
 
     <router-link :to="{ name: 'home' }" v-slot="{ href }">
-      <q-btn :to="href" color="primary" type="button">
+      <q-btn :to="href" color="primary">
         Voltar para a página inicial
       </q-btn>
     </router-link>
