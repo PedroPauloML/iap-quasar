@@ -1,6 +1,6 @@
 <template>
-  <div id="contact" class="mb-5">
-    <h1 class="mb-3">Contato</h1>
+  <div id="contact" class="q-mb-lg container">
+    <h1 class="text-h4 text-weight-bold q-mt-none q-mb-md">Contato</h1>
 
     <p>
       A Igreja Adventista da Promessa é o resultado de uma oração feita com fé.
@@ -35,7 +35,7 @@
       allowfullscreen=""
       aria-hidden="false"
       tabindex="0"
-      class="rounded mb-5"
+      class="rounded-borders q-mb-lg"
     ></iframe>
 
     <p>
@@ -44,111 +44,76 @@
 
     <div
       id="representatives"
-      class="flex flex-wrap flex-column flex-sm-row justify-space-around"
+      class="row q-col-gutter-md items-center justify-center q-mb-lg"
     >
       <div
         v-for="(integrant, index) in integrants"
         :key="index"
-        class="flex flex flex-sm-column align-start align-sm-center mb-5"
+        class="col-12 col-sm-6 col-md-4"
       >
-        <div style="position: relative;" class="mb-4 mr-3 mr-sm-0">
-          <q-img
-            :src="integrant.photo"
-            aspect-ratio="1"
-            :width="$q.screen.gt.sm ? 150 : 80"
-            :max-width="$q.screen.gt.sm ? 150 : 80"
-            :height="$q.screen.gt.sm ? 150 : 80"
-            :max-height="$q.screen.gt.sm ? 150 : 80"
-            class="rounded-circle"
-          >
-            <template v-slot:placeholder>
-              <v-row
-                class="full-height ma-0 secondary darken-1"
-                align="center"
-                justify="center"
-              >
-                <v-progress-circular
-                  indeterminate
-                  color="primary"
-                ></v-progress-circular>
-              </v-row>
-            </template>
-          </q-img>
-          <q-tooltip
-            v-if="userSigned"
-            top
-            :disabled="$vuetify.breakpoint.mobile"
-          >
-            <template v-slot:activator="{ on, attrs }">
+        <div class="row justify-center">
+          <div class="col-auto">
+            <div class="relative-position q-mb-md q-mr-md q-mr-sm-none">
+              <q-avatar :size="$q.screen.gt.sm ? '150px' : '80px'">
+                <q-img :src="integrant.photo" aspect-ratio="1" />
+              </q-avatar>
+
               <q-btn
+                v-if="userSigned"
                 color="red"
-                class="white--text delete-integrant"
-                fab
-                :x-small="$vuetify.breakpoint.xsOnly"
-                :small="$q.screen.gt.sm"
-                @click="deleteIntegrant(index)"
+                class="delete-integrant"
+                round
+                :size="$q.screen.gt.sm ? 'md' : 'sm'"
                 :loading="index == integrantIndexForDelete"
                 :disabled="integrantIndexForDelete != null"
-                v-bind="attrs"
-                v-on="on"
+                @click="deleteIntegrant(index)"
               >
-                <q-icon small>mdi-delete</q-icon>
-              </q-btn>
-            </template>
-            <span>Excluir</span>
-          </q-tooltip>
+                <q-icon name="mdi-delete" />
 
-          <q-tooltip
-            v-if="userSigned"
-            top
-            :disabled="$vuetify.breakpoint.mobile"
-          >
-            <template v-slot:activator="{ on, attrs }">
+                <q-tooltip v-if="$q.platform.is.desktop">Excluir</q-tooltip>
+              </q-btn>
+
               <q-btn
+                v-if="userSigned"
                 color="accent"
-                class="white--text edit-integrant"
-                fab
-                :x-small="$vuetify.breakpoint.xsOnly"
-                :small="$q.screen.gt.sm"
+                class="edit-integrant"
+                round
+                :size="$q.screen.gt.sm ? 'md' : 'sm'"
                 :disabled="integrantIndexForDelete != null"
                 @click="openIntegrantUpdateDialog(index)"
-                v-bind="attrs"
-                v-on="on"
               >
-                <q-icon small>mdi-pencil</q-icon>
+                <q-icon name="mdi-pencil" small />
+                <q-tooltip v-if="$q.platform.is.desktop">Editar</q-tooltip>
               </q-btn>
-            </template>
-            <span>Editar</span>
-          </q-tooltip>
-        </div>
-        <div class="flex text-center">
-          <span class="d-block display-1 font-weight-thin">
-            {{ integrant.name }}
-          </span>
-          <span class="d-block text-weight-bold">{{ integrant.role }}</span>
-          <span class="d-block overline">{{ integrant.contact }}</span>
+            </div>
+          </div>
+
+          <div class="col col-sm-12 text-center">
+            <span class="block text-h4 text-weight-thin">
+              {{ integrant.name }}
+            </span>
+            <span class="block text-weight-bold">{{ integrant.role }}</span>
+            <a
+              v-if="!!integrant.contact"
+              :href="`tel:55${integrant.contact.replace(/[() -]/g, '')}`"
+              class="block text-overline"
+              >{{ integrant.contact }}</a
+            >
+          </div>
         </div>
       </div>
 
-      <div
-        v-if="userSigned"
-        class="flex flex flex-sm-column align-center justify-center mb-5"
-      >
-        <q-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <q-btn
-              color="primary"
-              fab
-              :disabled="integrantIndexForDelete != null"
-              @click="newIntegrant"
-              v-bind="attrs"
-              v-on="on"
-            >
-              <q-icon large>mdi-plus</q-icon>
-            </q-btn>
-          </template>
-          <span>Adicionar novo integrante</span>
-        </q-tooltip>
+      <div v-if="userSigned" class="col-12 col-sm-6 col-md-4 text-center">
+        <q-btn
+          color="primary"
+          round
+          size="lg"
+          :disabled="integrantIndexForDelete != null"
+          @click="newIntegrant"
+        >
+          <q-icon name="mdi-plus" />
+          <q-tooltip>Adicionar novo integrante</q-tooltip>
+        </q-btn>
       </div>
     </div>
 
@@ -245,10 +210,10 @@ iframe {
   bottom: -10px;
   left: 0;
 }
-@media (min-width: 601px) {
-  #representatives > div {
-    max-width: 300px;
-    width: 300px;
-  }
-}
+// @media (min-width: 601px) {
+//   #representatives > div {
+//     max-width: 300px;
+//     width: 300px;
+//   }
+// }
 </style>

@@ -1,9 +1,9 @@
 <template>
-  <q-dialog :value="dialog" @input="closeDialog" max-width="400">
-    <q-card>
-      <q-card-section class="headline">
-        <span v-if="id" class="mr-2">Atualizar</span>
-        <span v-else class="mr-2">Adicionar</span>
+  <q-dialog :value="dialog" @input="closeDialog">
+    <q-card class="dialog-container">
+      <q-card-section class="text-h5 text-center text-weight-bold">
+        <span v-if="id" class="q-mr">Atualizar</span>
+        <span v-else class="q-mr">Adicionar</span>
         dados do integrate
       </q-card-section>
 
@@ -15,7 +15,6 @@
             :currentImage="currentPhoto"
             imageName="Foto"
             :aspectRatio="1 / 1"
-            class="mb-5"
             linear-actions-button
           />
           <q-input
@@ -241,4 +240,9 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="scss">
+.dialog-container {
+  max-width: 80vw;
+  width: 400px;
+}
+</style>
