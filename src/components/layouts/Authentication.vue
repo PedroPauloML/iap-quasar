@@ -20,14 +20,12 @@
           <q-separator />
 
           <q-card-section>
-            <q-form
-              ref="signUpForm"
-              v-model="signUpValid"
-              @submit="signUpByEmail"
-              lazy-validation
-            >
-              <p v-if="signUpError" class="red--text body-2 text-center">
-                Ocorreu um erro ao tentar cadastrar-se
+            <q-form ref="signUpForm" @submit="signUpByEmail" lazy-validation>
+              <p
+                v-if="signUpErrorMessage"
+                class="text-red text-body2 text-center q-mb-none"
+              >
+                {{ signUpErrorMessage }}
               </p>
 
               <q-input
@@ -47,28 +45,40 @@
               />
 
               <q-input
+                label="Senha"
                 v-model="password"
-                :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :rules="passwordRules"
                 :type="showPassword ? 'text' : 'password'"
-                label="Senha"
-                @click:append="showPassword = !showPassword"
                 autocomplete="new-password"
-              />
+              >
+                <template v-slot:append>
+                  <q-icon
+                    :name="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    @click.stop="showPassword = !showPassword"
+                    color="grey-5"
+                    class="cursor-pointer"
+                  />
+                </template>
+              </q-input>
 
               <q-input
+                label="Confirmação de senha"
                 v-model="passwordConfirmation"
-                :append-icon="
-                  showPasswordConfirmation ? 'mdi-eye' : 'mdi-eye-off'
-                "
                 :rules="passwordConfirmationRules"
                 :type="showPasswordConfirmation ? 'text' : 'password'"
-                label="Confirmação de senha"
-                @click:append="
-                  showPasswordConfirmation = !showPasswordConfirmation
-                "
                 autocomplete="new-password-confirmation"
-              />
+              >
+                <template v-slot:append>
+                  <q-icon
+                    :name="showPasswordConfirmation ? 'mdi-eye' : 'mdi-eye-off'"
+                    @click.stop="
+                      showPasswordConfirmation = !showPasswordConfirmation
+                    "
+                    color="grey-5"
+                    class="cursor-pointer"
+                  />
+                </template>
+              </q-input>
 
               <div class="flex justify-between">
                 <q-btn
@@ -86,7 +96,7 @@
                   color="primary"
                   type="submit"
                   class="col"
-                  :disabled="!signUpValid || signingUpByOAuth"
+                  :disabled="signingUpByOAuth"
                   :loading="signingUpByEmail"
                 >
                   Cadastrar
@@ -123,14 +133,12 @@
           <q-separator />
 
           <q-card-section>
-            <q-form
-              ref="signInForm"
-              v-model="signInValid"
-              lazy-validation
-              @submit="signInByEmail"
-            >
-              <p v-if="signInError" class="red--text body-2 text-center">
-                E-mail ou senha inválida
+            <q-form ref="signInForm" lazy-validation @submit="signInByEmail">
+              <p
+                v-if="signInErrorMessage"
+                class="text-red text-body2 text-center q-mb-none"
+              >
+                {{ signInErrorMessage }}
               </p>
 
               <q-input
@@ -142,14 +150,21 @@
               />
 
               <q-input
+                label="Senha"
                 v-model="password"
-                :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :rules="passwordRules"
                 :type="showPassword ? 'text' : 'password'"
-                label="Senha"
-                @click:append="showPassword = !showPassword"
                 autocomplete="new-password"
-              />
+              >
+                <template v-slot:append>
+                  <q-icon
+                    :name="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    @click.stop="showPassword = !showPassword"
+                    color="grey-5"
+                    class="cursor-pointer"
+                  />
+                </template>
+              </q-input>
 
               <router-link
                 :to="{ name: 'password_recover_request' }"
@@ -182,7 +197,7 @@
                   color="primary"
                   type="submit"
                   class="col"
-                  :disabled="!signInValid || signingInByOAuth"
+                  :disabled="signingInByOAuth"
                   :loading="signingInByEmail"
                 >
                   Entrar
@@ -212,83 +227,89 @@
 </template>
 
 <script>
+import AuthenticationRequest from "src/services/requests/authentication";
+
 export default {
   data() {
     return {
-      signUpMenu: false,
-      signUpValid: true,
       signingUpByEmail: false,
       signingUpByOAuth: false,
-      signUpError: false,
+      signUpErrorMessage: "",
 
-      signInMenu: false,
-      signInValid: true,
       signingInByEmail: false,
       signingInByOAuth: false,
-      signInError: false,
+      signInErrorMessage: "",
 
       name: "",
-      nameRules: [v => !!v || "Nome é obrigatório"],
       email: "",
+      password: "",
+      passwordConfirmation: "",
+
+      nameRules: [v => !!v || "Nome é obrigatório"],
       emailRules: [
         v => !!v || "E-mail é obrigatório",
         v => /.+@.+\..+/.test(v) || "E-mail precisa ser válido"
       ],
-      password: "",
-      showPassword: false,
       passwordRules: [
         v => !!v || "Senha é obrigatório",
         v => v.length >= 8 || "Deve ter conter, no mínimo, 8 caracteres"
       ],
-      passwordConfirmation: "",
-      showPasswordConfirmation: false,
       passwordConfirmationRules: [
         v => !!v || "Confirmação de senha é obrigatório",
         v => v == this.password || "Senhas não coincidem"
-      ]
+      ],
+
+      showPassword: false,
+      showPasswordConfirmation: false
     };
   },
   methods: {
     closeSignUpMenu() {
-      this.signUpMenu = false;
       this.showPassword = false;
-      this.name = null;
-      this.$refs.signUpForm.reset();
-      this.$refs.signUpForm.resetValidation();
+      this.showPasswordConfirmation = false;
+      this.signUpErrorMessage = "";
+      this.name = "";
+      this.email = "";
+      this.password = "";
+      this.passwordConfirmation = "";
     },
     closeSignInMenu() {
-      this.signInMenu = false;
       this.showPassword = false;
-      this.name = null;
-      this.$refs.signInForm.reset();
-      this.$refs.signInForm.resetValidation();
+      this.showPassword = false;
+      this.showPasswordConfirmation = false;
+      this.signInErrorMessage = "";
+      this.password = "";
+      this.email = "";
     },
     signInByEmail() {
-      this.signInError = false;
+      this.$refs.signInForm.validate(false).then(valid => {
+        if (valid && !this.signingInByEmail) {
+          this.signingInByEmail = true;
+          this.signInErrorMessage = "";
 
-      if (this.$refs.signInForm.validate()) {
-        const users = require("../../data/users.json");
+          AuthenticationRequest.sign_in(this.email, this.password)
+            .then(res => {
+              if (res) {
+                let user = res.data;
 
-        this.signingInByEmail = true;
-
-        setTimeout(() => {
-          let user = users.find(
-            u => u.email == this.email && u.password == this.password
-          );
-
-          if (user) {
-            let token = user.token;
-            this.closeSignInMenu();
-            this.$q.cookies.set("token", token, { path: "/" });
-            this.$store.dispatch("user/setUser", user);
-            // location.reload();
-          } else {
-            this.signInError = true;
-          }
-
-          this.signingInByEmail = false;
-        }, 1000);
-      }
+                if (user) {
+                  let token = user.token;
+                  this.closeSignInMenu();
+                  this.$q.cookies.set("token", token, { path: "/" });
+                  this.$store.dispatch("user/setUser", user);
+                  // location.reload();
+                }
+              }
+            })
+            .catch(err => {
+              if (err) {
+                console.log(err);
+                this.signInErrorMessage = err.response.data.error.message;
+                this.signingInByEmail = false;
+              }
+            });
+        }
+      });
     },
     // signInByOAuth() {
     //   this.signInError = false;
@@ -299,42 +320,45 @@ export default {
     //   }, 1000);
     // },
     signUpByEmail() {
-      if (this.$refs.signUpForm.validate()) {
-        this.signingUpByEmail = true;
+      this.$refs.signUpForm.validate(false).then(valid => {
+        if (valid && !this.signingUpByEmail) {
+          this.signingUpByEmail = true;
 
-        setTimeout(() => {
-          // let user = {
-          //   token: "user-2",
-          //   email: this.email,
-          //   password: this.password,
-          //   profile: {
-          //     name: this.name,
-          //   },
-          // };
-
-          // if (user) {
-          //   let jwt = user.token;
-          //   this.$cookies.set("jwt", jwt);
-          //   this.$store.dispatch("user/setUser", user);
-          //   this.closeSignUpMenu();
-          //   // location.reload();
-          // } else {
-          //   this.signUpError = true;
-          // }
-          // this.signingUpByEmail = false;
-
-          this.$router.push({
-            name: "confirmation_email",
-            params: {
+          let params = {
+            user: {
               email: this.email,
               password: this.password,
-              profile: {
+              password_confirmation: this.passwordConfirmation,
+              profile_attributes: {
                 name: this.name
               }
             }
-          });
-        }, 1000);
-      }
+          };
+
+          AuthenticationRequest.sign_up(params)
+            .then(res => {
+              if (res) {
+                this.$router.push({
+                  name: "confirmation_email",
+                  params: { email: this.email }
+                });
+              }
+            })
+            .catch(err => {
+              if (err) {
+                console.log(err.response.data);
+                if (err.response.data.error.full_message) {
+                  this.signUpErrorMessage = err.response.data.error.full_message.split(
+                    ": "
+                  )[1];
+                } else {
+                  this.signUpErrorMessage = err.response.data.error.message;
+                }
+                this.signingUpByEmail = false;
+              }
+            });
+        }
+      });
     }
     // signUpByOAuth() {
     //   this.signInError = false;

@@ -34,6 +34,10 @@
             A partir de agora você poderá acessar sua conta no IAP Paulo Afonso.
             Aproveite!
           </p>
+
+          <p class="text-h6 text-weight-bold">
+            Para iniciar faça login na página incial.
+          </p>
         </div>
 
         <router-link :to="{ name: 'home' }" v-slot="{ href }">
@@ -86,11 +90,10 @@
                     </p>
 
                     <q-input
+                      label="E-mail"
+                      ref="email"
                       v-model="email"
                       :rules="emailRules"
-                      label="E-mail"
-                      required
-                      @keyup.enter="resendConfirmationEmail"
                       class="q-mb-md"
                       autocomplete="new-email"
                     ></q-input>
@@ -108,7 +111,12 @@
               </q-card>
 
               <router-link :to="{ name: 'home' }" v-slot="{ href }">
-                <q-btn :to="href" flat color="primary">
+                <q-btn
+                  :to="href"
+                  flat
+                  color="primary"
+                  :loading="resendingConfirmationEmail"
+                >
                   Voltar para a página inicial
                 </q-btn>
               </router-link>
@@ -147,6 +155,8 @@
 </template>
 
 <script>
+import AuthenticationRequest from "src/services/requests/authentication";
+
 export default {
   data() {
     return {
@@ -170,49 +180,46 @@ export default {
     };
   },
   created() {
-    const users = require("../../data/users.json");
+    let token = this.$route.query.token;
 
-    setTimeout(() => {
-      let token = this.$route.query.token;
-      if (token && token == "123456") {
-        let user = users.find(u => u.email == "user@email.com");
-        let jwt = user.token;
-        this.$q.cookies.set("jwt", jwt);
-        this.$store.dispatch("user/setUser", user);
-
-        this.validToken = true;
-        this.checkingTokenValidity = false;
-      } else {
-        this.validToken = false;
-        this.checkingTokenValidity = false;
-      }
-    }, 2000);
+    AuthenticationRequest.confirm_email(token)
+      .then(res => {
+        if (res) {
+          this.validToken = true;
+          this.checkingTokenValidity = false;
+        }
+      })
+      .catch(err => {
+        if (err) {
+          this.validToken = false;
+          this.checkingTokenValidity = false;
+        }
+      });
   },
   methods: {
     resendConfirmationEmail() {
-      this.resendConfirmationEmailError = "";
+      this.$refs.form.validate(false).then(valid => {
+        if (valid) {
+          this.resendConfirmationEmailError = "";
+          this.resendingConfirmationEmail = true;
 
-      if (this.$refs.form.validate()) {
-        const users = require("../../data/users.json");
-
-        this.resendingConfirmationEmail = true;
-
-        setTimeout(() => {
-          let user = users.find(u => u.email == this.email);
-
-          if (user) {
-            this.resendConfirmationEmailError = "";
-            this.emailResended = true;
-          } else {
-            this.resendConfirmationEmailError =
-              "Não foi encontrado nenhum usuáro com esse e-mail. " +
-              "Verifique se o e-mail informado está correto.";
-            this.$refs.form.validate();
-          }
-
-          this.resendingConfirmationEmail = false;
-        }, 1000);
-      }
+          AuthenticationRequest.resend_confirmation_mail(this.email)
+            .then(res => {
+              if (res) {
+                this.emailResended = true;
+                this.resendingConfirmationEmail = false;
+              }
+            })
+            .catch(err => {
+              if (err) {
+                this.resendConfirmationEmailError =
+                  err.response.data.error.message;
+                this.resendingConfirmationEmail = false;
+                this.$refs.email.validate();
+              }
+            });
+        }
+      });
     }
   }
 };

@@ -244,7 +244,7 @@ export default {
       this.contentPrintError = !val;
     },
     tags(val) {
-      if (val.length > 5) {
+      if (this.$refs.form && val.length > 5) {
         this.$nextTick(() => this.tags.pop());
       }
     }

@@ -1,5 +1,5 @@
 <template>
-  <div id="sended-confirmation-email">
+  <div v-if="$route.params.email" id="sended-confirmation-email">
     <q-icon
       name="mdi-check-circle-outline"
       color="green-9"
@@ -13,8 +13,10 @@
       </h1>
 
       <p class="text-h6 text-weight-bold">
-        Acesse o link enviado para a sua caixa de e-mail para confirmar a sua
-        conta
+        Acesse o link enviado para a sua caixa de e-mail (<span
+          class="text-weight-regular"
+          >{{ $route.params.email }}</span
+        >) para confirmar a sua conta
       </p>
     </div>
 
@@ -27,7 +29,13 @@
 </template>
 
 <script>
-export default {};
+export default {
+  mounted() {
+    if (!this.$route.params.email) {
+      this.$router.replace({ name: "404" });
+    }
+  }
+};
 </script>
 
 <style lang="scss" scoped>

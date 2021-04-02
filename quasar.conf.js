@@ -18,7 +18,7 @@ module.exports = function(/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/boot-files
-    boot: ["mixins", "axios", "tiptap", "moment"],
+    boot: ["axios", "mixins", "tiptap", "moment", "router"],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
     css: ["app.scss"],
@@ -45,7 +45,9 @@ module.exports = function(/* ctx */) {
       env: {
         ENV_API: process.env.API_ENV || "DEVELOPMENT",
         API:
-          process.env.API_ENV == "HOMOLOGATION"
+          process.env.API_ENV == "PRODUCTION"
+            ? ""
+            : process.env.API_ENV == "STAGING"
             ? ""
             : "http://localhost:3000/v1"
       },
@@ -81,7 +83,7 @@ module.exports = function(/* ctx */) {
     devServer: {
       https: false,
       port: 8080,
-      open: true // opens browser window automatically
+      open: false // opens browser window automatically
     },
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
