@@ -1,5 +1,5 @@
 <template>
-  <div id="confirm-account">
+  <div id="confirm-account" class="centered">
     <transition
       enter-active-class="animated fadeInDown"
       leave-active-class="animated fadeOutUp"
@@ -196,6 +196,12 @@ export default {
         }
       });
   },
+  watch: {
+    email() {
+      if (!!this.resendConfirmationEmailError)
+        this.resendConfirmationEmailError = "";
+    }
+  },
   methods: {
     resendConfirmationEmail() {
       this.$refs.form.validate(false).then(valid => {
@@ -226,14 +232,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-#confirm-account,
-.centered {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
 .resend-confirmation-email-container {
   max-width: 600px;
   padding: 12px;

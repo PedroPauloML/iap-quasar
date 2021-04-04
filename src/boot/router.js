@@ -108,4 +108,13 @@ export default ({ router, store, Vue }) => {
 
     next();
   });
+
+  const site_name = "Portal IAP Paulo Afonso";
+  router.afterEach((to, from) => {
+    // Use next tick to handle router history correctly
+    // see: https://github.com/vuejs/vue-router/issues/914#issuecomment-384477609
+    Vue.nextTick(() => {
+      document.title = to.meta.title || site_name;
+    });
+  });
 };

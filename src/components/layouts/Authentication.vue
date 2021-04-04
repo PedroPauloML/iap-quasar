@@ -80,6 +80,21 @@
                 </template>
               </q-input>
 
+              <router-link
+                :to="{ name: 'resend_confirmation_email' }"
+                v-slot="{ href }"
+              >
+                <q-btn
+                  :to="href"
+                  color="primary"
+                  link
+                  flat
+                  class="q-mb-lg full-width"
+                >
+                  Re-enviar e-mail de confirmação de conta
+                </q-btn>
+              </router-link>
+
               <div class="flex justify-between">
                 <q-btn
                   flat
@@ -346,7 +361,6 @@ export default {
             })
             .catch(err => {
               if (err) {
-                console.log(err.response.data);
                 if (err.response.data.error.full_message) {
                   this.signUpErrorMessage = err.response.data.error.full_message.split(
                     ": "

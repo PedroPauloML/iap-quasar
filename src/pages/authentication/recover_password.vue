@@ -1,5 +1,5 @@
 <template>
-  <div id="recover-password">
+  <div id="recover-password" class="centered">
     <transition
       enter-active-class="animated fadeIn"
       leave-active-class="animated fadeOut"
@@ -39,6 +39,13 @@
 
               <q-card class="recover-password-container">
                 <q-card-section>
+                  <p
+                    v-if="recoverPasswordError"
+                    class="text-red text-body2 text-center q-mb-none"
+                  >
+                    {{ recoverPasswordError }}
+                  </p>
+
                   <q-form ref="form" @submit="recoverPassword" lazy-validation>
                     <q-input
                       label="Senha"
@@ -79,8 +86,6 @@
                     <q-btn
                       color="primary"
                       type="submit"
-                      @click="recoverPassword"
-                      :disabled="!recoverPassword"
                       :loading="resendingConfirmationEmail"
                       class="q-mt-md"
                     >
@@ -175,15 +180,20 @@
 </template>
 
 <script>
+import AuthenticationRequest from "src/services/requests/authentication";
+
 export default {
   data() {
     return {
       checkingTokenValidity: true,
       validToken: false,
 
+      token: this.$route.query.token,
+
       recoverPasswordValid: true,
       resendingConfirmationEmail: false,
       recoveredPassword: false,
+      recoverPasswordError: "",
       password: "",
       showPassword: false,
       passwordRules: [
@@ -199,48 +209,57 @@ export default {
     };
   },
   created() {
-    setTimeout(() => {
-      let token = this.$route.query.token;
-      if (token && token == "123456") {
-        this.validToken = true;
-        this.checkingTokenValidity = false;
-      } else {
-        this.validToken = false;
-        this.checkingTokenValidity = false;
-      }
-    }, 2000);
+    AuthenticationRequest.check_password_recover_token(this.token)
+      .then(res => {
+        if (res) {
+          this.validToken = true;
+          this.checkingTokenValidity = false;
+        }
+      })
+      .catch(err => {
+        if (err) {
+          this.validToken = false;
+          this.checkingTokenValidity = false;
+        }
+      });
   },
   methods: {
     recoverPassword() {
-      if (this.$refs.form.validate()) {
-        this.resendingConfirmationEmail = true;
+      this.$refs.form.validate(false).then(valid => {
+        if (valid) {
+          this.resendingConfirmationEmail = true;
 
-        const users = require("../../data/users.json");
-
-        setTimeout(() => {
-          let user = users.find(u => u.email == "user@email.com");
-          let jwt = user.token;
-          this.$q.cookies.set("jwt", jwt);
-          this.$store.dispatch("user/setUser", user);
-
-          this.resendingConfirmationEmail = false;
-          this.recoveredPassword = true;
-        }, 1000);
-      }
+          AuthenticationRequest.recover_password(
+            this.token,
+            this.password,
+            this.passwordConfirmation
+          )
+            .then(res => {
+              if (res) {
+                this.resendingConfirmationEmail = false;
+                this.recoveredPassword = true;
+              }
+            })
+            .catch(err => {
+              if (err) {
+                if (err.response.data.error.full_message) {
+                  this.recoverPasswordError = err.response.data.error.full_message.split(
+                    ": "
+                  )[1];
+                } else {
+                  this.recoverPasswordError = err.response.data.error.message;
+                }
+                this.resendingConfirmationEmail = false;
+              }
+            });
+        }
+      });
     }
   }
 };
 </script>
 
 <style lang="scss">
-#recover-password,
-.centered {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
 .recover-password-container {
   max-width: 600px;
   padding: 12px;

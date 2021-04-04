@@ -1,5 +1,5 @@
 <template>
-  <div id="password-recover-request">
+  <div id="password-recover-request" class="centered">
     <transition
       enter-active-class="animated fadeIn"
       leave-active-class="animated fadeOut"
@@ -36,11 +36,10 @@
                 </p>
 
                 <q-input
+                  label="E-mail"
+                  ref="email"
                   v-model="email"
                   :rules="emailRules"
-                  label="E-mail"
-                  required
-                  @keyup.enter="sendPasswordRecoverRequest"
                   class="q-mb-md"
                   autocomplete="new-email"
                 ></q-input>
@@ -48,8 +47,6 @@
                 <q-btn
                   color="primary"
                   type="submit"
-                  @click="sendPasswordRecoverRequest"
-                  :disabled="!sendPasswordRecoverRequest"
                   :loading="resendingConfirmationEmail"
                   class="btn-text-wrap"
                 >
@@ -60,7 +57,12 @@
           </q-card>
 
           <router-link :to="{ name: 'home' }" v-slot="{ href }">
-            <q-btn :to="href" flat text-color="primary">
+            <q-btn
+              :to="href"
+              flat
+              text-color="primary"
+              :disable="resendingConfirmationEmail"
+            >
               Voltar para a página inicial
             </q-btn>
           </router-link>
@@ -97,11 +99,13 @@
 </template>
 
 <script>
+import AuthenticationRequest from "src/services/requests/authentication";
+
 export default {
   data() {
     return {
       sendPasswordRecoverRequestValid: true,
-      sendPasswordRecoverRequestError: "",
+      passwordRecoverRequestError: "",
       resendingConfirmationEmail: false,
       requestPasswordRecoverSended: false,
       email: "",
@@ -109,50 +113,46 @@ export default {
         v => !!v || "E-mail é obrigatório",
         v => /.+@.+\..+/.test(v) || "E-mail precisa ser válido",
         () =>
-          !this.sendPasswordRecoverRequestError ||
-          this.sendPasswordRecoverRequestError
+          !this.passwordRecoverRequestError || this.passwordRecoverRequestError
       ]
     };
   },
+  watch: {
+    email() {
+      if (!!this.passwordRecoverRequestError)
+        this.passwordRecoverRequestError = "";
+    }
+  },
   methods: {
     sendPasswordRecoverRequest() {
-      this.sendPasswordRecoverRequestError = "";
+      this.$refs.form.validate(false).then(valid => {
+        if (valid) {
+          this.passwordRecoverRequestError = "";
+          this.resendingConfirmationEmail = true;
 
-      if (this.$refs.form.validate()) {
-        const users = require("../../data/users.json");
-
-        this.resendingConfirmationEmail = true;
-
-        setTimeout(() => {
-          let user = users.find(u => u.email == this.email);
-
-          if (user) {
-            this.sendPasswordRecoverRequestError = "";
-            this.requestPasswordRecoverSended = true;
-          } else {
-            this.sendPasswordRecoverRequestError =
-              "Não foi encontrado nenhum usuáro com esse e-mail. " +
-              "Verifique se o e-mail informado está correto.";
-            this.$refs.form.validate();
-          }
-
-          this.resendingConfirmationEmail = false;
-        }, 1000);
-      }
+          AuthenticationRequest.request_password_recover(this.email)
+            .then(res => {
+              if (res) {
+                this.passwordRecoverRequestError = "";
+                this.requestPasswordRecoverSended = true;
+              }
+            })
+            .catch(err => {
+              if (err) {
+                this.passwordRecoverRequestError =
+                  err.response.data.error.message;
+                this.$refs.email.validate();
+                this.resendingConfirmationEmail = false;
+              }
+            });
+        }
+      });
     }
   }
 };
 </script>
 
 <style lang="scss">
-#password-recover-request,
-.centered {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
 .password-recover-request-container {
   max-width: 600px;
   padding: 12px;

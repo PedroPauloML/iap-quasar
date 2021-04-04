@@ -8,6 +8,15 @@ const routes = [
     component: () => import("../layouts/Authentication"),
     children: [
       {
+        name: "resend_confirmation_email",
+        path: "resend_confirmation_email",
+        component: () =>
+          import("../pages/authentication/resend_confirmation_email"),
+        meta: {
+          title: `Re-enviar e-mail de confirmação de conta | ${site_name}`
+        }
+      },
+      {
         name: "confirmation_email",
         path: "confirmation_email",
         component: () => import("../pages/authentication/confirmation_email"),
