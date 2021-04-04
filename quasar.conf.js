@@ -46,7 +46,7 @@ module.exports = function(/* ctx */) {
         ENV_API: process.env.API_ENV || "DEVELOPMENT",
         API:
           process.env.API_ENV == "PRODUCTION"
-            ? ""
+            ? "https://portaliappa.herokuapp.com/v1"
             : process.env.API_ENV == "STAGING"
             ? ""
             : "http://localhost:3000/v1"
