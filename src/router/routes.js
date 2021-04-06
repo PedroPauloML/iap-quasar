@@ -179,6 +179,20 @@ const routes = [
         path: "/contact",
         component: () => import("../pages/contact/index"),
         meta: { title: `Contato | ${site_name}` }
+      },
+
+      // SETTINGS
+      {
+        path: "/settings",
+        component: () => import("../pages/settings/layout"),
+        children: [
+          {
+            name: "settings_profile",
+            path: "profile",
+            component: () => import("../pages/settings/profile"),
+            meta: { title: `Seu perfil | ${site_name}`, authentication: true }
+          }
+        ]
       }
     ]
   },

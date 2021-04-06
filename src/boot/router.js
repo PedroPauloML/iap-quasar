@@ -4,6 +4,7 @@ import UserRequest from "src/services/requests/user";
 
 export default ({ router, store, Vue }) => {
   router.beforeEach(async (to, from, next) => {
+    console.log("current_user", store.state.user.user);
     if (!store.state.user.user) {
       let token;
       const cookie_options = { path: "/" };
@@ -18,11 +19,13 @@ export default ({ router, store, Vue }) => {
         token = Cookies.get("token", cookie_options);
       }
 
+      console.log("token", token);
+
       if (token) {
         await UserRequest.find_by_token(token)
           .then(res => {
             if (res) {
-              Vue.prototype.$axios.defaults.headers.common["Session-Token"] =
+              Vue.prototype.$axios.defaults.headers.common["Token"] =
                 res.data.token;
               // Set session token to browser cookies for persist user session
               Cookies.set("token", res.data.token, cookie_options);
@@ -63,8 +66,12 @@ export default ({ router, store, Vue }) => {
             //     params: { redirect_to: to.fullPath }
             //   });
             // }
+            if (to.meta.authentication) {
+              router.replace({ name: "404" });
+            }
           });
-      } else if (to.name != "login") {
+      } else if (to.meta.authentication) {
+        router.replace({ name: "404" });
         // Notify.create({
         //   message: "Faça login antes de continuar",
         //   icon: "assignment_ind",
@@ -75,7 +82,8 @@ export default ({ router, store, Vue }) => {
         //   params: { redirect_to: to.fullPath }
         // });
       }
-    } else {
+    } else if (to.meta.authentication && !store.state.user.user) {
+      router.replace({ name: "404" });
       // await userRequest.permissions(store.state.user.user.id).then(res => {
       //   if (res) {
       //     store.dispatch("user/setPermissions", res.data);

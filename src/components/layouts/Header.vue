@@ -73,7 +73,7 @@
             min-width="200"
             max-width="300"
           >
-            <q-list dense>
+            <q-list dense class="menu-container">
               <q-item>
                 <q-item-section avatar class="q-py-sm">
                   <q-avatar>
@@ -95,15 +95,30 @@
                 </q-item-section>
 
                 <q-item-section class="q-py-sm">
-                  <p class="text-h6 q-ma-none text-no-wrap">
+                  <p class="text-weight-medium q-ma-none ellipsis full-width">
                     {{ $store.state.user.user.profile.name }}
                   </p>
-                  <p
-                    class="text-caption text-grey-7 q-ma-none"
+                  <div
+                    class="text-caption text-grey-7 flex no-wrap full-width"
                     style="margin-top: -8px"
                   >
-                    {{ $store.state.user.user.email }}
-                  </p>
+                    <span class="ellipsis">
+                      {{ $store.state.user.user.email.split("@")[0] }}
+                    </span>
+                    @{{ $store.state.user.user.email.split("@")[1] }}
+                  </div>
+                </q-item-section>
+              </q-item>
+
+              <q-separator></q-separator>
+
+              <q-item clickable :to="{ name: 'settings_profile' }">
+                <q-item-section avatar class="q-py-sm">
+                  <q-icon name="person_outline" />
+                </q-item-section>
+
+                <q-item-section class="q-py-sm">
+                  Meu perfil
                 </q-item-section>
               </q-item>
 
@@ -190,5 +205,9 @@ export default {
 #toolbar {
   max-width: 1200px;
   margin: 0 auto;
+}
+.menu-container {
+  max-width: 80vw;
+  width: 220px;
 }
 </style>
