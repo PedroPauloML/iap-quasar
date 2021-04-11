@@ -30,4 +30,19 @@ export default class User {
         });
     });
   }
+
+  static updateAvatar(id, params) {
+    return new Promise((resolve, reject) => {
+      Vue.prototype.$axios
+        .put(`/users/${id}/update_avatar`, params)
+        .then(res => {
+          if (res) {
+            resolve(res);
+          }
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
+  }
 }

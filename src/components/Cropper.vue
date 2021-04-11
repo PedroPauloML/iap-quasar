@@ -147,7 +147,8 @@ export default {
       imgSrc: this.value,
       loadingCropper: false,
       cropping: false,
-      cropImg: this.currentImage
+      cropImg: this.currentImage,
+      fileDetails: {}
     };
   },
   watch: {
@@ -159,14 +160,66 @@ export default {
     }
   },
   methods: {
-    cropImage() {
+    async cropImage() {
       // get image data for post processing, e.g. upload or setting image src
       const { canvas } = this.$refs.cropper.getResult();
+
       this.cropping = true;
-      let result = canvas.toDataURL();
+
+      let result = await this.resizeToMaxWidthAndMaxHeight(canvas);
       this.cropImg = result;
-      this.$emit("input", result);
-      this.cropping = false;
+
+      let _this = this;
+      this.urltoFile(result, this.fileDetails.name, this.fileDetails.type).then(
+        function(file) {
+          _this.$emit("input", file);
+          _this.cropping = false;
+        }
+      );
+    },
+    urltoFile(url, filename, mimeType) {
+      return fetch(url)
+        .then(function(res) {
+          return res.arrayBuffer();
+        })
+        .then(function(buf) {
+          return new File([buf], filename, { type: mimeType });
+        });
+    },
+    resizeToMaxWidthAndMaxHeight(canvas) {
+      return new Promise((resolve, reject) => {
+        let maxWidth = 1000;
+        let maxHeight = 1000;
+        if (canvas.width > maxWidth || canvas.height > maxHeight) {
+          let img = new Image();
+          img.crossOrigin = "";
+          img.onload = () => {
+            let width, height;
+            let wRatio = maxWidth / canvas.width;
+            let hRatio = maxHeight / canvas.height;
+
+            if (wRatio > hRatio) {
+              width = maxWidth;
+              height = wRatio * canvas.height;
+            } else {
+              width = hRatio * canvas.width;
+              height = maxHeight;
+            }
+
+            let newCanvas = document.createElement("canvas");
+            newCanvas.width = width;
+            newCanvas.height = height;
+
+            let ctx = newCanvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            resolve(newCanvas.toDataURL());
+          };
+          img.src = canvas.toDataURL();
+        } else {
+          resolve(canvas.toDataURL());
+        }
+      });
     },
     flipX() {
       const dom = this.$refs.flipX.$el;
@@ -202,10 +255,15 @@ export default {
             this.cropImg = "";
             this.loadingCropper = false;
           };
+          this.fileDetails = { name: file.name, type: file.type };
+          console.log(file);
           reader.readAsDataURL(file);
         } else {
+          this.fileDetails = {};
           alert("Sorry, FileReader API not supported");
         }
+      } else {
+        this.fileDetails = {};
       }
     },
     showFileChooser() {

@@ -77,7 +77,9 @@
               <q-item>
                 <q-item-section avatar class="q-py-sm">
                   <q-avatar>
-                    <q-img src="https://picsum.photos/id/1012/100/100">
+                    <q-img
+                      :src="$store.state.user.user.profile.avatar.url || ''"
+                    >
                       <template v-slot:placeholder>
                         <q-row
                           class="full-height ma-0 secondary darken-1"
