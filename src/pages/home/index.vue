@@ -33,7 +33,10 @@
               class="col"
               v-for="(single_new, i) in news"
               :key="i"
-              :class="{ 'col-12': true, 'self-end': i == news.length - 1 }"
+              :class="{
+                'col-12': true,
+                'self-end': i == news.length - 1 && news.length % 2 == 0
+              }"
             >
               <News :data="single_new" :coverRatio="2.1" no-content />
             </div>
