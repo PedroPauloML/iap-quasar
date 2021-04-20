@@ -54,6 +54,8 @@ export default ({ router, store, Vue }) => {
           });
 
           // router.push({ name: "login" });
+        } else if (error.response.status == 404) {
+          router.push({ name: "404" });
         }
       } else if (error.request) {
         Notify.create({

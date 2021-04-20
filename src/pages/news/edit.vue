@@ -1,21 +1,15 @@
 <template>
   <div id="edit-new">
-    <Form
-      v-if="news"
-      :data="news"
-      @closeForm="closeEditingForm"
-      @updateNews="(id, news) => updateNews(id, news)"
-    />
-    <div v-else class="mb-3 body-2">
-      <q-linear-progress indeterminate></q-linear-progress>
-      <p class="text-center mt-5">
-        Estamos preparando a notícia...
-      </p>
+    <div v-if="fetchingNews">
+      <q-linear-progress indeterminate color="primary" />
     </div>
+    <Form v-else :data="news" />
   </div>
 </template>
 
 <script>
+import NewsRequest from "src/services/requests/news";
+
 import Form from "../../components/news/Form";
 
 export default {
@@ -23,35 +17,50 @@ export default {
   data() {
     return {
       news: null,
-      showEditingForm: false
+      fetchingNews: false
     };
   },
   created() {
-    this.$store.dispatch("news/loadNews").then(this.findNews);
     this.$emit("setBackRoute", {
       name: "news_show",
       params: { id: this.$route.params.id }
     });
+    this.findNews();
   },
   methods: {
     findNews() {
-      this.news = this.$store.state.news.news.find(
-        el => el.id == this.$route.params.id
-      );
-    },
-    updateNews(payload) {
-      this.$store.dispatch("news/updateNews", payload).then(() => {
-        this.$router.push({
-          name: "news_show",
-          params: { id: this.$route.params.id }
-        });
-      });
-    },
-    closeEditingForm() {
-      this.$router.push({
-        name: "news_show",
-        params: { id: this.$route.params.id }
-      });
+      if (!this.fetchingNews) {
+        this.fetchingNews = true;
+
+        NewsRequest.find(this.$route.params.id)
+          .then(res => {
+            if (res) {
+              this.news = res.data;
+            }
+
+            this.fetchingNews = false;
+          })
+          .catch(err => {
+            if (err) {
+              if (err.response && err.response.data.error.message) {
+                this.$q.notify({
+                  message: err.response.data.error.message,
+                  icon: "info",
+                  color: "negative"
+                });
+              } else {
+                this.$q.notify({
+                  message:
+                    "Ocorreu um erro ao tentar encontrar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                  icon: "info",
+                  color: "negative"
+                });
+              }
+
+              this.fetchingNews = false;
+            }
+          });
+      }
     }
   },
   beforeRouteLeave(to, from, next) {

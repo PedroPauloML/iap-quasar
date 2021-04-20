@@ -9,48 +9,46 @@
         </q-btn>
       </router-link>
     </div>
-    <div v-if="news_list.length > 0" class="row q-col-gutter-lg q-mb-lg">
-      <div
-        v-for="(news, group_index) in grouped_news"
-        :key="group_index"
-        class="col-12 col-sm-6"
-      >
-        <div v-if="Array.isArray(news)" class="full-height row q-col-gutter-lg">
-          <div
-            class="col"
-            v-for="(single_new, i) in news"
-            :key="i"
-            :class="{ 'col-12': true, 'self-end': i == news.length - 1 }"
-          >
-            <News
-              :id="single_new.id"
-              :title="single_new.title"
-              :caption="single_new.caption"
-              :image="{
-                url: single_new.image,
-                ratio: '2.1'
-              }"
-            />
-          </div>
-        </div>
-        <News
-          v-else
-          :id="news.id"
-          :title="news.title"
-          :caption="news.caption"
-          :image="{
-            url: news.image,
-            ratio: '1'
-          }"
-        />
+
+    <transition
+      enter-active-class="animated fadeInDown"
+      leave-active-class="animated fadeOutUp"
+      mode="out-in"
+    >
+      <div v-if="fetchingNews">
+        <q-linear-progress indeterminate color="primary"></q-linear-progress>
       </div>
-    </div>
-    <div v-else class="flex no-wrap items-center justify-center q-mb-lg">
-      <q-img :src="newsSRC" width="40px" class="q-mr-lg" />
-      <span class="text-h6">
-        Nenhuma notícia no momento. Volte mais tarde.
-      </span>
-    </div>
+
+      <div v-else-if="news_list.length > 0" class="row q-col-gutter-lg q-mb-lg">
+        <div
+          v-for="(news, group_index) in grouped_news"
+          :key="group_index"
+          class="col-12 col-sm-6"
+        >
+          <div
+            v-if="Array.isArray(news)"
+            class="full-height row q-col-gutter-lg"
+          >
+            <div
+              class="col"
+              v-for="(single_new, i) in news"
+              :key="i"
+              :class="{ 'col-12': true, 'self-end': i == news.length - 1 }"
+            >
+              <News :data="single_new" :coverRatio="2.1" no-content />
+            </div>
+          </div>
+          <News v-else :data="news" :coverRatio="1" no-content />
+        </div>
+      </div>
+
+      <div v-else class="flex no-wrap items-center justify-center q-mb-lg">
+        <q-img :src="newsSRC" width="40px" class="q-mr-lg" />
+        <span class="text-h6">
+          Nenhuma notícia no momento. Volte mais tarde.
+        </span>
+      </div>
+    </transition>
 
     <div class="flex justify-between align-center q-mb-md">
       <span class="text-h6">Nossa Agenda</span>
@@ -160,6 +158,8 @@
 </template>
 
 <script>
+import NewsRequest from "src/services/requests/news";
+
 import News from "../../components/news/Component";
 import VerseOfDay from "../../components/verse_of_day/Component";
 import Message from "../../components/messages/Component";
@@ -180,6 +180,9 @@ export default {
       currentVerseContainerHeight: 450,
       message: null,
 
+      // Loading variables
+      fetchingNews: false,
+
       // Icons
       newsSRC,
       scheduleSRC
@@ -192,10 +195,8 @@ export default {
       }, 200);
     }
   },
-  created() {
-    this.$store.dispatch("news/loadNews").then(() => {
-      this.news_list = this.$store.state.news.news.slice(0, 3);
-    });
+  async created() {
+    await this.fetchNews();
 
     this.$store.dispatch("messages/loadMessages").then(() => {
       this.message = this.$store.state.messages.messages[0];
@@ -278,6 +279,44 @@ export default {
         ? currentVerseOfDay[0]?.$el?.clientHeight
         : 300;
       this.currentVerseContainerHeight = (height || 300) + 40;
+    },
+
+    fetchNews() {
+      if (!this.fetchingNews) {
+        this.fetchingNews = true;
+
+        let current_page = 1;
+        let per_page = 3;
+
+        NewsRequest.index("", {}, current_page, per_page)
+          .then(res => {
+            if (res) {
+              this.news_list = res.data.objects;
+            }
+
+            this.fetchingNews = false;
+          })
+          .catch(err => {
+            if (err) {
+              if (err.response && err.response.data.error.message) {
+                this.$q.notify({
+                  message: err.response.data.error.message,
+                  icon: "info",
+                  color: "negative"
+                });
+              } else {
+                this.$q.notify({
+                  message:
+                    "Ocorreu um erro ao tentar buscar as notícias. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                  icon: "info",
+                  color: "negative"
+                });
+              }
+
+              this.fetchingNews = false;
+            }
+          });
+      }
     }
   }
 };

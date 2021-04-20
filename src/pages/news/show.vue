@@ -1,30 +1,21 @@
 <template>
   <div id="new">
+    <div v-if="fetchingNews">
+      <q-linear-progress indeterminate color="primary" />
+    </div>
     <News
-      v-if="news"
-      :id="news.id"
-      :title="news.title"
-      :caption="news.caption"
-      :image="{
-        url: news.image,
-        //ratio: $vuetify.breakpoint.xs ? '1.2' : '2.5',
-        ratio: 16 / 9
-      }"
-      :content="news.content"
-      :metadata="news.metadata"
-      :tags="news.tags"
+      v-else
+      :data="news"
+      :coverRatio="16 / 9"
+      :metadata="{ read_time: true }"
       @onDestroy="$router.push({ name: 'news' })"
     />
-    <div v-else class="mb-3 body-2">
-      <q-linear-progress indeterminate></q-linear-progress>
-      <p class="text-center mt-5">
-        Estamos preparando a notícia...
-      </p>
-    </div>
   </div>
 </template>
 
 <script>
+import NewsRequest from "src/services/requests/news";
+
 import News from "../../components/news/Component";
 
 export default {
@@ -32,20 +23,48 @@ export default {
   data() {
     return {
       back_router: "/news",
-      news: null
+      news: null,
+
+      fetchingNews: false
     };
   },
   created() {
-    this.$store.dispatch("news/loadNews").then(this.findNews);
     this.$emit("setBackRoute", { name: "news" });
+    this.findNews();
   },
   methods: {
     findNews() {
-      this.news = this.$store.state.news.news.find(
-        el => el.id == this.$route.params.id
-      );
-      if (!this.news) {
-        this.$router.push({ name: "404" });
+      if (!this.fetchingNews) {
+        this.fetchingNews = true;
+
+        NewsRequest.find(this.$route.params.id)
+          .then(res => {
+            if (res) {
+              this.news = res.data;
+            }
+
+            this.fetchingNews = false;
+          })
+          .catch(err => {
+            if (err) {
+              if (err.response && err.response.data.error.message) {
+                this.$q.notify({
+                  message: err.response.data.error.message,
+                  icon: "info",
+                  color: "negative"
+                });
+              } else {
+                this.$q.notify({
+                  message:
+                    "Ocorreu um erro ao tentar encontrar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                  icon: "info",
+                  color: "negative"
+                });
+              }
+
+              this.fetchingNews = false;
+            }
+          });
       }
     }
   },

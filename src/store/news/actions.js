@@ -1,7 +1,7 @@
 export function loadNews({ commit, state }) {
   if (!state.news.length > 0) {
     let news = require("../../data/news.json").map(obj => {
-      obj.content = obj.content.filter(el => !!el).join("");
+      obj.content_html = obj.content_html.filter(el => !!el).join("");
 
       return obj;
     });

@@ -4,31 +4,19 @@ import UserRequest from "src/services/requests/user";
 
 export default ({ router, store, Vue }) => {
   router.beforeEach(async (to, from, next) => {
-    console.log("current_user", store.state.user.user);
     if (!store.state.user.user) {
       let token;
       const cookie_options = { path: "/" };
 
-      if (to.query.st) {
-        token = to.query.st;
-        let query = to.query;
-        delete query.st;
-        Cookies.set("token", token, cookie_options);
-        return router.replace({ query });
-      } else {
-        token = Cookies.get("token", cookie_options);
-      }
-
-      console.log("token", token);
+      token = Cookies.get("token", cookie_options);
 
       if (token) {
         await UserRequest.find_by_token(token)
           .then(res => {
             if (res) {
-              Vue.prototype.$axios.defaults.headers.common["Token"] =
-                res.data.token;
-              // Set session token to browser cookies for persist user session
-              Cookies.set("token", res.data.token, cookie_options);
+              Vue.prototype.$axios.defaults.headers.common["token"] = token;
+              // Set token to browser cookies for persist user session
+              Cookies.set("token", token, cookie_options);
               store.dispatch("user/setUser", res.data);
 
               // if (to.name == "login") {

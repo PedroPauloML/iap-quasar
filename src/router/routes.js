@@ -72,7 +72,7 @@ const routes = [
             name: "news_new",
             path: "/news/new",
             component: () => import("../pages/news/new"),
-            meta: { title: `Nova Notícia | ${site_name}` }
+            meta: { title: `Nova Notícia | ${site_name}`, authentication: true }
           },
           {
             name: "news_show",
@@ -84,7 +84,10 @@ const routes = [
             name: "news_edit",
             path: "/news/:id/edit",
             component: () => import("../pages/news/edit"),
-            meta: { title: `Editando Notícia | ${site_name}` }
+            meta: {
+              title: `Editando Notícia | ${site_name}`,
+              authentication: true
+            }
           }
         ]
       },

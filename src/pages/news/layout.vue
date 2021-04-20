@@ -8,9 +8,9 @@
       mode="out-in"
     >
       <router-view
-        @clearInputSearch="clearInputSearch"
+        @resetFilters="resetFilters"
         @setBackRoute="setBackRoute"
-        v-model="filters"
+        :filters="filters"
         :searching="searching"
         v-on:searching="value => (searching = value)"
       ></router-view>
@@ -27,7 +27,7 @@ export default {
     return {
       back_route: null,
       filters: {
-        search: this.$route.query.search,
+        query: this.$route.query.query,
         date: this.$route.query.date
           ? this.$moment(this.$route.query.date, "YYYY-MM-DD").format()
           : ""
@@ -39,9 +39,9 @@ export default {
     setBackRoute(route) {
       this.back_route = route;
     },
-    clearInputSearch() {
+    resetFilters() {
       this.filters = {
-        search: "",
+        query: "",
         date: ""
       };
     }

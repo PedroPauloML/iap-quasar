@@ -1,13 +1,29 @@
 <template>
   <q-card class="news-poster rounded-lg">
     <q-img
-      :src="image.url || ''"
-      :ratio="image.ratio"
+      :src="news.cover.url || ''"
+      :ratio="coverRatio"
       width="100%"
       height="100%"
     >
-      <div class="full-height full-width row items-end">
-        <div class="col background q-pa-md text-white">
+      <div class="full-height full-width row">
+        <div class="col-12 self-start q-pa-md">
+          <q-chip
+            v-if="!news.published"
+            square
+            icon="history_edu"
+            color="primary-lighten-2"
+            text-color="white"
+            class="text-bold"
+          >
+            Rascunho
+            <q-tooltip anchor="center end" self="center start">
+              Essa notícia ainda não foi publicada
+            </q-tooltip>
+          </q-chip>
+        </div>
+
+        <div class="col-12 self-end background q-pa-md text-white">
           <div class="row">
             <div class="col self-center">
               <p
@@ -18,11 +34,11 @@
                   'q-mb-sm': true
                 }"
               >
-                {{ title }}
+                {{ news.title }}
               </p>
             </div>
 
-            <div v-if="!noActions && !caption && route" class="col-auto">
+            <div v-if="!noActions && !news.caption && route" class="col-auto">
               <router-link :to="route" v-slot="{ href }">
                 <q-btn flat round size="lg" link color="white" :to="href">
                   <q-icon name="chevron_right" size="md" />
@@ -31,7 +47,7 @@
             </div>
           </div>
 
-          <div v-if="caption" class="row">
+          <div v-if="news.caption" class="row">
             <div class="col self-center">
               <p
                 :class="{
@@ -43,7 +59,7 @@
                   'text-truncate-2-line': route ? true : false
                 }"
               >
-                {{ caption }}
+                {{ news.caption }}
               </p>
             </div>
 
@@ -62,10 +78,26 @@
                 <q-menu>
                   <q-list dense flat>
                     <q-item
+                      v-if="!news.published"
+                      clickable
+                      @click="publishNews"
+                      class="bg-positive"
+                      :disable="publishing"
+                    >
+                      <q-item-section avatar>
+                        <q-icon name="send" />
+                      </q-item-section>
+
+                      <q-item-section>
+                        Publicar
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item
                       clickable
                       :to="{
                         name: 'news_edit',
-                        params: { id: id }
+                        params: { id: news.id }
                       }"
                     >
                       <q-item-section avatar>
@@ -96,43 +128,43 @@
     </q-img>
 
     <q-card-section
-      v-if="metadata"
+      v-if="!noContent"
       class="flex align-center metadata flex-column flex-sm-row text-overline text-uppercase"
     >
       <span v-if="metadata.read_time">
         Tempo de leitura:
-        {{ Math.ceil(content.split(" ").length / 5 / 60) }} minuto(s)
+        {{ Math.ceil(news.content_html.split(" ").length / 5 / 60) }} minuto(s)
       </span>
 
-      <span v-if="metadata.published_at">
+      <span>
         Publicado em:
         {{
-          $moment(metadata.published_at, "DD/MM/YYYY").format(
-            "DD/MM/YYYY hh:mm"
-          )
+          news.published_at
+            ? $moment(news.published_at).format("DD/MM/YYYY hh:mm")
+            : "Não publicado"
         }}
       </span>
 
-      <span v-if="metadata.author"> Autor: {{ metadata.author }} </span>
+      <span v-if="news.author_name"> Autor: {{ news.author_name }} </span>
     </q-card-section>
 
-    <q-separator v-if="metadata" />
+    <q-separator v-if="!noContent" />
 
-    <q-card-section v-if="content" class="q-pa-none">
+    <q-card-section v-if="!noContent && news.content_html" class="q-pa-none">
       <!-- <div
         class="content mce-content-body black--text text-body1"
         v-html="content"
       /> -->
-      <TipTapEditor ref="content" v-model="content" readonly />
+      <TipTapEditor ref="content" v-model="news.content_html" readonly />
     </q-card-section>
 
-    <q-separator v-if="content && tags" />
+    <q-separator v-if="!noContent && news.content_html && news.tags" />
 
-    <q-card-section v-if="tags">
+    <q-card-section v-if="!noContent && news.tags">
       <router-link
-        v-for="(tag, index) in tags"
+        v-for="(tag, index) in news.tags"
         :key="index"
-        :to="tagRoute(tag)"
+        :to="tagRoute(tag.slug)"
         v-slot="{ href }"
       >
         <q-chip
@@ -141,10 +173,10 @@
           color="accent"
           label
           text-color="white"
-          @click="$router.push(href)"
+          @click="noActions ? null : $router.push(href)"
         >
           <q-icon name="mdi-label" size="sm" class="q-mr-sm" />
-          {{ tag }}
+          {{ tag.name || tag.label }}
         </q-chip>
       </router-link>
     </q-card-section>
@@ -152,48 +184,150 @@
 </template>
 
 <script>
+import NewsRequest from "src/services/requests/news";
+
 import TipTapEditor from "../TipTapEditor";
 
 export default {
   props: {
-    id: Number,
-    title: String,
-    caption: String,
-    image: {
-      url: String,
-      ratio: String
-    },
-    content: String,
+    data: { type: Object, required: true },
+    coverRatio: { type: Number, required: true },
     metadata: {
-      read_time: Boolean,
-      published_at: String,
-      author: String
+      read_time: { type: Boolean, default: false },
+      default: () => ({ read_time: false })
     },
-    tags: Array,
+    noContent: { type: Boolean, default: false },
     noActions: { type: Boolean, default: false }
   },
   components: { TipTapEditor },
   data() {
     return {
+      news: JSON.parse(JSON.stringify(this.data)),
       optionsMenu: false,
-      route:
-        this.$router.currentRoute.name != "news_show" && this.id
-          ? { name: "news_show", params: { id: this.id } }
-          : null
+      route: null,
+
+      // Loading variables
+      publishing: false,
+      destroying: false,
     };
+  },
+  created() {
+    this.route =
+      this.$router.currentRoute.name != "news_show" &&
+      !!this.news &&
+      !!this.news.id
+        ? { name: "news_show", params: { id: this.news.id } }
+        : null;
+  },
+  watch: {
+    data: {
+      async handler(newValue) {
+        let newsData = JSON.parse(JSON.stringify(newValue));
+
+        // If has the method .name, it's a File({})
+        if (!!newValue.cover.name)
+          newsData.cover = { url: await this.toBase64(newValue.cover) };
+
+        this.news = newsData;
+      },
+      deep: true
+    }
   },
   methods: {
     tagRoute(tag) {
       return { name: "news", query: { search: tag } };
     },
+
+    toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          resolve(reader.result);
+        };
+        reader.onerror = error => reject(error);
+      });
+    },
+
     edit() {
       this.$router.push();
     },
+    publishNews() {
+      if (!this.publishing) {
+        this.publishing = true;
+
+        NewsRequest.publish(this.news.id)
+          .then(res => {
+            if (res) {
+              this.$q.notify({
+                message: "Notícia publicada com sucesso",
+                icon: "check",
+                color: "positive"
+              });
+
+              this.news = res.data;
+              this.publishing = false;
+
+              this.$emit("onPublish");
+            }
+          })
+          .catch(err => {
+            this.publishing = false;
+
+            if (err.response && err.response.news.error.full_message) {
+              this.$q.notify({
+                message: err.response.news.error.full_message,
+                icon: "info",
+                color: "negative"
+              });
+            } else {
+              this.$q.notify({
+                message:
+                  "Ocorreu um erro ao tentar publicar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                icon: "info",
+                color: "negative"
+              });
+            }
+          });
+      }
+    },
     destroy() {
-      if (confirm("Tem certeza que deseja remover essa notícia?")) {
-        this.$store
-          .dispatch("news/removeNews", this.id)
-          .then(() => this.$emit("onDestroy"));
+      if (!this.destroying) {
+        if (confirm("Tem certeza que deseja remover essa notícia?")) {
+          this.destroying = true
+
+          NewsRequest.destroy(this.news.id)
+            .then(res => {
+              if (res) {
+                this.$q.notify({
+                  message: "Notícia removida com sucesso",
+                  icon: "check",
+                  color: "positive"
+                });
+
+                this.$emit("onDestroy");
+              }
+            })
+            .catch(err => {
+              this.destroying = false;
+
+              if (err.response && err.response.news.error.full_message) {
+                this.$q.notify({
+                  message: err.response.news.error.full_message,
+                  icon: "info",
+                  color: "negative"
+                });
+              } else {
+                this.$q.notify({
+                  message:
+                    "Ocorreu um erro ao tentar publicar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                  icon: "info",
+                  color: "negative"
+                });
+              }
+            });
+
+        }
       }
     }
   }

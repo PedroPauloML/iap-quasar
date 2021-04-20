@@ -2,91 +2,90 @@
   <q-card>
     <q-card-section>
       <p class="text-h6 q-mb-none">
-        Criando nova notícia
+        {{ formTitle }}
       </p>
       <p class="q-mb-none text-grey-8">
-        Insira as informações abaixo para criar uma nova notícia. É possível
-        pré-visualizar como a notícia ficará antes de criá-la clicando em
-        "Pré-visualização".
+        {{ formCaption }}
       </p>
     </q-card-section>
 
     <q-card-section>
-      <News
-        v-show="preview"
-        :id="id"
-        :title="title"
-        :caption="caption"
-        :image="{
-          url: image || currentImage,
-          ratio: 16 / 9
-        }"
-        :content="content"
-        :metadata="{
-          read_time: true,
-          published_at: this.$moment().format('DD/MM/YYYY')
-        }"
-        :tags="tags"
-        no-actions
-      />
-      <q-form v-show="!preview" ref="form" v-model="valid" @submit="createNews">
+      <q-form v-show="!preview" ref="form" @submit="sendNews">
         <Cropper
-          ref="image"
-          v-model="image"
+          ref="cover"
+          :value="''"
+          @input="val => (news.cover = val)"
           :currentImage="currentImage"
-          imageName="Imagem de capa"
+          coverName="Imagem de capa"
         />
-        <p v-if="imagePrintError" class="red--text">
-          A imagem da notícia é obrigatório(a)
+        <p v-if="coverPrintError" class="text-red text-body2 q-mt-sm">
+          A capa da notícia é obrigatório(a)
         </p>
         <!-- <v-file-input
-          v-model="image"
+          v-model="cover"
           label="Imagem de capa"
           show-size
           prepend-icon="mdi-camera"
           required
-          :rules="requiredRules['image']"
+          :rules="requiredRules['cover']"
         ></v-file-input> -->
 
         <q-input
-          ref="title"
-          v-model="title"
+          ref="news[title]"
+          v-model="news.title"
           :rules="requiredRules.title"
           label="Título"
           required
         ></q-input>
 
         <q-input
-          ref="caption"
-          v-model="caption"
+          ref="news[caption]"
+          v-model="news.caption"
           :rules="requiredRules.caption"
           label="Legenda"
           required
         ></q-input>
 
         <p class="body-2 mt-2">Conteúdo</p>
-        <p ref="contentLabelError" v-show="contentPrintError" class="red--text">
+        <p
+          ref="contentHtmlLabelError"
+          v-show="contentHtmlPrintError"
+          class="text-red text-body2"
+        >
           O conteúdo da notícia é obrigatório(a)
         </p>
         <div class="q-mb-lg">
-          <TipTapEditor ref="content" v-model="content" />
+          <TipTapEditor ref="news[content_html]" v-model="news.content_html" />
         </div>
 
         <q-select
-          v-model="tags"
-          multiple
+          ref="news[tags]"
+          label="Tags (opcional)"
+          v-model="news.tags"
+          hint="Máximo de 5 tags"
           :options="tagsSuggestions"
+          multiple
           use-chips
           use-input
+          emit-value
+          map-options
           hide-dropdown-icon
           input-debounce="0"
-          label="Tags (opcional)"
-          hint="Máximo de 5 tags"
           new-value-mode="add"
         />
 
         <q-btn label="Submeter fomrulário" class="hidden" />
       </q-form>
+
+      <News
+        v-show="preview"
+        :data="{ ...news, cover: news.cover || { url: currentImage } }"
+        :coverRatio="16 / 9"
+        :metadata="{
+          read_time: true
+        }"
+        no-actions
+      />
     </q-card-section>
 
     <q-card-actions>
@@ -123,10 +122,15 @@
         Cancelar
       </q-btn>
 
-      <q-btn v-if="id" color="primary" @click="updateNews" :loading="loading">
+      <q-btn
+        v-if="news.id"
+        color="primary"
+        @click="sendNews"
+        :loading="loading"
+      >
         Atualizar
       </q-btn>
-      <q-btn v-else color="primary" @click="createNews" :loading="loading">
+      <q-btn v-else color="primary" @click="sendNews" :loading="loading">
         Criar
       </q-btn>
     </q-card-actions>
@@ -138,24 +142,30 @@ import News from "../../components/news/Component";
 import TipTapEditor from "../TipTapEditor";
 import Cropper from "../Cropper";
 
+import NewsRequest from "src/services/requests/news";
+
 export default {
   components: { TipTapEditor, Cropper, News },
-  props: { data: Object, default: {} },
+  props: { data: Object },
   data() {
     return {
       // General
       preview: false,
 
       // Fields
-      id: this.data ? this.data.id : null,
-      title: this.data ? this.data.title : null,
-      caption: this.data ? this.data.caption : null,
-      image: "",
-      currentImage: this.data ? this.data.image : null,
-      imagePrintError: false,
-      content: this.data ? this.data.content : "",
-      contentPrintError: false,
-      tags: this.data ? this.data.tags || [] : null,
+      newsSchema: {
+        id: null,
+        title: "",
+        caption: "",
+        cover: null,
+        content_html: "",
+        tags: []
+      },
+      news: null,
+      currentImage: this.data ? this.data.cover.url : null,
+      coverPrintError: false,
+      contentHtmlPrintError: false,
+      initialTags: [],
       tagsSuggestions: Array.from(
         new Set(
           this.$store.state.news.news
@@ -170,8 +180,8 @@ export default {
       requiredRules: [
         { field: "title", name: "Título" },
         { field: "caption", name: "Legenda" },
-        { field: "image", name: "Imagem" },
-        { field: "content", name: "Conteúdo" }
+        { field: "cover", name: "Imagem" },
+        { field: "content_html", name: "Conteúdo" }
       ].reduce((acc, val) => {
         acc[val.field] = [v => !!v || `${val.name} é obrigatório(a)`];
         return acc;
@@ -182,112 +192,212 @@ export default {
       loading: false
     };
   },
+  created() {
+    this.news = this.data
+      ? {
+          ...JSON.parse(JSON.stringify(this.data)),
+          cover: null
+        }
+      : this.newsSchema;
+
+    this.initialTags = Array.from(this.news.tags || []);
+    this.news.tags = this.formatTags(this.news.tags);
+
+    setTimeout(() => {
+      this.contentHtmlPrintError = false;
+      this.coverPrintError = false;
+    }, 200);
+  },
   watch: {
-    content: function(val) {
-      this.contentPrintError = !val;
+    "news.content_html": function(val) {
+      this.contentHtmlPrintError = !val;
     },
-    image: function(val) {
-      this.imagePrintError = !val;
+    "news.cover": function(val) {
+      this.coverPrintError = !val;
     },
-    tags(val) {
+    "news.tags"(val) {
       if (this.$refs.form && val.length > 5) {
-        this.$nextTick(() => this.tags.pop());
+        this.$nextTick(() => this.news.tags.pop());
       }
     }
   },
-  methods: {
-    createNews() {
-      if (!this.content) this.contentPrintError = true;
-      if (!this.image) this.imagePrintError = true;
-
-      if (this.$refs.form.validate() && this.content && this.image) {
-        let data = {
-          title: this.title,
-          caption: this.caption,
-          image: this.image,
-          content: this.content,
-          tags: this.tags,
-          metadata: {
-            read_time: true,
-            published_at: this.$moment().format("DD/MM/YYYY")
-          }
-        };
-
-        this.loading = true;
-
-        setTimeout(() => {
-          this.loading = false;
-          this.$emit("createNews", data);
-        }, 1000);
-      } else {
-        if (!this.image) {
-          let y =
-            this.$refs.image.$el.getBoundingClientRect().top +
-            window.pageYOffset -
-            60;
-          window.scrollTo({
-            top: y,
-            behavior: "smooth"
-          });
-          return;
-        }
-        if (!this.title) {
-          let y =
-            this.$refs.title.$el.getBoundingClientRect().top +
-            window.pageYOffset -
-            60;
-          window.scrollTo({
-            top: y,
-            behavior: "smooth"
-          });
-          return;
-        }
-        if (!this.caption) {
-          let y =
-            this.$refs.caption.$el.getBoundingClientRect().top +
-            window.pageYOffset -
-            60;
-          window.scrollTo({
-            top: y,
-            behavior: "smooth"
-          });
-          return;
-        }
-        if (!this.content) {
-          let y =
-            this.$refs.contentLabelError.getBoundingClientRect().top +
-            window.pageYOffset -
-            60;
-          window.scrollTo({
-            top: y,
-            behavior: "smooth"
-          });
-          return;
-        }
-      }
+  computed: {
+    formTitle() {
+      return this.news.id ? "Atualizando notícia" : "Criando nova notícia";
     },
-    updateNews() {
-      if (!this.content) this.contentPrintError = true;
-
-      if (this.$refs.form.validate() && this.content) {
-        let data = {
-          title: this.title,
-          caption: this.caption,
-          image: this.image || this.currentImage,
-          content: this.content,
-          tags: this.tags,
-          metadata: {
-            read_time: true,
-            published_at: this.$moment().format("DD/MM/YYYY")
-          }
+    formCaption() {
+      let caption;
+      if (this.news.id) {
+        caption =
+          "Edite as informações abaixo para atualizar a notícia. " +
+          "É possível pré-visualizar como a notícia ficará antes de salvá-la " +
+          'clicando em "Pré-visualização".';
+      } else {
+        caption =
+          "Insira as informações abaixo para criar uma nova notícia. " +
+          "É possível pré-visualizar como a notícia ficará antes de salvá-la " +
+          'clicando em "Pré-visualização".';
+      }
+      return caption;
+    }
+  },
+  methods: {
+    formatTags(tags) {
+      console.log("tags", tags);
+      return tags.map(tag => {
+        return {
+          label: tag.name,
+          value: tag.id
         };
+      });
+    },
+    sendNews() {
+      if (this.news.id ? true : !!this.news.cover) {
+        this.$refs.form.validate(false).then(valid => {
+          if (valid && this.news.content_html) {
+            let formData = new FormData();
 
-        this.loading = true;
+            formData.set("news[id]", this.news.id);
+            formData.set("news[title]", this.news.title);
+            formData.set("news[caption]", this.news.caption);
 
-        setTimeout(() => {
-          this.loading = false;
-          this.$emit("updateNews", { id: this.id, data });
-        }, 1000);
+            if (!!this.news.cover) formData.set("news[cover]", this.news.cover);
+
+            formData.set("news[content_html]", this.news.content_html);
+            formData.set("news[content_text]", this.news.content_html);
+
+            this.news.tags.forEach((tag, i) => {
+              let tagToKeep = this.initialTags.find(t => t.name == tag);
+
+              if (tagToKeep) {
+                formData.set(`news[tags_attributes][${i}][id]`, tagToKeep.id);
+                formData.set(
+                  `news[tags_attributes][${i}][name]`,
+                  tagToKeep.name
+                );
+              } else {
+                formData.set(`news[tags_attributes][${i}][name]`, tag);
+              }
+            });
+
+            this.initialTags.forEach((tag, i) => {
+              let tagToDestroy = this.news.tags.find(t => t.value == tag.id);
+              if (!tagToDestroy) {
+                formData.set(
+                  `news[tags_attributes][${i + this.news.tags.length}][id]`,
+                  tag.id
+                );
+                formData.set(
+                  `news[tags_attributes][${i +
+                    this.news.tags.length}][_destroy]`,
+                  true
+                );
+              }
+            });
+
+            this.loading = true;
+
+            if (this.news.id) {
+              NewsRequest.update(this.news.id, formData)
+                .then(res => {
+                  if (res) {
+                    this.$q.notify({
+                      message: "Notícia atualizada com sucesso",
+                      icon: "check",
+                      color: "positive"
+                    });
+
+                    this.$router.push({
+                      name: "news_show",
+                      params: { id: res.data.id }
+                    });
+                  }
+                })
+                .catch(err => {
+                  this.loading = false;
+
+                  if (err.response && err.response.data.error.full_message) {
+                    this.$q.notify({
+                      message: err.response.data.error.full_message,
+                      icon: "info",
+                      color: "negative"
+                    });
+                  } else {
+                    this.$q.notify({
+                      message:
+                        "Ocorreu um erro ao tentar criar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                      icon: "info",
+                      color: "negative"
+                    });
+                  }
+                });
+            } else {
+              NewsRequest.create(formData)
+                .then(res => {
+                  if (res) {
+                    this.loading = false;
+
+                    this.$q.notify({
+                      message: "Notícia criada com sucesso",
+                      icon: "check",
+                      color: "positive"
+                    });
+
+                    this.$router.push({
+                      name: "news_show",
+                      params: { id: res.data.id }
+                    });
+                  }
+                })
+                .catch(err => {
+                  this.loading = false;
+
+                  if (err.response && err.response.data.error.full_message) {
+                    this.$q.notify({
+                      message: err.response.data.error.full_message,
+                      icon: "info",
+                      color: "negative"
+                    });
+                  } else {
+                    this.$q.notify({
+                      message:
+                        "Ocorreu um erro ao tentar criar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                      icon: "info",
+                      color: "negative"
+                    });
+                  }
+                });
+            }
+          } else {
+            let element;
+
+            if (!this.news.title) {
+              element = this.$refs.title.$el;
+            } else if (!this.news.caption) {
+              element = this.$refs.caption.$el;
+            } else if (!this.news.content_html) {
+              element = this.$refs.contentHtmlLabelError;
+              this.contentHtmlPrintError = true;
+            }
+
+            let y =
+              element.getBoundingClientRect().top + window.pageYOffset - 60;
+            window.scrollTo({
+              top: y,
+              behavior: "smooth"
+            });
+          }
+        });
+      } else {
+        let y =
+          this.$refs.cover.$el.getBoundingClientRect().top +
+          window.pageYOffset -
+          60;
+        this.coverPrintError = true;
+        window.scrollTo({
+          top: y,
+          behavior: "smooth"
+        });
       }
     },
     closeForm() {
