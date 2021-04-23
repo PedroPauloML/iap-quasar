@@ -67,7 +67,6 @@
           multiple
           use-chips
           use-input
-          emit-value
           map-options
           hide-dropdown-icon
           input-debounce="0"
@@ -78,7 +77,7 @@
       </q-form>
 
       <News
-        v-show="preview"
+        v-if="preview"
         :data="{ ...news, cover: news.cover || { url: currentImage } }"
         :coverRatio="16 / 9"
         :metadata="{
@@ -251,6 +250,11 @@ export default {
         };
       });
     },
+
+    closeForm() {
+      this.$emit("closeForm");
+    },
+
     sendNews() {
       if (this.news.id ? true : !!this.news.cover) {
         this.$refs.form.validate(false).then(valid => {
@@ -267,7 +271,7 @@ export default {
             formData.set("news[content_text]", this.news.content_html);
 
             this.news.tags.forEach((tag, i) => {
-              let tagToKeep = this.initialTags.find(t => t.name == tag);
+              let tagToKeep = this.initialTags.find(t => t.id == tag.value);
 
               if (tagToKeep) {
                 formData.set(`news[tags_attributes][${i}][id]`, tagToKeep.id);
@@ -399,9 +403,6 @@ export default {
           behavior: "smooth"
         });
       }
-    },
-    closeForm() {
-      this.$emit("closeForm");
     }
   }
 };

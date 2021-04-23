@@ -1,4 +1,4 @@
-import { date as qDate } from "quasar";
+import { date as qDate, copyToClipboard } from "quasar";
 
 export default ({ app, router, store, Vue }) => {
   Vue.mixin({
@@ -36,6 +36,35 @@ export default ({ app, router, store, Vue }) => {
           qDate.extractDate(datetime, "YYYY-MM-DDTHH:mm:ss"),
           "DD/MM/YYYY HH:mm:ss"
         );
+      },
+      copyToClipboard(label, value) {
+        if (value) {
+          copyToClipboard(value)
+            .then(() => {
+              Notify.create({
+                message: `<b>${label}</b> copiado para a área de transferência`,
+                icon: "content_copy",
+                html: true,
+                color: "secondary",
+                group: false,
+                actions: [
+                  {
+                    label: "Fechar",
+                    color: "white",
+                    handler: () => {}
+                  }
+                ]
+              });
+            })
+            .catch(() => {
+              Notify.create({
+                message: `Ops! Ocorreu um erro ao tentar copiar o(a) <b>${label}</b> para a área de transferência.`,
+                icon: "info",
+                html: true,
+                color: "warning"
+              });
+            });
+        }
       }
     }
   });

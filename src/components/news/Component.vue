@@ -208,7 +208,7 @@ export default {
 
       // Loading variables
       publishing: false,
-      destroying: false,
+      destroying: false
     };
   },
   created() {
@@ -294,7 +294,7 @@ export default {
     destroy() {
       if (!this.destroying) {
         if (confirm("Tem certeza que deseja remover essa notícia?")) {
-          this.destroying = true
+          this.destroying = true;
 
           NewsRequest.destroy(this.news.id)
             .then(res => {
@@ -326,7 +326,6 @@ export default {
                 });
               }
             });
-
         }
       }
     }

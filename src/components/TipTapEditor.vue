@@ -34,6 +34,15 @@ export default {
       html: ""
     };
   },
+  watch: {
+    value(newValue) {
+      console.log("TipTapEditor value changed");
+      if (!this.editable) {
+        console.log("Changing QuasarTiptap value");
+        this.options.value = newValue;
+      }
+    }
+  },
   computed: {
     customMaxSize() {
       return {
