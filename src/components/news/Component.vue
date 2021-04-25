@@ -133,7 +133,7 @@
     >
       <span v-if="metadata.read_time">
         Tempo de leitura:
-        {{ Math.ceil(news.content_html.split(" ").length / 5 / 60) }} minuto(s)
+        {{ Math.ceil(news.content_text.split(" ").length / 5 / 60) }} minuto(s)
       </span>
 
       <span>

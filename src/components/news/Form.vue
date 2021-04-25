@@ -55,7 +55,16 @@
           O conteúdo da notícia é obrigatório(a)
         </p>
         <div class="q-mb-lg">
-          <TipTapEditor ref="news[content_html]" v-model="news.content_html" />
+          <TipTapEditor
+            ref="news[content_html]"
+            :value="news.content_html"
+            @input="
+              ({ plainText, html }) => {
+                news.content_text = plainText;
+                news.content_html = html;
+              }
+            "
+          />
         </div>
 
         <q-select
@@ -268,7 +277,7 @@ export default {
             if (!!this.news.cover) formData.set("news[cover]", this.news.cover);
 
             formData.set("news[content_html]", this.news.content_html);
-            formData.set("news[content_text]", this.news.content_html);
+            formData.set("news[content_text]", this.news.content_text);
 
             this.news.tags.forEach((tag, i) => {
               let tagToKeep = this.initialTags.find(t => t.id == tag.value);

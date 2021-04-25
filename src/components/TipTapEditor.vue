@@ -12,6 +12,7 @@ import { QuasarTiptap, RecommendedExtensions } from "quasar-tiptap";
 import "quasar-tiptap/lib/index.css";
 
 export default {
+  name: "TipTapEditor",
   props: {
     value: { type: String, required: true },
     readonly: Boolean,
@@ -52,7 +53,23 @@ export default {
   },
   methods: {
     onUpdate({ getJSON, getHTML }) {
-      this.$emit("input", getHTML());
+      let htmlToPlainText = getHTML();
+      htmlToPlainText = htmlToPlainText.replace(
+        /<style([\s\S]*?)<\/style>/gi,
+        ""
+      );
+      htmlToPlainText = htmlToPlainText.replace(
+        /<script([\s\S]*?)<\/script>/gi,
+        ""
+      );
+      htmlToPlainText = htmlToPlainText.replace(/<\/div>/gi, "\n");
+      htmlToPlainText = htmlToPlainText.replace(/<\/li>/gi, "\n");
+      htmlToPlainText = htmlToPlainText.replace(/<li>/gi, "  *  ");
+      htmlToPlainText = htmlToPlainText.replace(/<\/ul>/gi, "\n");
+      htmlToPlainText = htmlToPlainText.replace(/<\/p>/gi, "\n");
+      htmlToPlainText = htmlToPlainText.replace(/<br\s*[\/]?>/gi, "\n");
+      htmlToPlainText = htmlToPlainText.replace(/<[^>]+>/gi, "");
+      this.$emit("input", { plainText: htmlToPlainText, html: getHTML() });
     }
   }
 };
