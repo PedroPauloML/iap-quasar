@@ -1,53 +1,34 @@
 <template>
   <q-card>
     <q-card-section>
-      <p class="text-h6 q-mb-none">
-        {{ id ? "Editando mensagem" : "Criando nova mensagem" }}
-      </p>
-      <p class="q-mb-none text-grey-8">
-        {{
-          id
-            ? "Edite as informações abaixo para atualizar a mensagem."
-            : "Insira as informações abaixo para criar uma nova mensagem."
-        }}
-        É possível pré-visualizar como a mensagem ficará antes de criá-la
-        clicando em "Pré-visualização".
-      </p>
+      <p class="text-h6 q-mb-none">{{ formTitle }}</p>
+      <p class="q-mb-none text-grey-8">{{ formCaption }}</p>
     </q-card-section>
 
     <q-card-section>
-      <div ref="previewContainer" v-show="preview">
+      <div ref="previewContainer" v-if="preview">
         <p class="text-h6 text-primary text-weight-bold">Pré-visualização</p>
         <Message
-          :title="title"
-          :caption="caption"
-          :content="content"
-          :author="author"
-          :published_at="published_at"
-          :tags="tags"
+          :data="message"
           :metadata="{ read_time: true }"
-          @filterMessages="search => (value.search = search)"
           class="q-mb-lg"
           no-actions
         />
       </div>
-      <q-form
-        v-show="!preview"
-        ref="form"
-        @submit="id ? updateMessage : createMessage"
-      >
+
+      <q-form v-show="!preview" ref="form" @submit="sendMessage">
         <q-input
-          ref="title"
-          v-model="title"
-          :rules="requiredRules.title"
           label="Título"
+          ref="message[title]"
+          v-model="message.title"
+          :rules="formRules.title"
         />
 
         <q-input
-          ref="caption"
-          v-model="caption"
-          :rules="requiredRules.caption"
           label="Legenda"
+          ref="message[caption]"
+          v-model="message.caption"
+          :rules="formRules.caption"
         />
 
         <div
@@ -97,23 +78,31 @@
 
           <div class="q-mb-lg">
             <TipTapEditor
-              ref="content"
-              v-model="content"
+              ref="message[content_html]"
+              :value="message.content_html"
+              @input="
+                ({ plainText, html }) => {
+                  message.content_text = plainText;
+                  message.content_html = html;
+                }
+              "
               :max-size="fullscreen ? 'calc(100vh - 48px - 40px)' : null"
             />
           </div>
         </div>
 
         <q-select
-          v-model="tags"
-          multiple
+          label="Tags (opcional)"
+          ref="message[tags]"
+          v-model="message.tags"
+          hint="Máximo de 5 tags"
           :options="tagsSuggestions"
+          multiple
           use-chips
           use-input
+          map-options
           hide-dropdown-icon
           input-debounce="0"
-          label="Tags (opcional)"
-          hint="Máximo de 5 tags"
           new-value-mode="add"
         />
 
@@ -153,14 +142,14 @@
       </q-btn>
 
       <q-btn
-        v-if="id"
+        v-if="message.id"
         color="primary"
-        @click="updateMessage"
+        @click="sendMessage"
         :loading="loading"
       >
         Atualizar
       </q-btn>
-      <q-btn v-else color="primary" @click="createMessage" :loading="loading">
+      <q-btn v-else color="primary" @click="sendMessage" :loading="loading">
         Criar
       </q-btn>
     </q-card-actions>
@@ -168,6 +157,8 @@
 </template>
 
 <script>
+import MessageRequest from "src/services/requests/message";
+
 import Message from "./Component";
 import TipTapEditor from "../TipTapEditor";
 
@@ -181,169 +172,219 @@ export default {
       fullscreen: false,
 
       // Fields
-      id: this.data ? this.data.id : null,
-      title: this.data ? this.data.title : "",
-      caption: this.data ? this.data.caption : "",
-      content: this.data ? this.data.content : "",
+      messageSchema: {
+        id: null,
+        title: "",
+        caption: "",
+        content_html: "",
+        tags: []
+      },
+      message: null,
       contentPrintError: false,
-      author: this.$store.state.user.user.profile.name,
-      published_at: this.data
-        ? this.data.published_at
-        : this.$moment().format(),
-      tags: this.data ? Array.from(new Set(this.data.tags)) || [] : null,
-      tagsSuggestions: Array.from(
-        new Set(
-          this.$store.state.messages.messages
-            .map(el => el.tags)
-            .filter(el => el != null)
-            .flat()
-        )
-      ),
+      initialTags: [],
+      tagsSuggestions: [],
       tagsSearch: null,
 
       // Rules
-      requiredRules: [
-        { field: "title", name: "Título" },
-        { field: "caption", name: "Legenda" },
-        { field: "content", name: "Conteúdo" }
-      ].reduce((acc, val) => {
-        acc[val.field] = [v => !!v || `${val.name} é obrigatório(a)`];
-        return acc;
-      }, {}),
+      formRules: this.parseFormRules([
+        { field: "title", name: "Título", required: true },
+        { field: "caption", name: "Legenda", required: true },
+        { field: "content_html", name: "Conteúdo", required: true }
+      ]),
 
       // Form variables
-      valid: true,
       loading: false
     };
   },
+  created() {
+    this.message = this.data
+      ? JSON.parse(JSON.stringify(this.data))
+      : this.messageSchema;
+
+    this.initialTags = Array.from(this.message.tags || []);
+    this.message.tags = this.formatTags(this.message.tags);
+
+    setTimeout(() => {
+      this.contentHtmlPrintError = false;
+      this.coverPrintError = false;
+    }, 200);
+  },
   watch: {
-    preview(val) {
-      setTimeout(() => {
-        if (val) {
-          let y =
-            this.$refs.previewContainer.getBoundingClientRect().top +
-            window.pageYOffset -
-            60;
-          window.scrollTo({
-            top: y,
-            behavior: "smooth"
-          });
-        } else {
-          let y =
-            this.$refs.form.$el.getBoundingClientRect().top +
-            window.pageYOffset -
-            60;
-          window.scrollTo({
-            top: y,
-            behavior: "smooth"
-          });
-        }
-      }, 200);
+    "message.content_html": function(val) {
+      this.contentHtmlPrintError = !val;
     },
-    content: function(val) {
-      this.contentPrintError = !val;
-    },
-    tags(val) {
+    "message.tags"(val) {
       if (this.$refs.form && val.length > 5) {
-        this.$nextTick(() => this.tags.pop());
+        this.$nextTick(() => this.message.tags.pop());
       }
     }
   },
+  computed: {
+    formTitle() {
+      return this.message.id ? "Atualizando mensagem" : "Criando nova mensagem";
+    },
+    formCaption() {
+      let caption;
+      if (this.message.id) {
+        caption =
+          "Edite as informações abaixo para atualizar a mensagem. " +
+          "É possível pré-visualizar como a mensagem ficará antes de salvá-la " +
+          'clicando em "Pré-visualização".';
+      } else {
+        caption =
+          "Insira as informações abaixo para criar uma nova mensagem. " +
+          "É possível pré-visualizar como a mensagem ficará antes de salvá-la " +
+          'clicando em "Pré-visualização".';
+      }
+      return caption;
+    }
+  },
   methods: {
-    createMessage() {
-      this.$refs.form.validate(false).then(valid => {
-        if (valid) {
-          let data = {
-            title: this.title,
-            caption: this.caption,
-            content: this.content,
-            tags: this.tags,
-            published_at: this.$moment().format(),
-            author: this.author
-          };
-
-          this.loading = true;
-
-          setTimeout(() => {
-            this.loading = false;
-            this.$emit("createMessage", data);
-          }, 1000);
-        } else {
-          this.scrollToFieldNotValid();
-        }
+    formatTags(tags) {
+      return tags.map(tag => {
+        return {
+          label: tag.name,
+          value: tag.id
+        };
       });
     },
-    updateMessage() {
-      this.$refs.form.validate(false).then(valid => {
-        if (valid) {
-          let data = {
-            title: this.title,
-            caption: this.caption,
-            content: this.content,
-            tags: this.tags,
-            published_at: this.published_at,
-            author: this.author
-          };
 
-          this.loading = true;
-
-          setTimeout(() => {
-            this.loading = false;
-            this.$emit("updateMessage", { id: this.id, data });
-          }, 1000);
-        } else {
-          this.scrollToFieldNotValid();
-        }
-      });
-    },
-    scrollToFieldNotValid() {
-      if (!this.content) {
-        this.contentPrintError = true;
-        let y =
-          this.$refs.contentContainer.$el.getBoundingClientRect().top +
-          window.pageYOffset -
-          150;
-        window.scrollTo({
-          top: y,
-          behavior: "smooth"
-        });
-      }
-
-      if (!this.title) {
-        let y =
-          this.$refs.title.$el.getBoundingClientRect().top +
-          window.pageYOffset -
-          150;
-        window.scrollTo({
-          top: y,
-          behavior: "smooth"
-        });
-      }
-
-      if (!this.caption) {
-        let y =
-          this.$refs.caption.$el.getBoundingClientRect().top +
-          window.pageYOffset -
-          150;
-        window.scrollTo({
-          top: y,
-          behavior: "smooth"
-        });
-      }
-
-      if (!this.content) {
-        let y =
-          this.$refs.contentLabelError.getBoundingClientRect().top +
-          window.pageYOffset -
-          150;
-        window.scrollTo({
-          top: y,
-          behavior: "smooth"
-        });
-      }
-    },
     closeForm() {
       this.$emit("closeForm");
+    },
+
+    sendMessage() {
+      if (!this.loading) {
+        this.$refs.form.validate(false).then(valid => {
+          if (valid && this.message.content_html) {
+            this.loading = true;
+
+            let params = {
+              id: this.message.id,
+              title: this.message.title,
+              caption: this.message.caption,
+              content_html: this.message.content_html,
+              content_text: this.message.content_text,
+              tags_attributes: []
+            };
+
+            this.message.tags.forEach((tag, i) => {
+              let tagToKeep = this.initialTags.find(t => t.id == tag.value);
+              let tagParams = {};
+
+              if (tagToKeep) {
+                tagParams["id"] = tagToKeep.id;
+                tagParams["name"] = tagToKeep.name;
+              } else {
+                tagParams["name"] = tag;
+              }
+
+              params.tags_attributes.push(tagParams);
+            });
+
+            this.initialTags.forEach((tag, i) => {
+              let tagToDestroy = this.message.tags.find(t => t.value == tag.id);
+
+              if (!tagToDestroy) {
+                params.tags_attributes.push({
+                  id: tag.id,
+                  _destroy: true
+                });
+              }
+            });
+
+            if (this.message.id) {
+              MessageRequest.update(this.message.id, params)
+                .then(res => {
+                  if (res) {
+                    this.$q.notify({
+                      message: "Mensagem atualizada com sucesso",
+                      icon: "check",
+                      color: "positive"
+                    });
+
+                    this.$router.push({
+                      name: "messages_show",
+                      params: { id: res.data.id }
+                    });
+                  }
+                })
+                .catch(err => {
+                  this.loading = false;
+
+                  if (err.response && err.response.data.error.full_message) {
+                    this.$q.notify({
+                      message: err.response.data.error.full_message,
+                      icon: "info",
+                      color: "negative"
+                    });
+                  } else {
+                    this.$q.notify({
+                      message:
+                        "Ocorreu um erro ao tentar criar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                      icon: "info",
+                      color: "negative"
+                    });
+                  }
+                });
+            } else {
+              MessageRequest.create(params)
+                .then(res => {
+                  if (res) {
+                    this.loading = false;
+
+                    this.$q.notify({
+                      message: "Mensagem criada com sucesso",
+                      icon: "check",
+                      color: "positive"
+                    });
+
+                    this.$router.push({
+                      name: "messages_show",
+                      params: { id: res.data.id }
+                    });
+                  }
+                })
+                .catch(err => {
+                  this.loading = false;
+
+                  if (err.response && err.response.data.error.full_message) {
+                    this.$q.notify({
+                      message: err.response.data.error.full_message,
+                      icon: "info",
+                      color: "negative"
+                    });
+                  } else {
+                    this.$q.notify({
+                      message:
+                        "Ocorreu um erro ao tentar criar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                      icon: "info",
+                      color: "negative"
+                    });
+                  }
+                });
+            }
+          } else {
+            let element;
+
+            if (!this.message.title) {
+              element = this.$refs.title.$el;
+            } else if (!this.message.caption) {
+              element = this.$refs.caption.$el;
+            } else if (!this.message.content_html) {
+              element = this.$refs.contentHtmlLabelError;
+              this.contentHtmlPrintError = true;
+            }
+
+            let y =
+              element.getBoundingClientRect().top + window.pageYOffset - 60;
+            window.scrollTo({
+              top: y,
+              behavior: "smooth"
+            });
+          }
+        });
+      }
     }
   }
 };

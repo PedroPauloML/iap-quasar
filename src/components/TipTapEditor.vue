@@ -37,9 +37,7 @@ export default {
   },
   watch: {
     value(newValue) {
-      console.log("TipTapEditor value changed");
       if (!this.editable) {
-        console.log("Changing QuasarTiptap value");
         this.options.value = newValue;
       }
     }
@@ -76,17 +74,23 @@ export default {
 </script>
 
 <style lang="scss">
-.tiptap-editor:not(.readonly) {
-  border: 1px solid #eee;
-
+.tiptap-editor {
   .editor__content {
-    overflow: auto;
+    overflow: hidden;
     max-height: var(--custom-max-size);
   }
 
-  .menubar {
-    flex-wrap: nowrap;
-    overflow: auto;
+  &:not(.readonly) {
+    border: 1px solid #eee;
+
+    .editor__content {
+      overflow: auto;
+    }
+
+    .menubar {
+      flex-wrap: nowrap;
+      overflow: auto;
+    }
   }
 }
 </style>

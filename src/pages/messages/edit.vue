@@ -1,21 +1,15 @@
 <template>
-  <div id="edit-new">
-    <Form
-      v-if="message"
-      :data="message"
-      @closeForm="closeEditingForm"
-      @updateMessage="(id, message) => updateMessage(id, message)"
-    />
-    <div v-else class="mb-3 body-2">
-      <q-linear-progress indeterminate></q-linear-progress>
-      <p class="text-center mt-5">
-        Estamos preparando a mensagem...
-      </p>
+  <div id="edit-message">
+    <div v-if="fetchingMessage">
+      <q-linear-progress indeterminate color="primary" />
     </div>
+    <Form v-else :data="message" />
   </div>
 </template>
 
 <script>
+import MessageRequest from "src/services/requests/message";
+
 import Form from "../../components/messages/Form";
 
 export default {
@@ -23,35 +17,52 @@ export default {
   data() {
     return {
       message: null,
-      showEditingForm: false
+      fetchingMessage: false
     };
   },
   created() {
-    this.$store.dispatch("messages/loadMessages").then(this.findMessage);
     this.$emit("setBackRoute", {
       name: "messages_show",
       params: { id: this.$route.params.id }
     });
+    this.findMessage();
   },
   methods: {
     findMessage() {
-      this.message = this.$store.state.messages.messages.find(
-        el => el.id == this.$route.params.id
-      );
-    },
-    updateMessage(payload) {
-      this.$store.dispatch("messages/updateMessage", payload).then(() => {
-        this.$router.push({
-          name: "messages_show",
-          params: { id: this.$route.params.id }
-        });
-      });
-    },
-    closeEditingForm() {
-      this.$router.push({
-        name: "messages_show",
-        params: { id: this.$route.params.id }
-      });
+      if (!this.fetchingMessage) {
+        this.fetchingMessage = true;
+
+        MessageRequest.find(this.$route.params.id)
+          .then(res => {
+            if (res) {
+              this.message = res.data;
+            }
+
+            this.fetchingMessage = false;
+          })
+          .catch(err => {
+            if (err) {
+              if (err.response && err.response.status != 404) {
+                if (err.response.data.error.message) {
+                  this.$q.notify({
+                    message: err.response.data.error.message,
+                    icon: "info",
+                    color: "negative"
+                  });
+                } else {
+                  this.$q.notify({
+                    message:
+                      "Ocorreu um erro ao tentar encontrar a mensagem. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                    icon: "info",
+                    color: "negative"
+                  });
+                }
+              }
+
+              this.fetchingMessage = false;
+            }
+          });
+      }
     }
   },
   beforeRouteLeave(to, from, next) {

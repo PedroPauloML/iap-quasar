@@ -1,9 +1,10 @@
 import Vue from "vue";
-export default class News {
+
+export default class Message {
   static index(query, options, page, per_page) {
     return new Promise((resolve, reject) => {
       Vue.prototype.$axios
-        .get(`/news`, {
+        .get(`/messages`, {
           params: { query, ...options, page, per_page }
         })
         .then(res => {
@@ -20,7 +21,7 @@ export default class News {
   static find(id) {
     return new Promise((resolve, reject) => {
       Vue.prototype.$axios
-        .get(`/news/${id}`)
+        .get(`/messages/${id}`)
         .then(res => {
           if (res) {
             resolve(res);
@@ -35,7 +36,7 @@ export default class News {
   static create(params) {
     return new Promise((resolve, reject) => {
       Vue.prototype.$axios
-        .post(`/news`, params)
+        .post(`/messages`, { message: params })
         .then(res => {
           if (res) {
             resolve(res);
@@ -50,7 +51,7 @@ export default class News {
   static update(id, params) {
     return new Promise((resolve, reject) => {
       Vue.prototype.$axios
-        .put(`/news/${id}`, params)
+        .put(`/messages/${id}`, { message: params })
         .then(res => {
           if (res) {
             resolve(res);
@@ -65,7 +66,7 @@ export default class News {
   static publish(id) {
     return new Promise((resolve, reject) => {
       Vue.prototype.$axios
-        .put(`/news/${id}/publish`)
+        .put(`/messages/${id}/publish`)
         .then(res => {
           if (res) {
             resolve(res);
@@ -80,7 +81,7 @@ export default class News {
   static destroy(id) {
     return new Promise((resolve, reject) => {
       Vue.prototype.$axios
-        .delete(`/news/${id}`)
+        .delete(`/messages/${id}`)
         .then(res => {
           if (res) {
             resolve(res);

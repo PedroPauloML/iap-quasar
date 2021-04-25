@@ -235,6 +235,7 @@ export default {
   },
   methods: {
     tagRoute(tag) {
+      if (!tag) return "";
       return { name: "news", query: { search: tag } };
     },
 
@@ -249,9 +250,6 @@ export default {
       });
     },
 
-    edit() {
-      this.$router.push();
-    },
     publishNews() {
       if (!this.publishing) {
         this.publishing = true;

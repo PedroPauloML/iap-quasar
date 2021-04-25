@@ -44,61 +44,61 @@
           leave-active-class="animated fadeOutUp"
           mode="out-in"
         >
-          <div v-if="!showForm">
-            <div v-if="searching">
-              <q-linear-progress
-                indeterminate
-                color="primary"
-              ></q-linear-progress>
-            </div>
+          <!-- <div v-if="!showForm"> -->
+          <div v-if="searching">
+            <q-linear-progress
+              indeterminate
+              color="primary"
+            ></q-linear-progress>
+          </div>
 
+          <div
+            v-else-if="publishedNews.length > 0"
+            class="row q-col-gutter-lg q-mb-lg"
+          >
             <div
-              v-else-if="publishedNews.length > 0"
-              class="row q-col-gutter-lg q-mb-lg"
+              v-for="(news, index) in groupedPublishedNews"
+              :key="index"
+              class="col-12 col-sm-6"
             >
               <div
-                v-for="(news, index) in groupedPublishedNews"
-                :key="index"
-                class="col-12 col-sm-6"
+                v-if="Array.isArray(news)"
+                class="full-height row q-col-gutter-lg"
               >
                 <div
-                  v-if="Array.isArray(news)"
-                  class="full-height row q-col-gutter-lg"
+                  class="col"
+                  v-for="(single_new, i) in news"
+                  :key="i"
+                  :class="{
+                    'col-12': true,
+                    'self-end': i == news.length - 1 && news.length % 2 == 0
+                  }"
                 >
-                  <div
-                    class="col"
-                    v-for="(single_new, i) in news"
-                    :key="i"
-                    :class="{
-                      'col-12': true,
-                      'self-end': i == news.length - 1 && news.length % 2 == 0
-                    }"
-                  >
-                    <News
-                      :data="single_new"
-                      :coverRatio="$q.screen.lt.sm ? 1.2 : 2.1"
-                      no-content
-                      @onDestroy="fetchFirstPageOfPublishedNews"
-                    />
-                  </div>
+                  <News
+                    :data="single_new"
+                    :coverRatio="$q.screen.lt.sm ? 1.2 : 2.1"
+                    no-content
+                    @onDestroy="fetchFirstPageOfPublishedNews"
+                  />
                 </div>
-                <News
-                  v-else
-                  :data="news"
-                  :coverRatio="$q.screen.lt.sm ? 1.2 : 1"
-                  no-content
-                  @onDestroy="fetchFirstPageOfPublishedNews"
-                />
               </div>
-            </div>
-
-            <div v-else class="flex no-wrap items-center justify-center">
-              <q-img :src="newsSRC" width="40px" class="q-mr-lg" />
-              <span class="text-h6">
-                Nenhuma notícia no momento. Volte mais tarde.
-              </span>
+              <News
+                v-else
+                :data="news"
+                :coverRatio="$q.screen.lt.sm ? 1.2 : 1"
+                no-content
+                @onDestroy="fetchFirstPageOfPublishedNews"
+              />
             </div>
           </div>
+
+          <div v-else class="flex no-wrap items-center justify-center">
+            <q-img :src="newsSRC" width="40px" class="q-mr-lg" />
+            <span class="text-h6">
+              Nenhuma notícia no momento. Volte mais tarde.
+            </span>
+          </div>
+          <!-- </div> -->
         </transition>
       </q-tab-panel>
 
@@ -108,64 +108,64 @@
           leave-active-class="animated fadeOutUp"
           mode="out-in"
         >
-          <div v-if="!showForm">
-            <div v-if="searching">
-              <q-linear-progress
-                indeterminate
-                color="primary"
-              ></q-linear-progress>
-            </div>
+          <!-- <div v-if="!showForm"> -->
+          <div v-if="searching">
+            <q-linear-progress
+              indeterminate
+              color="primary"
+            ></q-linear-progress>
+          </div>
 
+          <div
+            v-else-if="groupedDraftNews.length > 0"
+            class="row q-col-gutter-lg q-mb-lg"
+          >
             <div
-              v-else-if="groupedDraftNews.length > 0"
-              class="row q-col-gutter-lg q-mb-lg"
+              v-for="(news, index) in groupedDraftNews"
+              :key="index"
+              class="col-12 col-sm-6"
             >
               <div
-                v-for="(news, index) in groupedDraftNews"
-                :key="index"
-                class="col-12 col-sm-6"
+                v-if="Array.isArray(news)"
+                class="full-height row q-col-gutter-lg"
               >
                 <div
-                  v-if="Array.isArray(news)"
-                  class="full-height row q-col-gutter-lg"
+                  class="col"
+                  v-for="(single_new, i) in news"
+                  :key="i"
+                  :class="{
+                    'col-12': true,
+                    'self-end': i == news.length - 1 && news.length % 2 == 0
+                  }"
                 >
-                  <div
-                    class="col"
-                    v-for="(single_new, i) in news"
-                    :key="i"
-                    :class="{
-                      'col-12': true,
-                      'self-end': i == news.length - 1 && news.length % 2 == 0
-                    }"
-                  >
-                    <News
-                      :data="single_new"
-                      :coverRatio="$q.screen.lt.sm ? 1.2 : 2.1"
-                      no-content
-                      @onPublish="onPublish"
-                      @onDestroy="fetchFirstPageOfNewDraftNews"
-                    />
-                  </div>
+                  <News
+                    :data="single_new"
+                    :coverRatio="$q.screen.lt.sm ? 1.2 : 2.1"
+                    no-content
+                    @onPublish="onPublish"
+                    @onDestroy="fetchFirstPageOfNewDraftNews"
+                  />
                 </div>
-                <News
-                  v-else
-                  :data="news"
-                  :coverRatio="$q.screen.lt.sm ? 1.2 : 1"
-                  no-content
-                  @onPublish="onPublish"
-                  @onDestroy="fetchFirstPageOfNewDraftNews"
-                />
               </div>
-            </div>
-
-            <div v-else class="flex no-wrap items-center justify-center">
-              <q-icon name="history_edu" size="40px" class="q-mr-lg" />
-              <span class="text-h6">
-                Nenhum rascunho de notícia no momento. Você tem alguma nova
-                notícia para contar?
-              </span>
+              <News
+                v-else
+                :data="news"
+                :coverRatio="$q.screen.lt.sm ? 1.2 : 1"
+                no-content
+                @onPublish="onPublish"
+                @onDestroy="fetchFirstPageOfNewDraftNews"
+              />
             </div>
           </div>
+
+          <div v-else class="flex no-wrap items-center justify-center">
+            <q-icon name="history_edu" size="40px" class="q-mr-lg" />
+            <span class="text-h6">
+              Nenhum rascunho de notícia no momento. Você tem alguma nova
+              notícia para contar?
+            </span>
+          </div>
+          <!-- </div> -->
         </transition>
       </q-tab-panel>
     </q-tab-panels>
@@ -186,8 +186,7 @@ export default {
       query: { type: String, required: true },
       date: { type: String, required: true }
     },
-    searching: Boolean,
-    showForm: Boolean
+    searching: Boolean
   },
   data() {
     return {
@@ -234,9 +233,22 @@ export default {
       deep: true
     },
     tab(newValue) {
-      this.$emit("resetFilters");
-      if (newValue == "draft" && this.draftNews.length == 0) {
-        this.fetchDraftNews();
+      if (this.filters.date != "" || this.filters.query != "") {
+        this.$emit("resetFilters");
+      } else {
+        if (
+          newValue == "published" &&
+          this.publishedNews.length == 0 &&
+          this.canFetchMoreDraftNews
+        ) {
+          this.fetchDraftNews();
+        } else if (
+          newValue == "draft" &&
+          this.draftNews.length == 0 &&
+          this.canFetchMoreDraftNews
+        ) {
+          this.fetchDraftNews();
+        }
       }
     }
   },
@@ -319,15 +331,24 @@ export default {
       `;
 
       return `<p>${text}</p>`;
+    },
+
+    canFetchMorePublishedNews() {
+      return (
+        this.publishedNewsPagination.current_page <
+        this.publishedNewsPagination.total_pages
+      );
+    },
+    canFetchMoreDraftNews() {
+      return (
+        this.draftNewsPagination.current_page <
+        this.draftNewsPagination.total_pages
+      );
     }
   },
   methods: {
     fetchPublishedNews() {
-      if (
-        !this.searching &&
-        this.publishedNewsPagination.current_page <
-          this.publishedNewsPagination.total_pages
-      ) {
+      if (!this.searching && this.canFetchMorePublishedNews) {
         this.$emit("searching", true);
 
         let { current_page, per_page } = this.publishedNewsPagination;
@@ -368,11 +389,7 @@ export default {
       }
     },
     fetchDraftNews() {
-      if (
-        !this.searching &&
-        this.draftNewsPagination.current_page <
-          this.draftNewsPagination.total_pages
-      ) {
+      if (!this.searching && this.canFetchMoreDraftNews) {
         this.$emit("searching", true);
 
         let { current_page, per_page } = this.draftNewsPagination;

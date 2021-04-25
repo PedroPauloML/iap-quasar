@@ -62,8 +62,8 @@
 
               <div class="col-12 col-sm">
                 <q-input
-                  name="search"
-                  v-model="filters.search"
+                  name="query"
+                  v-model="filters.query"
                   placeholder="Pesquisar por..."
                   background-color="white"
                   width="100"
@@ -130,7 +130,7 @@ export default {
   props: {
     back_route: Object,
     value: {
-      search: String,
+      query: String,
       date: String
     },
     searching: Boolean
@@ -168,7 +168,7 @@ export default {
         this.$router.push({
           name: "messages",
           query: {
-            search: this.filters.search,
+            query: this.filters.query,
             date: this.filters.date
           }
         });

@@ -131,8 +131,7 @@ export default {
       query: String,
       date: String
     },
-    searching: Boolean,
-    showForm: Boolean
+    searching: Boolean
   },
   data() {
     return {

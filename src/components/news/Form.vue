@@ -1,12 +1,8 @@
 <template>
   <q-card>
     <q-card-section>
-      <p class="text-h6 q-mb-none">
-        {{ formTitle }}
-      </p>
-      <p class="q-mb-none text-grey-8">
-        {{ formCaption }}
-      </p>
+      <p class="text-h6 q-mb-none">{{ formTitle }}</p>
+      <p class="q-mb-none text-grey-8">{{ formCaption }}</p>
     </q-card-section>
 
     <q-card-section>
@@ -27,22 +23,22 @@
           show-size
           prepend-icon="mdi-camera"
           required
-          :rules="requiredRules['cover']"
+          :rules="formRules['cover']"
         ></v-file-input> -->
 
         <q-input
+          label="Título"
           ref="news[title]"
           v-model="news.title"
-          :rules="requiredRules.title"
-          label="Título"
+          :rules="formRules.title"
           required
         ></q-input>
 
         <q-input
+          label="Legenda"
           ref="news[caption]"
           v-model="news.caption"
-          :rules="requiredRules.caption"
-          label="Legenda"
+          :rules="formRules.caption"
           required
         ></q-input>
 
@@ -68,8 +64,8 @@
         </div>
 
         <q-select
-          ref="news[tags]"
           label="Tags (opcional)"
+          ref="news[tags]"
           v-model="news.tags"
           hint="Máximo de 5 tags"
           :options="tagsSuggestions"
@@ -167,6 +163,7 @@ export default {
         caption: "",
         cover: null,
         content_html: "",
+        content_text: "",
         tags: []
       },
       news: null,
@@ -174,29 +171,18 @@ export default {
       coverPrintError: false,
       contentHtmlPrintError: false,
       initialTags: [],
-      tagsSuggestions: Array.from(
-        new Set(
-          this.$store.state.news.news
-            .map(el => el.tags)
-            .filter(el => el != null)
-            .flat()
-        )
-      ),
+      tagsSuggestions: [],
       tagsSearch: null,
 
       // Rules
-      requiredRules: [
-        { field: "title", name: "Título" },
-        { field: "caption", name: "Legenda" },
-        { field: "cover", name: "Imagem" },
-        { field: "content_html", name: "Conteúdo" }
-      ].reduce((acc, val) => {
-        acc[val.field] = [v => !!v || `${val.name} é obrigatório(a)`];
-        return acc;
-      }, {}),
+      formRules: this.parseFormRules([
+        { field: "title", name: "Título", required: true },
+        { field: "caption", name: "Legenda", required: true },
+        { field: "cover", name: "Imagem", required: true },
+        { field: "content_html", name: "Conteúdo", required: true }
+      ]),
 
       // Form variables
-      valid: true,
       loading: false
     };
   },
@@ -251,7 +237,6 @@ export default {
   },
   methods: {
     formatTags(tags) {
-      console.log("tags", tags);
       return tags.map(tag => {
         return {
           label: tag.name,
@@ -265,152 +250,155 @@ export default {
     },
 
     sendNews() {
-      if (this.news.id ? true : !!this.news.cover) {
-        this.$refs.form.validate(false).then(valid => {
-          if (valid && this.news.content_html) {
-            let formData = new FormData();
+      if (!this.loading) {
+        if (this.news.id ? true : !!this.news.cover) {
+          this.$refs.form.validate(false).then(valid => {
+            if (valid && this.news.content_html) {
+              this.loading = true;
 
-            formData.set("news[id]", this.news.id);
-            formData.set("news[title]", this.news.title);
-            formData.set("news[caption]", this.news.caption);
+              let formData = new FormData();
 
-            if (!!this.news.cover) formData.set("news[cover]", this.news.cover);
+              formData.set("news[id]", this.news.id);
+              formData.set("news[title]", this.news.title);
+              formData.set("news[caption]", this.news.caption);
 
-            formData.set("news[content_html]", this.news.content_html);
-            formData.set("news[content_text]", this.news.content_text);
+              if (!!this.news.cover)
+                formData.set("news[cover]", this.news.cover);
 
-            this.news.tags.forEach((tag, i) => {
-              let tagToKeep = this.initialTags.find(t => t.id == tag.value);
+              formData.set("news[content_html]", this.news.content_html);
+              formData.set("news[content_text]", this.news.content_text);
 
-              if (tagToKeep) {
-                formData.set(`news[tags_attributes][${i}][id]`, tagToKeep.id);
-                formData.set(
-                  `news[tags_attributes][${i}][name]`,
-                  tagToKeep.name
-                );
-              } else {
-                formData.set(`news[tags_attributes][${i}][name]`, tag);
-              }
-            });
+              this.news.tags.forEach((tag, i) => {
+                let tagToKeep = this.initialTags.find(t => t.id == tag.value);
 
-            this.initialTags.forEach((tag, i) => {
-              let tagToDestroy = this.news.tags.find(t => t.value == tag.id);
-              if (!tagToDestroy) {
-                formData.set(
-                  `news[tags_attributes][${i + this.news.tags.length}][id]`,
-                  tag.id
-                );
-                formData.set(
-                  `news[tags_attributes][${i +
-                    this.news.tags.length}][_destroy]`,
-                  true
-                );
-              }
-            });
+                if (tagToKeep) {
+                  formData.set(`news[tags_attributes][${i}][id]`, tagToKeep.id);
+                  formData.set(
+                    `news[tags_attributes][${i}][name]`,
+                    tagToKeep.name
+                  );
+                } else {
+                  formData.set(`news[tags_attributes][${i}][name]`, tag);
+                }
+              });
 
-            this.loading = true;
+              this.initialTags.forEach((tag, i) => {
+                let tagToDestroy = this.news.tags.find(t => t.value == tag.id);
+                if (!tagToDestroy) {
+                  formData.set(
+                    `news[tags_attributes][${i + this.news.tags.length}][id]`,
+                    tag.id
+                  );
+                  formData.set(
+                    `news[tags_attributes][${i +
+                      this.news.tags.length}][_destroy]`,
+                    true
+                  );
+                }
+              });
 
-            if (this.news.id) {
-              NewsRequest.update(this.news.id, formData)
-                .then(res => {
-                  if (res) {
-                    this.$q.notify({
-                      message: "Notícia atualizada com sucesso",
-                      icon: "check",
-                      color: "positive"
-                    });
+              if (this.news.id) {
+                NewsRequest.update(this.news.id, formData)
+                  .then(res => {
+                    if (res) {
+                      this.$q.notify({
+                        message: "Notícia atualizada com sucesso",
+                        icon: "check",
+                        color: "positive"
+                      });
 
-                    this.$router.push({
-                      name: "news_show",
-                      params: { id: res.data.id }
-                    });
-                  }
-                })
-                .catch(err => {
-                  this.loading = false;
-
-                  if (err.response && err.response.data.error.full_message) {
-                    this.$q.notify({
-                      message: err.response.data.error.full_message,
-                      icon: "info",
-                      color: "negative"
-                    });
-                  } else {
-                    this.$q.notify({
-                      message:
-                        "Ocorreu um erro ao tentar criar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
-                      icon: "info",
-                      color: "negative"
-                    });
-                  }
-                });
-            } else {
-              NewsRequest.create(formData)
-                .then(res => {
-                  if (res) {
+                      this.$router.push({
+                        name: "news_show",
+                        params: { id: res.data.id }
+                      });
+                    }
+                  })
+                  .catch(err => {
                     this.loading = false;
 
-                    this.$q.notify({
-                      message: "Notícia criada com sucesso",
-                      icon: "check",
-                      color: "positive"
-                    });
+                    if (err.response && err.response.data.error.full_message) {
+                      this.$q.notify({
+                        message: err.response.data.error.full_message,
+                        icon: "info",
+                        color: "negative"
+                      });
+                    } else {
+                      this.$q.notify({
+                        message:
+                          "Ocorreu um erro ao tentar criar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                        icon: "info",
+                        color: "negative"
+                      });
+                    }
+                  });
+              } else {
+                NewsRequest.create(formData)
+                  .then(res => {
+                    if (res) {
+                      this.loading = false;
 
-                    this.$router.push({
-                      name: "news_show",
-                      params: { id: res.data.id }
-                    });
-                  }
-                })
-                .catch(err => {
-                  this.loading = false;
+                      this.$q.notify({
+                        message: "Notícia criada com sucesso",
+                        icon: "check",
+                        color: "positive"
+                      });
 
-                  if (err.response && err.response.data.error.full_message) {
-                    this.$q.notify({
-                      message: err.response.data.error.full_message,
-                      icon: "info",
-                      color: "negative"
-                    });
-                  } else {
-                    this.$q.notify({
-                      message:
-                        "Ocorreu um erro ao tentar criar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
-                      icon: "info",
-                      color: "negative"
-                    });
-                  }
-                });
+                      this.$router.push({
+                        name: "news_show",
+                        params: { id: res.data.id }
+                      });
+                    }
+                  })
+                  .catch(err => {
+                    this.loading = false;
+
+                    if (err.response && err.response.data.error.full_message) {
+                      this.$q.notify({
+                        message: err.response.data.error.full_message,
+                        icon: "info",
+                        color: "negative"
+                      });
+                    } else {
+                      this.$q.notify({
+                        message:
+                          "Ocorreu um erro ao tentar criar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                        icon: "info",
+                        color: "negative"
+                      });
+                    }
+                  });
+              }
+            } else {
+              let element;
+
+              if (!this.news.title) {
+                element = this.$refs.title.$el;
+              } else if (!this.news.caption) {
+                element = this.$refs.caption.$el;
+              } else if (!this.news.content_html) {
+                element = this.$refs.contentHtmlLabelError;
+                this.contentHtmlPrintError = true;
+              }
+
+              let y =
+                element.getBoundingClientRect().top + window.pageYOffset - 60;
+              window.scrollTo({
+                top: y,
+                behavior: "smooth"
+              });
             }
-          } else {
-            let element;
-
-            if (!this.news.title) {
-              element = this.$refs.title.$el;
-            } else if (!this.news.caption) {
-              element = this.$refs.caption.$el;
-            } else if (!this.news.content_html) {
-              element = this.$refs.contentHtmlLabelError;
-              this.contentHtmlPrintError = true;
-            }
-
-            let y =
-              element.getBoundingClientRect().top + window.pageYOffset - 60;
-            window.scrollTo({
-              top: y,
-              behavior: "smooth"
-            });
-          }
-        });
-      } else {
-        let y =
-          this.$refs.cover.$el.getBoundingClientRect().top +
-          window.pageYOffset -
-          60;
-        this.coverPrintError = true;
-        window.scrollTo({
-          top: y,
-          behavior: "smooth"
-        });
+          });
+        } else {
+          let y =
+            this.$refs.cover.$el.getBoundingClientRect().top +
+            window.pageYOffset -
+            60;
+          this.coverPrintError = true;
+          window.scrollTo({
+            top: y,
+            behavior: "smooth"
+          });
+        }
       }
     }
   }

@@ -3,41 +3,64 @@
     :class="{
       message: true,
       rounded: true,
-      'full-content': !!full_content || !showReadMore
+      'full-content': !!fullContent || !showReadMore
     }"
   >
     <q-card-section class="header">
-      <router-link
-        v-if="id && $router.currentRoute.name != 'messages_show'"
-        :to="{ name: 'messages_show', params: { id: id } }"
-        v-slot="{ href }"
-      >
-        <a class="text-h4 text-weight-bold text-primary" :href="href">
-          {{ title }}
-        </a>
-      </router-link>
-      <span v-else class="text-h4 text-weight-bold text-primary">
-        {{ title }}
-      </span>
+      <div class="flex items-center">
+        <q-chip
+          v-if="!message.published"
+          square
+          icon="history_edu"
+          color="primary-lighten-2"
+          text-color="white"
+          class="text-bold q-mr-md"
+        >
+          Rascunho
+          <q-tooltip anchor="center end" self="center start">
+            Essa mensagem ainda não foi publicada
+          </q-tooltip>
+        </q-chip>
+
+        <router-link
+          v-if="message.id && $router.currentRoute.name != 'messages_show'"
+          :to="{ name: 'messages_show', params: { id: message.id } }"
+          v-slot="{ href }"
+        >
+          <a class="text-h4 text-weight-bold text-primary" :href="href">
+            {{ message.title }}
+          </a>
+        </router-link>
+        <span v-else class="text-h4 text-weight-bold text-primary">
+          {{ message.title }}
+        </span>
+      </div>
 
       <span class="text-grey-8 text-weight-medium q-my-sm block">
-        {{ caption }}
+        {{ message.caption }}
       </span>
 
       <div class="row">
-        <div class="col-12 col-sm self-center metadata">
-          <span v-if="metadata.read_time" class="text-overline text-uppercase">
+        <div
+          class="col-12 col-sm self-center metadata text-overline text-uppercase"
+        >
+          <span v-if="metadata.read_time">
             Tempo de leitura:
-            {{ Math.ceil(content.split(" ").length / 5 / 60) }} minuto(s)
+            {{ Math.ceil(message.content_text.split(" ").length / 5 / 60) }}
+            minuto(s)
           </span>
 
-          <span v-if="published_at" class="text-overline text-uppercase">
+          <span>
             Publicado em:
-            {{ $moment(published_at).format("DD/MM/YYYY hh:mm") }}
+            {{
+              message.published_at
+                ? $moment(message.published_at).format("DD/MM/YYYY hh:mm")
+                : "Não publicado"
+            }}
           </span>
 
-          <span v-if="author" class="text-overline text-uppercase">
-            Autor: {{ author }}
+          <span v-if="message.author_name">
+            Autor: {{ message.author_name }}
           </span>
         </div>
 
@@ -54,30 +77,46 @@
           <q-btn v-if="userSigned" flat round>
             <q-icon name="mdi-dots-vertical" />
 
-            <q-menu bottom left offset-y>
+            <q-menu>
               <q-list dense flat>
+                <q-item
+                  v-if="!message.published"
+                  clickable
+                  @click="publishMessage"
+                  class="bg-positive"
+                  :disable="publishing"
+                >
+                  <q-item-section avatar>
+                    <q-icon name="send" />
+                  </q-item-section>
+
+                  <q-item-section>
+                    Publicar
+                  </q-item-section>
+                </q-item>
+
                 <q-item
                   clickable
                   :to="{
                     name: 'messages_edit',
-                    params: { id: id }
+                    params: { id: message.id }
                   }"
                 >
-                  <q-item-section avatar class="q-py-sm">
+                  <q-item-section avatar>
                     <q-icon name="edit" />
                   </q-item-section>
 
-                  <q-item-section class="q-py-sm">
+                  <q-item-section>
                     Editar
                   </q-item-section>
                 </q-item>
 
                 <q-item clickable @click="destroy">
-                  <q-item-section avatar class="q-py-sm">
+                  <q-item-section avatar>
                     <q-icon name="delete" />
                   </q-item-section>
 
-                  <q-item-section class="q-py-sm">
+                  <q-item-section>
                     Excluir
                   </q-item-section>
                 </q-item>
@@ -91,8 +130,14 @@
     <q-separator />
 
     <div class="content-wrapper tiptap">
-      <q-card-section v-if="content">
-        <div class="content editor__content" v-html="content" />
+      <q-card-section v-if="message.content_html">
+        <!-- <div class="content editor__content" v-html="content" /> -->
+        <TipTapEditor
+          ref="content"
+          v-model="message.content_html"
+          readonly
+          :max-size="showReadMore ? '50vh' : 'auto'"
+        />
       </q-card-section>
 
       <div v-if="showReadMore" class="show-more flex align-end">
@@ -111,62 +156,148 @@
       </div>
     </div>
 
-    <q-separator v-if="content && tags" />
+    <q-separator v-if="message.content_html && message.tags" />
 
-    <q-card-section v-if="tags">
-      <q-chip
-        v-for="(tag, index) in tags"
+    <q-card-section v-if="message.tags">
+      <router-link
+        v-for="(tag, index) in message.tags"
         :key="index"
-        color="accent"
-        label
-        text-color="white"
-        square
-        clickable
-        @click="filterMessages(tag)"
+        :to="tagRoute(tag.slug)"
+        v-slot="{ href }"
       >
-        <q-icon name="mdi-label" size="sm" class="q-mr-sm" />
-        {{ tag }}
-      </q-chip>
+        <q-chip
+          clickable
+          class="ma-2 font-weight-medium"
+          color="accent"
+          label
+          text-color="white"
+          @click="noActions ? null : $router.push(href)"
+        >
+          <q-icon name="mdi-label" size="sm" class="q-mr-sm" />
+          {{ tag.name || tag.label || tag }}
+        </q-chip>
+      </router-link>
     </q-card-section>
   </q-card>
 </template>
 
 <script>
+import MessageRequest from "src/services/requests/message";
+
+import TipTapEditor from "../TipTapEditor";
+
 export default {
   props: {
-    id: Number,
-    title: { type: String, required: true },
-    caption: { type: String, required: true },
-    content: { type: String, required: true },
-    full_content: Boolean,
-    published_at: String,
-    author: String,
+    data: { type: Object, required: true },
     metadata: {
-      read_time: Boolean
+      read_time: { type: Boolean, default: false },
+      default: () => ({ read_time: false })
     },
-    tags: Array,
-    noActions: Boolean
+    fullContent: { type: Boolean, default: false },
+    noActions: { type: Boolean, default: false }
   },
+  components: { TipTapEditor },
   data() {
     return {
+      message: JSON.parse(JSON.stringify(this.data)),
       saved: false,
-      showReadMore: !this.full_content,
-      optionsMenu: false
+      showReadMore: !this.fullContent,
+      optionsMenu: false,
+
+      // Loading variables
+      publishing: false,
+      destroying: false
     };
   },
+  watch: {
+    data: {
+      async handler(newValue) {
+        this.message = JSON.parse(JSON.stringify(newValue));
+      },
+      deep: true
+    }
+  },
   methods: {
-    filterMessages(tag) {
-      if (this.$router.currentRoute.name == "messages") {
-        this.$emit("filterMessages", tag);
-      } else {
-        this.$router.push({ name: "messages", query: { search: tag } });
+    tagRoute(tag) {
+      if (!tag) return "";
+      return { name: "messages", query: { search: tag } };
+    },
+
+    publishMessage() {
+      if (!this.publishing) {
+        this.publishing = true;
+
+        MessageRequest.publish(this.message.id)
+          .then(res => {
+            if (res) {
+              this.$q.notify({
+                message: "Notícia publicada com sucesso",
+                icon: "check",
+                color: "positive"
+              });
+
+              this.message = res.data;
+              this.publishing = false;
+
+              this.$emit("onPublish");
+            }
+          })
+          .catch(err => {
+            this.publishing = false;
+
+            if (err.response && err.response.data.error.full_message) {
+              this.$q.notify({
+                message: err.response.data.error.full_message,
+                icon: "info",
+                color: "negative"
+              });
+            } else {
+              this.$q.notify({
+                message:
+                  "Ocorreu um erro ao tentar publicar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                icon: "info",
+                color: "negative"
+              });
+            }
+          });
       }
     },
     destroy() {
-      if (confirm("Tem certeza que deseja remover essa mensagem?")) {
-        this.$store
-          .dispatch("messages/removeMessages", this.id)
-          .then(() => this.$emit("onDestroy"));
+      if (!this.destroying) {
+        if (confirm("Tem certeza que deseja remover essa notícia?")) {
+          this.destroying = true;
+
+          MessageRequest.destroy(this.message.id)
+            .then(res => {
+              if (res) {
+                this.$q.notify({
+                  message: "Notícia removida com sucesso",
+                  icon: "check",
+                  color: "positive"
+                });
+
+                this.$emit("onDestroy");
+              }
+            })
+            .catch(err => {
+              this.destroying = false;
+
+              if (err.response && err.response.data.error.full_message) {
+                this.$q.notify({
+                  message: err.response.data.error.full_message,
+                  icon: "info",
+                  color: "negative"
+                });
+              } else {
+                this.$q.notify({
+                  message:
+                    "Ocorreu um erro ao tentar publicar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                  icon: "info",
+                  color: "negative"
+                });
+              }
+            });
+        }
       }
     }
   }

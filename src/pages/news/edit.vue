@@ -42,19 +42,21 @@ export default {
           })
           .catch(err => {
             if (err) {
-              if (err.response && err.response.data.error.message) {
-                this.$q.notify({
-                  message: err.response.data.error.message,
-                  icon: "info",
-                  color: "negative"
-                });
-              } else {
-                this.$q.notify({
-                  message:
-                    "Ocorreu um erro ao tentar encontrar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
-                  icon: "info",
-                  color: "negative"
-                });
+              if (err.response && err.response.status != 404) {
+                if (err.response.data.error.message) {
+                  this.$q.notify({
+                    message: err.response.data.error.message,
+                    icon: "info",
+                    color: "negative"
+                  });
+                } else {
+                  this.$q.notify({
+                    message:
+                      "Ocorreu um erro ao tentar encontrar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                    icon: "info",
+                    color: "negative"
+                  });
+                }
               }
 
               this.fetchingNews = false;

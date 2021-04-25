@@ -11,6 +11,29 @@ export default ({ app, router, store, Vue }) => {
       }
     },
     methods: {
+      parseFormRules(rules) {
+        let newRules = rules.reduce((acc, val) => {
+          let rules = [];
+
+          if (val.required) {
+            rules.push(v => !!v || `${val.name} é obrigatório(a)`);
+          }
+
+          if (val.extraRules) {
+            val.extraRules.forEach(rule => rules.push(rule));
+          }
+
+          if (rules.length > 0) {
+            if (val.namespace) {
+              this.assignRecursive(acc, val.namespace, val.field, rules);
+            } else {
+              acc[val.field] = rules;
+            }
+          }
+          return acc;
+        }, {});
+        return newRules;
+      },
       parseDateToPicker(date) {
         if (!date) return "";
         let format;
