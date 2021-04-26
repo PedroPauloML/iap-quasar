@@ -145,23 +145,38 @@
       </q-carousel-slide>
     </q-carousel>
 
-    <Message
-      v-if="message"
-      :id="message.id"
-      :title="message.title"
-      :caption="message.caption"
-      :content="message.content"
-      :author="message.author"
-      :published_at="message.published_at"
-      :tags="Array.from(new Set(message.tags))"
-      :metadata="{ read_time: true }"
-      class="mb-10"
-    />
+    <transition
+      enter-active-class="animated fadeInDown"
+      leave-active-class="animated fadeOutUp"
+      mode="out-in"
+    >
+      <div v-if="fetchingMessages">
+        <q-linear-progress indeterminate color="primary" />
+      </div>
+
+      <div v-else-if="messages.length > 0">
+        <Message
+          v-for="(message, index) in messages"
+          :key="index"
+          :data="message"
+          :metadata="{ read_time: true }"
+          class="q-mb-lg"
+        />
+      </div>
+
+      <div v-else class="flex no-wrap items-center justify-center">
+        <q-icon name="auto_stories" size="40px" class="q-mr-lg" />
+        <span class="text-h6">
+          Nenhuma mensagem no momento. Volte mais tarde.
+        </span>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
 import NewsRequest from "src/services/requests/news";
+import MessageRequest from "src/services/requests/message";
 
 import News from "../../components/news/Component";
 import VerseOfDay from "../../components/verse_of_day/Component";
@@ -181,10 +196,18 @@ export default {
       verses_of_day_list: [],
       verses_of_day_page: 0,
       currentVerseContainerHeight: 450,
-      message: null,
+
+      messages: [],
+      messagesPagination: {
+        current_page: 1,
+        total_objects: 0,
+        per_page: 10,
+        total_pages: 2
+      },
 
       // Loading variables
       fetchingNews: false,
+      fetchingMessages: false,
 
       // Icons
       newsSRC,
@@ -200,10 +223,6 @@ export default {
   },
   async created() {
     await this.fetchNews();
-
-    this.$store.dispatch("messages/loadMessages").then(() => {
-      this.message = this.$store.state.messages.messages[0];
-    });
 
     this.$store.dispatch("schedules/loadSchedules").then(() => {
       this.schedules_list = this.$store.state.schedules.schedules.filter(el => {
@@ -225,6 +244,8 @@ export default {
       });
     }
     this.verses_of_day_list = verses;
+
+    await this.fetchMessages();
   },
   mounted() {
     this.setCurrentVerseContainerHeight();
@@ -267,6 +288,12 @@ export default {
           : accumulator.push([item]);
         return accumulator;
       }, []);
+    },
+    canFetchMoreMessages() {
+      return (
+        this.messagesPagination.current_page <
+        this.messagesPagination.total_pages
+      );
     }
   },
   methods: {
@@ -317,6 +344,45 @@ export default {
               }
 
               this.fetchingNews = false;
+            }
+          });
+      }
+    },
+
+    fetchMessages() {
+      if (!this.fetchingMessages && this.canFetchMoreMessages) {
+        this.fetchingMessages = true;
+
+        let { current_page, per_page } = this.messagesPagination;
+
+        MessageRequest.index("", {}, current_page, per_page)
+          .then(res => {
+            if (res) {
+              this.messages = res.data.objects;
+              this.messagesPagination = res.data.pagination;
+              this.messagesPagination.current_page += 1;
+            }
+
+            this.fetchingMessages = false;
+          })
+          .catch(err => {
+            if (err) {
+              if (err.response && err.response.data.error.message) {
+                this.$q.notify({
+                  message: err.response.data.error.message,
+                  icon: "info",
+                  color: "negative"
+                });
+              } else {
+                this.$q.notify({
+                  message:
+                    "Ocorreu um erro ao tentar buscar as mensagens. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                  icon: "info",
+                  color: "negative"
+                });
+              }
+
+              this.fetchingMessages = false;
             }
           });
       }
