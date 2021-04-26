@@ -64,17 +64,23 @@
           </span>
         </div>
 
-        <div v-if="!noActions" class="col-auto actions">
-          <q-btn flat round color="accent" @click="saved = !saved">
-            <q-icon v-if="saved" name="mdi-bookmark" />
+        <div v-if="!noActions && userSigned" class="col-auto actions">
+          <q-btn
+            flat
+            round
+            color="accent"
+            @click="toggleFavoriteMessage"
+            :loading="favoring"
+          >
+            <q-icon v-if="message.favorite" name="mdi-bookmark" />
             <q-icon v-else name="mdi-bookmark-outline" />
 
             <q-tooltip>
-              {{ saved ? "Remover marcação" : "Marcar publicação" }}
+              {{ message.favorite ? "Desfavoritar" : "Favoritar" }}
             </q-tooltip>
           </q-btn>
 
-          <q-btn v-if="userSigned" flat round>
+          <q-btn flat round>
             <q-icon name="mdi-dots-vertical" />
 
             <q-menu>
@@ -183,6 +189,7 @@
 
 <script>
 import MessageRequest from "src/services/requests/message";
+import MessageFavoriteRequest from "src/services/requests/message/favorite";
 
 import TipTapEditor from "../TipTapEditor";
 
@@ -200,14 +207,17 @@ export default {
   data() {
     return {
       message: JSON.parse(JSON.stringify(this.data)),
-      saved: false,
       showReadMore: !this.fullContent,
       optionsMenu: false,
 
       // Loading variables
+      favoring: false,
       publishing: false,
       destroying: false
     };
+  },
+  created() {
+    console.log(this.message, this.message.favorite);
   },
   watch: {
     data: {
@@ -223,6 +233,68 @@ export default {
       return { name: "messages", query: { search: tag } };
     },
 
+    toggleFavoriteMessage() {
+      if (!this.favoring) {
+        this.favoring = true;
+
+        if (this.message.favorite) {
+          MessageFavoriteRequest.destroy(
+            this.message.id,
+            this.message.favorite.id
+          )
+            .then(res => {
+              if (res) {
+                this.message.favorite = null;
+                this.favoring = false;
+              }
+            })
+            .catch(err => {
+              this.favoring = false;
+
+              if (err.response && err.response.data.error.full_message) {
+                this.$q.notify({
+                  message: err.response.data.error.full_message,
+                  icon: "info",
+                  color: "negative"
+                });
+              } else {
+                this.$q.notify({
+                  message:
+                    "Ocorreu um erro ao tentar desfavoritar a mensagem. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                  icon: "info",
+                  color: "negative"
+                });
+              }
+            });
+        } else {
+          MessageFavoriteRequest.create(this.message.id)
+            .then(res => {
+              if (res) {
+                this.message.favorite = res.data;
+                this.favoring = false;
+              }
+            })
+            .catch(err => {
+              this.favoring = false;
+
+              if (err.response && err.response.data.error.full_message) {
+                this.$q.notify({
+                  message: err.response.data.error.full_message,
+                  icon: "info",
+                  color: "negative"
+                });
+              } else {
+                this.$q.notify({
+                  message:
+                    "Ocorreu um erro ao tentar favoritar a mensagem. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                  icon: "info",
+                  color: "negative"
+                });
+              }
+            });
+        }
+      }
+    },
     publishMessage() {
       if (!this.publishing) {
         this.publishing = true;
@@ -231,7 +303,7 @@ export default {
           .then(res => {
             if (res) {
               this.$q.notify({
-                message: "Notícia publicada com sucesso",
+                message: "Mensagem publicada com sucesso",
                 icon: "check",
                 color: "positive"
               });
@@ -254,7 +326,7 @@ export default {
             } else {
               this.$q.notify({
                 message:
-                  "Ocorreu um erro ao tentar publicar a notícia. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                  "Ocorreu um erro ao tentar publicar a mensagem. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
                 icon: "info",
                 color: "negative"
               });

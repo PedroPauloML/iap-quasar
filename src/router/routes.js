@@ -127,7 +127,10 @@ const routes = [
             name: "messages_new",
             path: "/messages/new",
             component: () => import("../pages/messages/new"),
-            meta: { title: `Nova Mensagem | ${site_name}` }
+            meta: {
+              title: `Nova Mensagem | ${site_name}`,
+              authentication: true
+            }
           },
           {
             name: "messages_show",
@@ -139,7 +142,27 @@ const routes = [
             name: "messages_edit",
             path: "/messages/:id/edit",
             component: () => import("../pages/messages/edit"),
-            meta: { title: `Editando Mensagem | ${site_name}` }
+            meta: {
+              title: `Editando Mensagem | ${site_name}`,
+              authentication: true
+            }
+          }
+        ]
+      },
+
+      // MESSAGES - FAVORITES
+      {
+        path: "/messages/favorites",
+        component: () => import("../pages/messages/favorites/layout"),
+        children: [
+          {
+            name: "favorite_messages",
+            path: "",
+            component: () => import("../pages/messages/favorites/index"),
+            meta: {
+              title: `Mensagens Favoritadas | ${site_name}`,
+              authentication: true
+            }
           }
         ]
       },

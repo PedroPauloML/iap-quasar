@@ -88,36 +88,51 @@
             </div>
           </div>
 
-          <div class="col-auto">
-            <q-btn
-              v-if="userSigned"
-              color="primary"
-              round
-              @click="
-                $router.push({
-                  name:
-                    $router.currentRoute.name == 'messages_new'
-                      ? 'messages'
-                      : 'messages_new'
-                })
-              "
-              class="q-ml-lg"
-            >
-              <q-icon
-                name="mdi-plus"
-                :class="{
-                  rotateZ: $router.currentRoute.name == 'messages_new'
-                }"
-              >
-              </q-icon>
+          <div v-if="userSigned" class="col-auto q-ml-md q-ml-sm-sm">
+            <div class="column row-sm">
+              <q-btn flat round class="q-mb-md q-mb-sm-none">
+                <q-icon name="mdi-dots-vertical" />
 
-              <q-tooltip>
-                <span v-if="$router.currentRoute.name == 'messages_new'"
-                  >Cancelar mensagem</span
+                <q-menu>
+                  <q-list dense flat>
+                    <q-item clickable :to="{ name: 'favorite_messages' }">
+                      <q-item-section>
+                        Favoritos
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
+
+              <q-btn
+                color="primary"
+                round
+                @click="
+                  $router.push({
+                    name:
+                      $router.currentRoute.name == 'messages_new'
+                        ? 'messages'
+                        : 'messages_new'
+                  })
+                "
+                class="q-ml-sm-sm"
+              >
+                <q-icon
+                  name="mdi-plus"
+                  :class="{
+                    rotateZ: $router.currentRoute.name == 'messages_new'
+                  }"
                 >
-                <span v-else>Criar mensagem</span>
-              </q-tooltip>
-            </q-btn>
+                </q-icon>
+
+                <q-tooltip>
+                  <span v-if="$router.currentRoute.name == 'messages_new'"
+                    >Cancelar mensagem</span
+                  >
+                  <span v-else>Criar mensagem</span>
+                </q-tooltip>
+              </q-btn>
+            </div>
           </div>
         </div>
       </div>
