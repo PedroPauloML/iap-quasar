@@ -54,6 +54,7 @@
               :key="index"
               :data="message"
               :metadata="{ read_time: true }"
+              @filterByTag="filterByTag"
               @onDestroy="fetchFirstPageOfPublishedMessages"
               class="q-mb-lg"
             />
@@ -211,6 +212,9 @@ export default {
     }
   },
   methods: {
+    filterByTag(tag) {
+      this.$emit("filterByTag", tag);
+    },
     fetchPublishedMessages() {
       if (!this.searching && this.canFetchMorePublishedMessages) {
         this.$emit("searching", true);

@@ -169,7 +169,7 @@
         v-for="(tag, index) in message.tags"
         :key="index"
         :to="tagRoute(tag.slug)"
-        v-slot="{ href }"
+        v-slot="{ route }"
       >
         <q-chip
           clickable
@@ -177,7 +177,7 @@
           color="accent"
           label
           text-color="white"
-          @click="noActions ? null : $router.push(href)"
+          @click="filterByTag(route)"
         >
           <q-icon name="mdi-label" size="sm" class="q-mr-sm" />
           {{ tag.name || tag.label || tag }}
@@ -230,7 +230,16 @@ export default {
   methods: {
     tagRoute(tag) {
       if (!tag) return "";
-      return { name: "messages", query: { search: tag } };
+      return { name: "messages", params: { query: tag } };
+    },
+    filterByTag(route) {
+      if (this.noActions) {
+        return null;
+      } else if (route.name == this.$router.currentRoute.name) {
+        this.$emit("filterByTag", route.params.query);
+      } else {
+        this.$router.push(route);
+      }
     },
 
     toggleFavoriteMessage() {
