@@ -8,6 +8,7 @@
       mode="out-in"
     >
       <router-view
+        @filterByTag="filterByTag"
         @resetFilters="resetFilters"
         @setBackRoute="setBackRoute"
         :filters="filters"
@@ -27,9 +28,9 @@ export default {
     return {
       back_route: null,
       filters: {
-        query: this.$route.query.query,
-        date: this.$route.query.date
-          ? this.$moment(this.$route.query.date, "YYYY-MM-DD").format()
+        query: this.$route.params.query,
+        date: this.$route.params.date
+          ? this.$moment(this.$route.params.date, "YYYY-MM-DD").format()
           : ""
       },
       searching: false
@@ -38,6 +39,9 @@ export default {
   methods: {
     setBackRoute(route) {
       this.back_route = route;
+    },
+    filterByTag(tag) {
+      this.filters.query = tag;
     },
     resetFilters() {
       this.filters = {

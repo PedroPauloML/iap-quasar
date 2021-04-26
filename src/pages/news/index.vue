@@ -78,6 +78,7 @@
                     :data="single_new"
                     :coverRatio="$q.screen.lt.sm ? 1.2 : 2.1"
                     no-content
+                    @filterByTag="filterByTag"
                     @onDestroy="fetchFirstPageOfPublishedNews"
                   />
                 </div>
@@ -87,6 +88,7 @@
                 :data="news"
                 :coverRatio="$q.screen.lt.sm ? 1.2 : 1"
                 no-content
+                @filterByTag="filterByTag"
                 @onDestroy="fetchFirstPageOfPublishedNews"
               />
             </div>
@@ -141,6 +143,7 @@
                   <News
                     :data="single_new"
                     :coverRatio="$q.screen.lt.sm ? 1.2 : 2.1"
+                    @filterByTag="filterByTag"
                     no-content
                     @onPublish="onPublish"
                     @onDestroy="fetchFirstPageOfNewDraftNews"
@@ -151,6 +154,7 @@
                 v-else
                 :data="news"
                 :coverRatio="$q.screen.lt.sm ? 1.2 : 1"
+                @filterByTag="filterByTag"
                 no-content
                 @onPublish="onPublish"
                 @onDestroy="fetchFirstPageOfNewDraftNews"
@@ -216,18 +220,30 @@ export default {
     };
   },
   created() {
-    this.fetchPublishedNews();
+    if (
+      this.$route.params.query &&
+      this.$route.params.query != this.filters.query
+    ) {
+      this.filterByTag(this.$route.params.query);
+    } else {
+      this.fetchPublishedNews();
+    }
   },
   watch: {
     filters: {
       handler: function() {
-        switch (this.tab) {
-          case "published":
-            this.fetchFirstPageOfPublishedNews();
-            break;
-          case "draft":
-            this.fetchFirstPageOfNewDraftNews();
-            break;
+        if (this.filters.date == "" && this.filters.query == "") {
+          this.fetchFirstPageOfPublishedNews();
+          this.fetchFirstPageOfNewDraftNews();
+        } else {
+          switch (this.tab) {
+            case "published":
+              this.fetchFirstPageOfPublishedNews();
+              break;
+            case "draft":
+              this.fetchFirstPageOfNewDraftNews();
+              break;
+          }
         }
       },
       deep: true
@@ -347,6 +363,10 @@ export default {
     }
   },
   methods: {
+    filterByTag(tag) {
+      this.$emit("filterByTag", tag);
+    },
+
     fetchPublishedNews() {
       if (!this.searching && this.canFetchMorePublishedNews) {
         this.$emit("searching", true);
