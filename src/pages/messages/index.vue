@@ -143,13 +143,18 @@ export default {
   watch: {
     filters: {
       handler: function() {
-        switch (this.tab) {
-          case "published":
-            this.fetchFirstPageOfPublishedMessages();
-            break;
-          case "draft":
-            this.fetchFirstPageOfNewDraftMessages();
-            break;
+        if (this.filters.date == "" && this.filters.query == "") {
+          this.fetchFirstPageOfPublishedMessages();
+          this.fetchFirstPageOfNewDraftMessages();
+        } else {
+          switch (this.tab) {
+            case "published":
+              this.fetchFirstPageOfPublishedMessages();
+              break;
+            case "draft":
+              this.fetchFirstPageOfNewDraftMessages();
+              break;
+          }
         }
       },
       deep: true
