@@ -54,7 +54,7 @@
             Publicado em:
             {{
               message.published_at
-                ? $moment(message.published_at).format("DD/MM/YYYY hh:mm")
+                ? $moment(message.published_at).format("DD/MM/YYYY HH:mm")
                 : "Não publicado"
             }}
           </span>
@@ -80,7 +80,7 @@
             </q-tooltip>
           </q-btn>
 
-          <q-btn flat round>
+          <q-btn v-if="hasPermissionToShowOptions" flat round>
             <q-icon name="mdi-dots-vertical" />
 
             <q-menu>
@@ -164,7 +164,7 @@
 
     <q-separator v-if="message.content_html && message.tags" />
 
-    <q-card-section v-if="message.tags">
+    <q-card-section v-if="message.tags && message.tags.length > 0">
       <router-link
         v-for="(tag, index) in message.tags"
         :key="index"
@@ -216,15 +216,20 @@ export default {
       destroying: false
     };
   },
-  created() {
-    console.log(this.message, this.message.favorite);
-  },
   watch: {
     data: {
       async handler(newValue) {
         this.message = JSON.parse(JSON.stringify(newValue));
       },
       deep: true
+    }
+  },
+  computed: {
+    hasPermissionToShowOptions() {
+      return (
+        this.message.author_id == this.current_user.id ||
+        this.current_user.id == 1
+      );
     }
   },
   methods: {

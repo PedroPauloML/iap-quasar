@@ -71,7 +71,10 @@
               </router-link>
             </div>
 
-            <div v-if="!noActions && userSigned" class="col-auto">
+            <div
+              v-if="!noActions && userSigned && hasPermissionToShowOptions"
+              class="col-auto"
+            >
               <q-btn flat round size="lg" color="white">
                 <q-icon name="mdi-dots-vertical" size="md" />
 
@@ -140,7 +143,7 @@
         Publicado em:
         {{
           news.published_at
-            ? $moment(news.published_at).format("DD/MM/YYYY hh:mm")
+            ? $moment(news.published_at).format("DD/MM/YYYY HH:mm")
             : "Não publicado"
         }}
       </span>
@@ -160,7 +163,7 @@
 
     <q-separator v-if="!noContent && news.content_html && news.tags" />
 
-    <q-card-section v-if="!noContent && news.tags">
+    <q-card-section v-if="!noContent && news.tags && news.tags.length > 0">
       <router-link
         v-for="(tag, index) in news.tags"
         :key="index"
@@ -233,6 +236,13 @@ export default {
       deep: true
     }
   },
+  computed: {
+    hasPermissionToShowOptions() {
+      return (
+        this.news.author_id == this.current_user.id || this.current_user.id == 1
+      );
+    }
+  },
   methods: {
     tagRoute(tag) {
       if (!tag) return "";
@@ -281,9 +291,9 @@ export default {
           .catch(err => {
             this.publishing = false;
 
-            if (err.response && err.response.news.error.full_message) {
+            if (err.response && err.response.data.error.full_message) {
               this.$q.notify({
-                message: err.response.news.error.full_message,
+                message: err.response.data.error.full_message,
                 icon: "info",
                 color: "negative"
               });
@@ -318,9 +328,9 @@ export default {
             .catch(err => {
               this.destroying = false;
 
-              if (err.response && err.response.news.error.full_message) {
+              if (err.response && err.response.data.error.full_message) {
                 this.$q.notify({
-                  message: err.response.news.error.full_message,
+                  message: err.response.data.error.full_message,
                   icon: "info",
                   color: "negative"
                 });

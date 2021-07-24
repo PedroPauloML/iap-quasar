@@ -39,137 +39,155 @@
           </div>
         </transition>
 
+        <div v-if="searching">
+          <q-linear-progress indeterminate color="primary"></q-linear-progress>
+        </div>
+
         <transition
           enter-active-class="animated fadeInDown"
           leave-active-class="animated fadeOutUp"
           mode="out-in"
         >
-          <!-- <div v-if="!showForm"> -->
-          <div v-if="searching">
-            <q-linear-progress
-              indeterminate
-              color="primary"
-            ></q-linear-progress>
-          </div>
-
-          <div
-            v-else-if="publishedNews.length > 0"
-            class="row q-col-gutter-lg q-mb-lg"
+          <q-infinite-scroll
+            @load="publishedNewsInfiniteScroll"
+            :offset="250"
+            :disable="!canFetchMorePublishedNews"
           >
             <div
-              v-for="(news, index) in groupedPublishedNews"
-              :key="index"
-              class="col-12 col-sm-6"
+              v-if="publishedNews.length > 0"
+              class="row q-col-gutter-lg q-mb-lg"
             >
               <div
-                v-if="Array.isArray(news)"
-                class="full-height row q-col-gutter-lg"
+                v-for="(news, index) in groupedPublishedNews"
+                :key="index"
+                class="col-12 col-sm-6"
               >
                 <div
-                  class="col"
-                  v-for="(single_new, i) in news"
-                  :key="i"
-                  :class="{
-                    'col-12': true,
-                    'self-end': i == news.length - 1 && news.length % 2 == 0
-                  }"
+                  v-if="Array.isArray(news)"
+                  class="full-height row q-col-gutter-lg"
                 >
-                  <News
-                    :data="single_new"
-                    :coverRatio="$q.screen.lt.sm ? 1.2 : 2.1"
-                    no-content
-                    @filterByTag="filterByTag"
-                    @onDestroy="fetchFirstPageOfPublishedNews"
-                  />
+                  <div
+                    class="col"
+                    v-for="(single_new, i) in news"
+                    :key="i"
+                    :class="{
+                      'col-12': true,
+                      'self-end': i == news.length - 1 && news.length % 2 == 0
+                    }"
+                  >
+                    <News
+                      :data="single_new"
+                      :coverRatio="$q.screen.lt.sm ? 1.2 : 2.1"
+                      no-content
+                      @filterByTag="filterByTag"
+                      @onDestroy="fetchFirstPageOfPublishedNews"
+                    />
+                  </div>
                 </div>
+                <News
+                  v-else
+                  :data="news"
+                  :coverRatio="$q.screen.lt.sm ? 1.2 : 1"
+                  no-content
+                  @filterByTag="filterByTag"
+                  @onDestroy="fetchFirstPageOfPublishedNews"
+                />
               </div>
-              <News
-                v-else
-                :data="news"
-                :coverRatio="$q.screen.lt.sm ? 1.2 : 1"
-                no-content
-                @filterByTag="filterByTag"
-                @onDestroy="fetchFirstPageOfPublishedNews"
-              />
             </div>
-          </div>
+            <div
+              v-else-if="filters.date == '' && filters.query == ''"
+              class="flex no-wrap items-center justify-center"
+            >
+              <q-img :src="newsSRC" width="40px" class="q-mr-lg" />
+              <span class="text-h6">
+                Nenhuma notícia no momento. Volte mais tarde.
+              </span>
+            </div>
 
-          <div v-else class="flex no-wrap items-center justify-center">
-            <q-img :src="newsSRC" width="40px" class="q-mr-lg" />
-            <span class="text-h6">
-              Nenhuma notícia no momento. Volte mais tarde.
-            </span>
-          </div>
-          <!-- </div> -->
+            <template v-slot:loading>
+              <div class="row justify-center q-my-md">
+                <q-spinner-dots color="primary" size="40px" />
+              </div>
+            </template>
+          </q-infinite-scroll>
         </transition>
       </q-tab-panel>
 
       <q-tab-panel v-if="userSigned" name="draft">
+        <div v-if="searching" class="q-mb-lg">
+          <q-linear-progress indeterminate color="primary"></q-linear-progress>
+        </div>
+
         <transition
           enter-active-class="animated fadeInDown"
           leave-active-class="animated fadeOutUp"
           mode="out-in"
         >
-          <!-- <div v-if="!showForm"> -->
-          <div v-if="searching">
-            <q-linear-progress
-              indeterminate
-              color="primary"
-            ></q-linear-progress>
-          </div>
-
-          <div
-            v-else-if="groupedDraftNews.length > 0"
-            class="row q-col-gutter-lg q-mb-lg"
+          <q-infinite-scroll
+            @load="draftNewsInfiniteScroll"
+            :offset="250"
+            :disable="!canFetchMoreDraftNews"
           >
             <div
-              v-for="(news, index) in groupedDraftNews"
-              :key="index"
-              class="col-12 col-sm-6"
+              v-if="groupedDraftNews.length > 0"
+              class="row q-col-gutter-lg q-mb-lg"
             >
               <div
-                v-if="Array.isArray(news)"
-                class="full-height row q-col-gutter-lg"
+                v-for="(news, index) in groupedDraftNews"
+                :key="index"
+                class="col-12 col-sm-6"
               >
                 <div
-                  class="col"
-                  v-for="(single_new, i) in news"
-                  :key="i"
-                  :class="{
-                    'col-12': true,
-                    'self-end': i == news.length - 1 && news.length % 2 == 0
-                  }"
+                  v-if="Array.isArray(news)"
+                  class="full-height row q-col-gutter-lg"
                 >
-                  <News
-                    :data="single_new"
-                    :coverRatio="$q.screen.lt.sm ? 1.2 : 2.1"
-                    @filterByTag="filterByTag"
-                    no-content
-                    @onPublish="onPublish"
-                    @onDestroy="fetchFirstPageOfNewDraftNews"
-                  />
+                  <div
+                    class="col"
+                    v-for="(single_new, i) in news"
+                    :key="i"
+                    :class="{
+                      'col-12': true,
+                      'self-end': i == news.length - 1 && news.length % 2 == 0
+                    }"
+                  >
+                    <News
+                      :data="single_new"
+                      :coverRatio="$q.screen.lt.sm ? 1.2 : 2.1"
+                      @filterByTag="filterByTag"
+                      no-content
+                      @onPublish="onPublish"
+                      @onDestroy="fetchFirstPageOfNewDraftNews"
+                    />
+                  </div>
                 </div>
+                <News
+                  v-else
+                  :data="news"
+                  :coverRatio="$q.screen.lt.sm ? 1.2 : 1"
+                  @filterByTag="filterByTag"
+                  no-content
+                  @onPublish="onPublish"
+                  @onDestroy="fetchFirstPageOfNewDraftNews"
+                />
               </div>
-              <News
-                v-else
-                :data="news"
-                :coverRatio="$q.screen.lt.sm ? 1.2 : 1"
-                @filterByTag="filterByTag"
-                no-content
-                @onPublish="onPublish"
-                @onDestroy="fetchFirstPageOfNewDraftNews"
-              />
             </div>
-          </div>
+            <div
+              v-else-if="filters.date == '' && filters.query == ''"
+              class="flex no-wrap items-center justify-center"
+            >
+              <q-img :src="newsSRC" width="40px" class="q-mr-lg" />
+              <span class="text-h6">
+                Nenhum rascunho de notícia no momento. Você tem alguma nova
+                notícia para contar?
+              </span>
+            </div>
 
-          <div v-else class="flex no-wrap items-center justify-center">
-            <q-icon name="history_edu" size="40px" class="q-mr-lg" />
-            <span class="text-h6">
-              Nenhum rascunho de notícia no momento. Você tem alguma nova
-              notícia para contar?
-            </span>
-          </div>
-          <!-- </div> -->
+            <template v-slot:loading>
+              <div class="row justify-center q-my-md">
+                <q-spinner-dots color="primary" size="40px" />
+              </div>
+            </template>
+          </q-infinite-scroll>
         </transition>
       </q-tab-panel>
     </q-tab-panels>
@@ -368,89 +386,125 @@ export default {
     },
 
     fetchPublishedNews() {
-      if (!this.searching && this.canFetchMorePublishedNews) {
-        this.$emit("searching", true);
+      return new Promise((resolve, reject) => {
+        if (!this.searching && this.canFetchMorePublishedNews) {
+          this.$emit("searching", true);
 
-        let { current_page, per_page } = this.publishedNewsPagination;
-        let { query, date } = this.filters;
+          let { current_page, per_page } = this.publishedNewsPagination;
+          let { query, date } = this.filters;
 
-        NewsRequest.index(query, { date }, current_page, per_page)
-          .then(res => {
-            if (res) {
-              this.publishedNews = res.data.objects;
-              this.publishedNewsPagination = res.data.pagination;
-              this.publishedNewsPagination.current_page += 1;
-            }
+          NewsRequest.index(query, { date }, current_page, per_page)
+            .then(res => {
+              if (res) {
+                if (res.data.pagination.current_page == 1) {
+                  this.draftNews = res.data.objects;
+                  this.publishedNews = res.data.objects;
+                } else {
+                  this.publishedNews = [
+                    ...this.publishedNews,
+                    ...res.data.objects
+                  ];
+                }
 
-            this.hasNewNews = false;
-            this.$emit("searching", false);
-          })
-          .catch(err => {
-            if (err) {
-              if (err.response && err.response.data.error.message) {
-                this.$q.notify({
-                  message: err.response.data.error.message,
-                  icon: "info",
-                  color: "negative"
-                });
-              } else {
-                this.$q.notify({
-                  message:
-                    "Ocorreu um erro ao tentar buscar as notícias. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
-                  icon: "info",
-                  color: "negative"
-                });
+                this.publishedNewsPagination = res.data.pagination;
+                this.publishedNewsPagination.current_page += 1;
               }
 
               this.hasNewNews = false;
               this.$emit("searching", false);
-            }
-          });
-      }
+              resolve();
+            })
+            .catch(err => {
+              if (err) {
+                if (err.response && err.response.data.error.message) {
+                  this.$q.notify({
+                    message: err.response.data.error.message,
+                    icon: "info",
+                    color: "negative"
+                  });
+                } else {
+                  this.$q.notify({
+                    message:
+                      "Ocorreu um erro ao tentar buscar as notícias. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                    icon: "info",
+                    color: "negative"
+                  });
+                }
+
+                this.hasNewNews = false;
+                this.$emit("searching", false);
+                resolve();
+              }
+            });
+        } else {
+          resolve();
+        }
+      });
     },
     fetchDraftNews() {
-      if (!this.searching && this.canFetchMoreDraftNews) {
-        this.$emit("searching", true);
+      return new Promise((resolve, reject) => {
+        if (!this.searching && this.canFetchMoreDraftNews) {
+          this.$emit("searching", true);
 
-        let { current_page, per_page } = this.draftNewsPagination;
-        let { query, date } = this.filters;
+          let { current_page, per_page } = this.draftNewsPagination;
+          let { query, date } = this.filters;
 
-        NewsRequest.index(
-          query,
-          { date, published: false },
-          current_page,
-          per_page
-        )
-          .then(res => {
-            if (res) {
-              this.draftNews = res.data.objects;
-              this.draftNewsPagination = res.data.pagination;
-              this.draftNewsPagination.current_page += 1;
-            }
+          NewsRequest.index(
+            query,
+            { date, published: false },
+            current_page,
+            per_page
+          )
+            .then(res => {
+              if (res) {
+                if (res.data.pagination.current_page == 1) {
+                  this.draftNews = res.data.objects;
+                } else {
+                  this.draftNews = [...this.draftNews, ...res.data.objects];
+                }
 
-            this.$emit("searching", false);
-          })
-          .catch(err => {
-            if (err) {
-              if (err.response && err.response.data.error.message) {
-                this.$q.notify({
-                  message: err.response.data.error.message,
-                  icon: "info",
-                  color: "negative"
-                });
-              } else {
-                this.$q.notify({
-                  message:
-                    "Ocorreu um erro ao tentar buscar as notícias. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
-                  icon: "info",
-                  color: "negative"
-                });
+                this.draftNewsPagination = res.data.pagination;
+                this.draftNewsPagination.current_page += 1;
               }
 
               this.$emit("searching", false);
-            }
-          });
-      }
+              resolve();
+            })
+            .catch(err => {
+              if (err) {
+                if (err.response && err.response.data.error.message) {
+                  this.$q.notify({
+                    message: err.response.data.error.message,
+                    icon: "info",
+                    color: "negative"
+                  });
+                } else {
+                  this.$q.notify({
+                    message:
+                      "Ocorreu um erro ao tentar buscar as notícias. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                    icon: "info",
+                    color: "negative"
+                  });
+                }
+
+                this.$emit("searching", false);
+                resolve();
+              }
+            });
+        } else {
+          resolve();
+        }
+      });
+    },
+    async publishedNewsInfiniteScroll(index, done) {
+      console.log("publishedNewsInfiniteScroll");
+      await this.fetchPublishedNews();
+      done();
+    },
+    async draftNewsInfiniteScroll(index, done) {
+      console.log("draftNewsInfiniteScroll");
+      await this.fetchDraftNews();
+      done();
     },
 
     onPublish() {

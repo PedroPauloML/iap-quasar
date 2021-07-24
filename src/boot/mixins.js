@@ -8,6 +8,9 @@ export default ({ app, router, store, Vue }) => {
           !!store.state.user.user &&
           Object.keys(store.state.user.user).length > 0
         );
+      },
+      current_user() {
+        return store.state.user.user;
       }
     },
     methods: {

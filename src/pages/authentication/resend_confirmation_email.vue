@@ -87,6 +87,12 @@ export default {
               if (res) {
                 this.emailResended = true;
                 this.resendingConfirmationEmail = false;
+
+                this.$q.notify({
+                  message: res.data.message,
+                  icon: "check",
+                  color: "positive"
+                });
               }
             })
             .catch(err => {

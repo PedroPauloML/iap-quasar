@@ -39,33 +39,50 @@
           </div>
         </transition>
 
+        <div v-if="searching" class="q-mb-lg">
+          <q-linear-progress indeterminate color="primary" />
+        </div>
+
         <transition
           enter-active-class="animated fadeInDown"
           leave-active-class="animated fadeOutUp"
           mode="out-in"
         >
-          <div v-if="searching">
-            <q-linear-progress indeterminate color="primary" />
-          </div>
+          <q-infinite-scroll
+            @load="publishedMessagesInfiniteScroll"
+            :offset="250"
+            :disable="!canFetchMorePublishedMessages"
+          >
+            <div
+              v-if="publishedMessages.length > 0"
+              class="row q-col-gutter-lg q-mb-lg"
+            >
+              <Message
+                v-for="(message, index) in publishedMessages"
+                :key="index"
+                :data="message"
+                :metadata="{ read_time: true }"
+                @filterByTag="filterByTag"
+                @onDestroy="fetchFirstPageOfPublishedMessages"
+                class="q-mb-lg"
+              />
+            </div>
+            <div
+              v-else-if="filters.date == '' && filters.query == ''"
+              class="flex no-wrap items-center justify-center"
+            >
+              <q-icon name="auto_stories" size="40px" class="q-mr-lg" />
+              <span class="text-h6">
+                Nenhuma mensagem no momento. Volte mais tarde.
+              </span>
+            </div>
 
-          <div v-else-if="publishedMessages.length > 0">
-            <Message
-              v-for="(message, index) in publishedMessages"
-              :key="index"
-              :data="message"
-              :metadata="{ read_time: true }"
-              @filterByTag="filterByTag"
-              @onDestroy="fetchFirstPageOfPublishedMessages"
-              class="q-mb-lg"
-            />
-          </div>
-
-          <div v-else class="flex no-wrap items-center justify-center">
-            <q-icon name="auto_stories" size="40px" class="q-mr-lg" />
-            <span class="text-h6">
-              Nenhuma mensagem no momento. Volte mais tarde.
-            </span>
-          </div>
+            <template v-slot:loading>
+              <div class="row justify-center q-my-md">
+                <q-spinner-dots color="primary" size="40px" />
+              </div>
+            </template>
+          </q-infinite-scroll>
         </transition>
       </q-tab-panel>
 
@@ -74,25 +91,42 @@
           <q-linear-progress indeterminate color="primary" />
         </div>
 
-        <div v-else-if="draftMessages.length > 0">
-          <Message
-            v-for="(message, index) in draftMessages"
-            :key="index"
-            :data="message"
-            :metadata="{ read_time: true }"
-            @onPublish="onPublish"
-            @onDestroy="fetchFirstPageOfNewDraftMessages"
-            class="q-mb-lg"
-          />
-        </div>
+        <q-infinite-scroll
+          @load="draftMessagesInfiniteScroll"
+          :offset="250"
+          :disable="!canFetchMoreDraftMessages"
+        >
+          <div
+            v-if="draftMessages.length > 0"
+            class="row q-col-gutter-lg q-mb-lg"
+          >
+            <Message
+              v-for="(message, index) in draftMessages"
+              :key="index"
+              :data="message"
+              :metadata="{ read_time: true }"
+              @filterByTag="filterByTag"
+              @onDestroy="fetchFirstPageOfDraftMessages"
+              class="q-mb-lg"
+            />
+          </div>
+          <div
+            v-else-if="filters.date == '' && filters.query == ''"
+            class="flex no-wrap items-center justify-center"
+          >
+            <q-icon name="auto_stories" size="40px" class="q-mr-lg" />
+            <span class="text-h6">
+              Nenhum rascunho de mensagem no momento. Você tem alguma nova
+              mensagem para compartilhar?
+            </span>
+          </div>
 
-        <div v-else class="flex no-wrap items-center justify-center">
-          <q-icon name="auto_stories" size="40px" class="q-mr-lg" />
-          <span class="text-h6">
-            Nenhum rascunho de mensagem no momento. Você tem alguma nova
-            mensagem para compartilhar?
-          </span>
-        </div>
+          <template v-slot:loading>
+            <div class="row justify-center q-my-md">
+              <q-spinner-dots color="primary" size="40px" />
+            </div>
+          </template>
+        </q-infinite-scroll>
       </q-tab-panel>
     </q-tab-panels>
   </div>
@@ -221,89 +255,130 @@ export default {
       this.$emit("filterByTag", tag);
     },
     fetchPublishedMessages() {
-      if (!this.searching && this.canFetchMorePublishedMessages) {
-        this.$emit("searching", true);
+      return new Promise((resolve, reject) => {
+        if (!this.searching && this.canFetchMorePublishedMessages) {
+          this.$emit("searching", true);
 
-        let { current_page, per_page } = this.publishedMessagesPagination;
-        let { query, date } = this.filters;
+          let { current_page, per_page } = this.publishedMessagesPagination;
+          let { query, date } = this.filters;
 
-        MessageRequest.index(query, { date }, current_page, per_page)
-          .then(res => {
-            if (res) {
-              this.publishedMessages = res.data.objects;
-              this.publishedMessagesPagination = res.data.pagination;
-              this.publishedMessagesPagination.current_page += 1;
-            }
+          MessageRequest.index(query, { date }, current_page, per_page)
+            .then(res => {
+              if (res) {
+                if (res.data.pagination.current_page == 1) {
+                  this.publishedMessages = res.data.objects;
+                } else {
+                  this.publishedMessages = [
+                    ...this.publishedMessages,
+                    ...res.data.objects
+                  ];
+                  // res.data.objects.forEach(obj =>
+                  //   this.publishedMessages.push(obj)
+                  // );
+                }
 
-            this.hasNewMessages = false;
-            this.$emit("searching", false);
-          })
-          .catch(err => {
-            if (err) {
-              if (err.response && err.response.data.error.message) {
-                this.$q.notify({
-                  message: err.response.data.error.message,
-                  icon: "info",
-                  color: "negative"
-                });
-              } else {
-                this.$q.notify({
-                  message:
-                    "Ocorreu um erro ao tentar buscar as mensagens. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
-                  icon: "info",
-                  color: "negative"
-                });
+                this.publishedMessagesPagination = res.data.pagination;
+                this.publishedMessagesPagination.current_page += 1;
               }
 
               this.hasNewMessages = false;
               this.$emit("searching", false);
-            }
-          });
-      }
+              resolve();
+            })
+            .catch(err => {
+              if (err) {
+                if (err.response && err.response.data.error.message) {
+                  this.$q.notify({
+                    message: err.response.data.error.message,
+                    icon: "info",
+                    color: "negative"
+                  });
+                } else {
+                  this.$q.notify({
+                    message:
+                      "Ocorreu um erro ao tentar buscar as mensagens. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                    icon: "info",
+                    color: "negative"
+                  });
+                }
+
+                this.hasNewMessages = false;
+                this.$emit("searching", false);
+                resolve();
+              }
+            });
+        } else {
+          resolve();
+        }
+      });
     },
     fetchDraftMessages() {
-      if (!this.searching && this.canFetchMoreDraftMessages) {
-        this.$emit("searching", true);
+      return new Promise((resolve, reject) => {
+        if (!this.searching && this.canFetchMoreDraftMessages) {
+          this.$emit("searching", true);
 
-        let { current_page, per_page } = this.draftMessagesPagination;
-        let { query, date } = this.filters;
+          let { current_page, per_page } = this.draftMessagesPagination;
+          let { query, date } = this.filters;
 
-        MessageRequest.index(
-          query,
-          { date, published: false },
-          current_page,
-          per_page
-        )
-          .then(res => {
-            if (res) {
-              this.draftMessages = res.data.objects;
-              this.draftMessagesPagination = res.data.pagination;
-              this.draftMessagesPagination.current_page += 1;
-            }
+          MessageRequest.index(
+            query,
+            { date, published: false },
+            current_page,
+            per_page
+          )
+            .then(res => {
+              if (res) {
+                if (res.data.pagination.current_page == 1) {
+                  this.draftMessages = res.data.objects;
+                } else {
+                  this.draftMessages = [
+                    ...this.draftMessages,
+                    ...res.data.objects
+                  ];
+                }
 
-            this.$emit("searching", false);
-          })
-          .catch(err => {
-            if (err) {
-              if (err.response && err.response.data.error.message) {
-                this.$q.notify({
-                  message: err.response.data.error.message,
-                  icon: "info",
-                  color: "negative"
-                });
-              } else {
-                this.$q.notify({
-                  message:
-                    "Ocorreu um erro ao tentar buscar as mensagens. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
-                  icon: "info",
-                  color: "negative"
-                });
+                this.draftMessagesPagination = res.data.pagination;
+                this.draftMessagesPagination.current_page += 1;
               }
 
               this.$emit("searching", false);
-            }
-          });
-      }
+              resolve();
+            })
+            .catch(err => {
+              if (err) {
+                if (err.response && err.response.data.error.message) {
+                  this.$q.notify({
+                    message: err.response.data.error.message,
+                    icon: "info",
+                    color: "negative"
+                  });
+                } else {
+                  this.$q.notify({
+                    message:
+                      "Ocorreu um erro ao tentar buscar as mensagens. Tente novamente. Caso o erro persista, entre em contato com o suporte técnico.",
+                    icon: "info",
+                    color: "negative"
+                  });
+                }
+
+                this.$emit("searching", false);
+                resolve();
+              }
+            });
+        } else {
+          resolve();
+        }
+      });
+    },
+    async publishedMessagesInfiniteScroll(index, done) {
+      console.log("publishedMessagesInfiniteScroll");
+      await this.fetchPublishedMessages();
+      done();
+    },
+    async draftMessagesInfiniteScroll(index, done) {
+      console.log("draftMessagesInfiniteScroll");
+      await this.fetchDraftMessages();
+      done();
     },
 
     onPublish() {

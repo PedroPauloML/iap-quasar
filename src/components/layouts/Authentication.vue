@@ -47,7 +47,7 @@
               <q-input
                 label="Senha"
                 v-model="password"
-                :rules="passwordRules"
+                :rules="signUpPasswordRules"
                 :type="showPassword ? 'text' : 'password'"
                 autocomplete="new-password"
               >
@@ -161,15 +161,15 @@
                 :rules="emailRules"
                 label="E-mail"
                 required
-                autocomplete="new-email"
+                autocomplete="email"
               />
 
               <q-input
                 label="Senha"
                 v-model="password"
-                :rules="passwordRules"
+                :rules="signInPasswordRules"
                 :type="showPassword ? 'text' : 'password'"
-                autocomplete="new-password"
+                autocomplete="password"
               >
                 <template v-slot:append>
                   <q-icon
@@ -265,10 +265,11 @@ export default {
         v => !!v || "E-mail é obrigatório",
         v => /.+@.+\..+/.test(v) || "E-mail precisa ser válido"
       ],
-      passwordRules: [
+      signUpPasswordRules: [
         v => !!v || "Senha é obrigatório",
         v => v.length >= 8 || "Deve ter conter, no mínimo, 8 caracteres"
       ],
+      signInPasswordRules: [v => !!v || "Senha é obrigatório"],
       passwordConfirmationRules: [
         v => !!v || "Confirmação de senha é obrigatório",
         v => v == this.password || "Senhas não coincidem"

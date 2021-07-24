@@ -49,14 +49,14 @@
                 :class="{
                   'q-mt-md q-mb-sm': !fullscreen,
                   'q-mb-none': fullscreen,
-                  'text-red': contentPrintError
+                  'text-red': contentHtmlPrintError
                 }"
               >
                 Conteúdo
               </p>
               <p
-                ref="contentLabelError"
-                v-show="contentPrintError && !fullscreen"
+                ref="contentHtmlLabelError"
+                v-show="contentHtmlPrintError && !fullscreen"
                 class="text-red q-mb-sm"
               >
                 O conteúdo da notícia é obrigatório(a)
@@ -180,7 +180,7 @@ export default {
         tags: []
       },
       message: null,
-      contentPrintError: false,
+      contentHtmlPrintError: false,
       initialTags: [],
       tagsSuggestions: [],
       tagsSearch: null,
